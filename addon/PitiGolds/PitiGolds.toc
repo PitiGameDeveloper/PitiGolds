@@ -1,0 +1,15 @@
+## Interface: 16001, 120105
+## Title: PitiGolds
+## Notes: Recoge personajes, profesiones, inventario y subasta para el motor de PitiGolds.
+## Author: Piti
+## Version: 0.1.0
+## SavedVariables: PitiGoldsDB
+## IconTexture: Interface\Icons\INV_Misc_Coin_01
+
+Generated.lua
+Core.lua
+Character.lua
+Professions.lua
+Inventory.lua
+AuctionScan.lua
+UI.lua

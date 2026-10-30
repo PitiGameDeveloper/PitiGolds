@@ -1,0 +1,314 @@
+-- Entorno falso de WoW para probar el addon fuera del juego (Lua 5.1, como WoW).
+-- Imita solo las partes de la API que usa PitiGolds y simula las respuestas del
+-- servidor con temporizadores, igual que llegarían los eventos en el juego.
+
+Mock = {
+  startNow = 1762300000,
+  startGame = 1000,
+  gameTime = 1000,
+  timers = {},
+  timerSeq = 0,
+  frames = {},
+  chat = {},
+  reloaded = false,
+  unknownEvents = {},
+}
+
+function time() return math.floor(Mock.startNow + (Mock.gameTime - Mock.startGame)) end
+function GetTime() return Mock.gameTime end
+date = os.date
+
+-- Temporizadores -------------------------------------------------------------------
+
+function Mock.Schedule(delay, fn)
+  Mock.timerSeq = Mock.timerSeq + 1
+  table.insert(Mock.timers, { at = Mock.gameTime + delay, seq = Mock.timerSeq, fn = fn })
+end
+
+C_Timer = { After = function(delay, fn) Mock.Schedule(delay, fn) end }
+
+-- Avanza el reloj ejecutando por orden los temporizadores que vencen.
+function Mock.Advance(seconds)
+  local target = Mock.gameTime + seconds
+  while true do
+    local best, bestIndex
+    for i, t in ipairs(Mock.timers) do
+      if t.at <= target and (not best or t.at < best.at or (t.at == best.at and t.seq < best.seq)) then
+        best, bestIndex = t, i
+      end
+    end
+    if not best then break end
+    table.remove(Mock.timers, bestIndex)
+    if best.at > Mock.gameTime then Mock.gameTime = best.at end
+    best.fn()
+  end
+  Mock.gameTime = target
+end
+
+-- Frames ------------------------------------------------------------------------------
+
+local Frame = {}
+local FrameMeta = {
+  __index = function(_, key)
+    return Frame[key] or function() end -- métodos de dibujo que no importan aquí
+  end,
+}
+
+function Frame:RegisterEvent(event)
+  if Mock.unknownEvents[event] then error("Attempt to register unknown event " .. event) end
+  self.events[event] = true
+end
+function Frame:UnregisterEvent(event) self.events[event] = nil end
+function Frame:SetScript(name, fn) self.scripts[name] = fn end
+function Frame:GetScript(name) return self.scripts[name] end
+function Frame:Show() self.shown = true end
+function Frame:Hide() self.shown = false end
+function Frame:IsShown() return self.shown end
+function Frame:SetText(text) self.text = text end
+function Frame:GetText() return self.text end
+function Frame:SetPoint(...) self.point = { ... } end
+function Frame:GetPoint() return unpack(self.point or { "CENTER", nil, "CENTER", 0, 0 }) end
+function Frame:CreateFontString() return Mock.NewFrame() end
+
+function Mock.NewFrame(name)
+  local f = setmetatable({ events = {}, scripts = {}, shown = true, name = name }, FrameMeta)
+  table.insert(Mock.frames, f)
+  if name then _G[name] = f end
+  return f
+end
+
+function CreateFrame(_, name) return Mock.NewFrame(name) end
+
+UIParent = Mock.NewFrame("UIParent")
+DEFAULT_CHAT_FRAME = { AddMessage = function(_, msg) table.insert(Mock.chat, msg) end }
+SlashCmdList = {}
+
+function Mock.Fire(event, ...)
+  for _, f in ipairs(Mock.frames) do
+    if f.events[event] and f.scripts.OnEvent then f.scripts.OnEvent(f, event, ...) end
+  end
+end
+
+function Mock.Slash(text)
+  SlashCmdList.PITIGOLDS(text)
+end
+
+function Mock.ClickButton(label)
+  for _, f in ipairs(Mock.frames) do
+    if f.text == label and f.scripts.OnClick then
+      f.scripts.OnClick(f)
+      return true
+    end
+  end
+  return false
+end
+
+function hooksecurefunc(name, hook)
+  local original = _G[name]
+  _G[name] = function(...)
+    local results = { original(...) }
+    hook(...)
+    return unpack(results)
+  end
+end
+
+function ReloadUI() Mock.reloaded = true end
+
+-- Personaje -----------------------------------------------------------------------------
+
+Mock.player = { name = "Brujo", realm = "Dio", money = 1234567 }
+
+function GetBuildInfo() return "1.60.1", "70532", "Oct 28 2026", 16001 end
+function UnitName() return Mock.player.name end
+function GetRealmName() return Mock.player.realm end
+function GetNormalizedRealmName() return (Mock.player.realm:gsub("%s", "")) end
+function UnitFactionGroup() return "Horde" end
+function UnitClass() return "Brujo", "WARLOCK" end
+function UnitRace() return "Orco", "Orc" end
+function UnitLevel() return 60 end
+function UnitGUID() return "Player-1-00000001" end
+function GetMoney() return Mock.player.money end
+
+Enum = {
+  BagIndex = {
+    Backpack = 0, Bag_1 = 1, Bag_2 = 2, Bag_3 = 3, Bag_4 = 4, ReagentBag = 5,
+    Bank = -1, Reagentbank = -3,
+    BankBag_1 = 6, BankBag_2 = 7, BankBag_3 = 8, BankBag_4 = 9, BankBag_5 = 10, BankBag_6 = 11, BankBag_7 = 12,
+    AccountBankTab_1 = 13, AccountBankTab_2 = 14, AccountBankTab_3 = 15, AccountBankTab_4 = 16, AccountBankTab_5 = 17,
+  },
+  PlayerInteractionType = { Banker = 8, MailInfo = 17, Auctioneer = 21, AccountBanker = 68 },
+  ItemClass = { Consumable = 0, Reagent = 5, Tradegoods = 7, Gem = 3, ItemEnhancement = 8, Recipe = 9, Profession = 19 },
+  AuctionHouseSortOrder = { Price = 0, Name = 1 },
+  BankType = { Character = 0, Guild = 1, Account = 2 },
+}
+NUM_TOTAL_EQUIPPED_BAG_SLOTS = 5
+ATTACHMENTS_MAX_RECEIVE = 16
+ATTACHMENTS_MAX_SEND = 12
+
+Mock.itemNames = {}
+C_Item = { GetItemNameByID = function(id) return Mock.itemNames[id] end }
+
+-- Bolsas: Mock.bags[bag] = { numSlots = n, [slot] = { itemID, stackCount, hyperlink, isBound } }
+Mock.bags = {}
+C_Container = {
+  GetContainerNumSlots = function(bag) return Mock.bags[bag] and Mock.bags[bag].numSlots or 0 end,
+  GetContainerItemInfo = function(bag, slot) return Mock.bags[bag] and Mock.bags[bag][slot] end,
+}
+Mock.warbandMoney = 0
+C_Bank = { FetchDepositedMoney = function() return Mock.warbandMoney end }
+
+Mock.currencies = {}
+C_CurrencyInfo = { GetCurrencyInfo = function(id) return Mock.currencies[id] end }
+
+Mock.factions = {}
+C_Reputation = {
+  GetNumFactions = function() return #Mock.factions end,
+  GetFactionDataByIndex = function(i) return Mock.factions[i] end,
+}
+
+Mock.professions = {}
+function GetProfessions() return 1, 2, nil, nil, 5 end
+function GetProfessionInfo(index)
+  local p = Mock.professions[index]
+  if p then return p.name, 0, p.rank, p.maxRank, 0, 0, p.skillLine, 0 end
+end
+
+-- Profesión abierta -------------------------------------------------------------------------
+
+Mock.tradeSkill = { recipes = {}, schematics = {}, sources = {} }
+C_TradeSkillUI = {
+  IsTradeSkillReady = function() return true end,
+  IsTradeSkillLinked = function() return false end,
+  IsTradeSkillGuild = function() return false end,
+  IsNPCCrafting = function() return false end,
+  GetBaseProfessionInfo = function() return Mock.tradeSkill.base end,
+  GetChildProfessionInfo = function() return Mock.tradeSkill.child end,
+  GetAllRecipeIDs = function()
+    local ids = {}
+    for id in pairs(Mock.tradeSkill.recipes) do ids[#ids + 1] = id end
+    table.sort(ids)
+    return ids
+  end,
+  GetRecipeInfo = function(id) return Mock.tradeSkill.recipes[id] end,
+  GetRecipeSchematic = function(id) return Mock.tradeSkill.schematics[id] end,
+  GetRecipeSourceText = function(id) return Mock.tradeSkill.sources[id] end,
+  GetCategoryInfo = function(id) return { name = "Categoría " .. id, parentCategoryID = 0 } end,
+}
+
+-- Correo --------------------------------------------------------------------------------------
+
+Mock.inbox = {}
+Mock.sendItems = {}
+function GetInboxNumItems() return #Mock.inbox, #Mock.inbox end
+function GetInboxHeaderInfo(i)
+  local m = Mock.inbox[i]
+  return nil, nil, m.sender, m.subject, m.money or 0, m.cod or 0, m.daysLeft or 30, #(m.items or {})
+end
+function GetInboxItem(i, j)
+  local it = Mock.inbox[i].items and Mock.inbox[i].items[j]
+  if it then return it.name, it.itemID, 0, it.count end
+end
+function SendMail() end
+function GetSendMailItem(i)
+  local it = Mock.sendItems[i]
+  if it then return it.name, it.itemID, 0, it.count end
+end
+function GetSendMailMoney() return 0 end
+
+-- Casa de subastas ------------------------------------------------------------------------------
+-- Mock.replicate: lista de subastas { itemID, count, buyout, owner, name }
+-- Mock.browseData[classID]: lista de resultados de búsqueda, se sirven en páginas de 2.
+
+Mock.replicate = {}
+Mock.browseData = {}
+Mock.owned = {}
+Mock.browseQueries = 0
+
+local browse = { results = {}, all = {} }
+
+C_AuctionHouse = {
+  ReplicateItems = function()
+    Mock.Schedule(3, function() Mock.Fire("REPLICATE_ITEM_LIST_UPDATE") end)
+  end,
+  GetNumReplicateItems = function() return #Mock.replicate end,
+  GetReplicateItemInfo = function(index)
+    local a = Mock.replicate[index + 1]
+    return a.name, 0, a.count, 1, true, 1, 0, 0, 0, a.buyout, 0, false, nil, a.owner, a.owner, 0, a.itemID, true
+  end,
+  IsThrottledMessageSystemReady = function() return true end,
+  SendBrowseQuery = function(query)
+    Mock.browseQueries = Mock.browseQueries + 1
+    browse.all = Mock.browseData[query.itemClassFilters[1].classID] or {}
+    browse.results = {}
+    for i = 1, math.min(2, #browse.all) do browse.results[i] = browse.all[i] end
+    Mock.Schedule(0.5, function() Mock.Fire("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED") end)
+  end,
+  RequestMoreBrowseResults = function()
+    local n = #browse.results
+    for i = n + 1, math.min(n + 2, #browse.all) do browse.results[i] = browse.all[i] end
+    Mock.Schedule(0.5, function() Mock.Fire("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", {}) end)
+  end,
+  GetBrowseResults = function() return browse.results end,
+  HasFullBrowseResults = function() return #browse.results >= #browse.all end,
+  QueryOwnedAuctions = function()
+    Mock.Schedule(0.5, function() Mock.Fire("OWNED_AUCTIONS_UPDATED") end)
+  end,
+  GetNumOwnedAuctions = function() return #Mock.owned end,
+  GetOwnedAuctionInfo = function(i) return Mock.owned[i] end,
+}
+
+-- Carga del addon y guardado -------------------------------------------------------------------
+
+Mock.ns = {}
+
+function Mock.LoadAddon(dir, files)
+  for _, file in ipairs(files) do
+    local chunk, err = loadfile(dir .. "/" .. file)
+    if chunk then
+      chunk("PitiGolds", Mock.ns)
+    elseif file ~= "Generated.lua" then
+      -- Generated.lua no existe hasta que el motor lo escribe; el addon funciona sin él.
+      error(err)
+    end
+  end
+end
+
+-- Escribe una variable como lo hace WoW en SavedVariables.
+function Mock.Serialize(name, value)
+  local out = {}
+  local function write(v, indent)
+    local t = type(v)
+    if t == "table" then
+      out[#out + 1] = "{\n"
+      local n = #v
+      for i = 1, n do
+        out[#out + 1] = indent .. "\t"
+        write(v[i], indent .. "\t")
+        out[#out + 1] = ", -- [" .. i .. "]\n"
+      end
+      for k, val in pairs(v) do
+        local isArray = type(k) == "number" and k >= 1 and k <= n and k == math.floor(k)
+        if not isArray then
+          out[#out + 1] = indent .. "\t["
+          out[#out + 1] = type(k) == "string" and string.format("%q", k) or string.format("%.0f", k)
+          out[#out + 1] = "] = "
+          write(val, indent .. "\t")
+          out[#out + 1] = ",\n"
+        end
+      end
+      out[#out + 1] = indent .. "}"
+    elseif t == "string" then
+      out[#out + 1] = string.format("%q", v)
+    elseif t == "number" then
+      out[#out + 1] = (v == math.floor(v)) and string.format("%.0f", v) or tostring(v)
+    elseif t == "boolean" then
+      out[#out + 1] = tostring(v)
+    else
+      out[#out + 1] = "nil"
+    end
+  end
+  out[#out + 1] = name .. " = "
+  write(value, "")
+  out[#out + 1] = "\n"
+  return table.concat(out)
+end

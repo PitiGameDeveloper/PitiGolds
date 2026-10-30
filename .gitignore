@@ -1,0 +1,10 @@
+# Entorno de Python
+.venv/
+__pycache__/
+*.pyc
+
+# Datos personales y archivos que genera el motor
+datos/
+config.json
+addon/PitiGolds/Generated.lua
+*.tmp
