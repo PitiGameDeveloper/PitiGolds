@@ -11,6 +11,60 @@ Addon personal para WoW Forever que ayuda a decidir en qué gastar el tiempo par
 - **Fase 3 (hecha):** comparador de métodos, guía de subida de profesión con su coste y cuándo se
   recupera la inversión según las horas que juegas. Además, los métodos de tus guías valorados con
   tus precios y tus personajes, las esperas de las recetas y el talento de Legacy de subir profesión.
+- **Fase 4 (hecha):** el asesor de Claude Code (`asesor/`), que te dice qué hacer cada sesión y busca
+  métodos nuevos en lo publicado los últimos 7 días.
+
+## El asesor (Fase 4)
+
+La carpeta `asesor/` es un asesor de Claude Code que usa tu suscripción: sin claves de API ni gasto
+extra. Ábrela como carpeta de una sesión en Claude Code (la app de escritorio, pestaña Code) y pídele:
+
+| Pídele | Qué hace |
+|---|---|
+| «¿Qué hago hoy? Tengo 2 horas» (`que-hago`) | Lee tus datos y te da un plan: qué vender y a qué ritmo, qué craftear, qué farmear y qué medir. |
+| «Busca métodos nuevos» (`buscar-metodos`) | Revisa lo publicado en los últimos 7 días y añade al catálogo los métodos concretos que encuentre. |
+| «Mira los chollos» (`chollos`) | Comprueba en Wowhead si algún vendedor vende los posibles chollos y lo apunta. |
+| «¿Me compensa subir Sastrería?» (`subir-profesion`) | Guía de subida, coste, y si se recupera según el comparador. |
+
+El asesor no hace cuentas: las hace el motor y él las lee y te las explica. Solo edita el catálogo de
+métodos y la lista de fuentes; el código no lo toca.
+
+**Para gastar pocos tokens**, `buscar-metodos` no lee internet a lo loco:
+
+```
+.venv\Scripts\python -m motor fuentes
+```
+
+Este comando lista solo lo nuevo y aún sin revisar: título, fecha y resumen de cada novedad. Lo sacan
+los feeds de `conocimiento/fuentes.json` (de entrada, las noticias de Forever de Wowhead y r/woweconomy)
+y los archivos nuevos que dejes en `fuentes/`. El asesor criba por el título y abre a fondo como mucho
+5. Cada novedad sale una sola vez.
+- **YouTube**: se añaden canales con su código `UC...`. Solo se leen el título y la descripción, no
+  los subtítulos.
+- **Discord**: no se puede leer sin cuenta. Copia lo que te interese a un `.txt` en `fuentes/` y saldrá
+  como novedad.
+
+**Activar los comandos con barra (`/que-hago`...).** Sin esto el asesor funciona igual, pidiéndoselo con
+tus palabras. Claude no puede escribir su propia configuración, así que este paso lo haces tú:
+
+1. Crea la carpeta `asesor\.claude\commands\` y copia en ella los cuatro archivos de `asesor\comandos\`.
+2. Si quieres que no te pida permiso cada vez que lanza el motor o mira Wowhead, crea
+   `asesor\.claude\settings.json` con esto:
+
+   ```json
+   {
+     "permissions": {
+       "additionalDirectories": [".."],
+       "allow": [
+         "Bash(../.venv/Scripts/python pg.py:*)",
+         "WebSearch",
+         "WebFetch(domain:www.wowhead.com)",
+         "WebFetch(domain:www.reddit.com)",
+         "WebFetch(domain:www.youtube.com)"
+       ]
+     }
+   }
+   ```
 
 ## Qué te conviene hacer (comparador)
 
@@ -96,7 +150,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 | `addon/PitiGolds/` | El addon. Está enlazado dentro de WoW (`_forever_\Interface\AddOns\PitiGolds`), así que cualquier cambio aquí se ve en el juego tras un `/reload`. |
 | `motor/` | Programa en Python, sin IA, que lee lo que guarda el addon y lo pasa a `datos/pitigolds.db` (SQLite). |
 | `tests/` | Un WoW simulado para probar el addon fuera del juego. |
-| `conocimiento/` | Métodos de tus guías (`metodos.json`), con tus palabras: sin copiar las guías. |
+| `asesor/` | El asesor de Claude Code: sus instrucciones (`CLAUDE.md`), sus guiones (`comandos/`) y `pg.py`, que lanza el motor desde ahí. |
+| `conocimiento/` | Métodos de tus guías (`metodos.json`), escritos con otras palabras, y las fuentes que revisa el asesor (`fuentes.json`). |
 | `fuentes/` | Las guías tal cual (PDF, Word...). Solo en tu PC: no se suben a GitHub. |
 
 ## Uso diario

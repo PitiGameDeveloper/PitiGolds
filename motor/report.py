@@ -410,6 +410,9 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
     elif client_build and client_build != game_build:
         notes.append(f"Los datos del juego son de la versión {game_build} y tu cliente es la {client_build}: "
                      "python -m motor datos-juego")
+    if a.catalog_error:
+        notes.append(f"No he podido leer los métodos de tus guías: {a.catalog_error}. "
+                     "Revísalo con python -m motor metodos.")
     if a.guide_unknown_items:
         unknown = a.guide_unknown_items
         notes.append(f"Objetos de tus guías que no salen en los datos del juego ({len(unknown)}), así que no tienen "

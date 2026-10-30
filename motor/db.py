@@ -133,6 +133,12 @@ CREATE TABLE IF NOT EXISTS ledger (
 );
 CREATE INDEX IF NOT EXISTS idx_ledger_t ON ledger(t);
 
+-- Novedades de tus fuentes (fuentes.py). status: nuevo (sin revisar) o visto.
+CREATE TABLE IF NOT EXISTS source_items (
+  key TEXT PRIMARY KEY, source TEXT, title TEXT, url TEXT, published INTEGER, summary TEXT,
+  first_seen INTEGER, status TEXT
+);
+
 -- Datos del juego descargados de wago.tools (gamedata.py). Se rehacen en cada importación.
 CREATE TABLE IF NOT EXISTS gd_skill_lines (skill_line INTEGER PRIMARY KEY, name TEXT, category INTEGER, parent INTEGER);
 

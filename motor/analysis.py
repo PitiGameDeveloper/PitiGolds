@@ -7,7 +7,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 
 from .business import Business, compute_business, craft_capacity
-from .catalogo import CatalogEntry, GuideMethod, evaluate_catalog, load_catalog, resolve_items
+from .catalogo import CatalogEntry, CatalogError, GuideMethod, evaluate_catalog, load_catalog, resolve_items
 from .crafting import CraftResult, evaluate_recipes, recipe_item_ids
 from .farming import FarmSession, FarmSummary, farm_item_ids, load_sessions, summarize, value_sessions
 from .market import Backtest, MarketSignals, backtest, compute_signals, load_series
@@ -31,6 +31,7 @@ class Analysis:
     vendor_candidates: list[VendorCandidate] = field(default_factory=list)
     guide_methods: list[GuideMethod] = field(default_factory=list)
     guide_unknown_items: list[str] = field(default_factory=list)   # objetos de las guías sin reconocer
+    catalog_error: str | None = None   # el catálogo de métodos no se ha podido leer
     last_scan: int | None = None
 
     def best_known_craft(self) -> dict[int, CraftResult]:
@@ -68,7 +69,12 @@ def owned_items(conn: sqlite3.Connection) -> dict[int, int]:
 
 def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None) -> Analysis:
     """catalog: los métodos de tus guías; sin él se lee conocimiento/metodos.json."""
-    catalog = load_catalog() if catalog is None else catalog
+    catalog_error = None
+    if catalog is None:
+        try:
+            catalog = load_catalog()
+        except CatalogError as exc:  # un catálogo roto no debe dejarte sin informe
+            catalog, catalog_error = [], str(exc)
     resolved, unknown = resolve_items(conn, catalog)
     owned = owned_items(conn)
     ledger_ids = {r[0] for r in conn.execute("SELECT DISTINCT item_id FROM ledger WHERE item_id IS NOT NULL")}
@@ -101,6 +107,7 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
     result.vendor_candidates = vendor_candidates(conn, prices, crafts, result.farms)
     result.guide_methods = evaluate_catalog(conn, catalog, resolved, prices, signals, crafts, result.farm_summary)
     result.guide_unknown_items = unknown
+    result.catalog_error = catalog_error
     relevant = result.relevant_items()
     result.accuracy = backtest({i: p for i, p in series.items() if i in relevant}, fulls)
     return result

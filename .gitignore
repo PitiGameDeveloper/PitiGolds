@@ -11,3 +11,6 @@ addon/PitiGolds/Generated.lua
 
 # Guías compradas: solo para uso personal, nunca en GitHub
 fuentes/
+
+# Permisos que vas aprobando en Claude Code (son de tu PC)
+**/.claude/settings.local.json

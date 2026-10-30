@@ -9,6 +9,7 @@
     python -m motor ajustes --horas-semana 10 --semanas 4 --legado-subida 0   para comparar métodos
     python -m motor guia herreria [--desde 50] [--hasta 150]  guía de subida con su coste
     python -m motor metodos    los métodos de tus guías (conocimiento/metodos.json) con tus precios
+    python -m motor fuentes [--dias 7] [--hecho]   novedades de tus fuentes sin revisar
 """
 
 from __future__ import annotations
@@ -18,12 +19,14 @@ import sqlite3
 import sys
 import time
 import unicodedata
+from pathlib import Path
 
 from . import db as dbmod
 from .analysis import analyze
-from .catalogo import CATALOG_PATH, load_catalog
+from .catalogo import CATALOG_PATH, catalog_problems, load_catalog
 from .config import Config, load_config
 from .gamedata import update_game_data
+from .fuentes import DEFAULT_DAYS, LOCAL_DIR, collect, load_sources, mark_done, word_text
 from .generated import write_generated
 from .ingest import ingest_file
 from .leveling import plan_leveling
@@ -136,12 +139,19 @@ def cmd_ajustes(config: Config, hours: float | None, weeks: float | None, skillu
 
 
 def cmd_metodos(config: Config) -> int:
-    entries = load_catalog()
-    if not entries:
-        print(f"No hay métodos en {CATALOG_PATH}.")
-        return 1
     conn = dbmod.connect(config.db_path)
     try:
+        lines = {r[0] for r in conn.execute("SELECT skill_line FROM gd_skill_lines")}
+        problems = catalog_problems(known_lines=lines or None)
+        if problems:
+            print(f"Hay que arreglar {CATALOG_PATH.name}:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        entries = load_catalog()
+        if not entries:
+            print(f"No hay métodos en {CATALOG_PATH}.")
+            return 1
         analysis = analyze(conn, entries)
         write_report(conn, config, analysis)
     finally:
@@ -154,6 +164,42 @@ def cmd_metodos(config: Config) -> int:
     if unknown:
         print(f"{len(unknown)} objetos que no salen en los datos del juego: {', '.join(unknown)}.")
     print(f"Todos, con tus precios: {config.db_path.parent / 'metodos.md'}")
+    return 0
+
+
+def cmd_fuentes(config: Config, days: float, done: list[int] | None, text_of: str | None) -> int:
+    if text_of:
+        path = Path(text_of)
+        if not path.is_file():
+            path = LOCAL_DIR / text_of
+        if path.suffix.lower() != ".docx" or not path.is_file():
+            print("Solo hace falta para archivos .docx de la carpeta fuentes/ (los PDF se leen directamente).")
+            return 1
+        target = config.db_path.parent / "fuentes-texto" / (path.stem + ".txt")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(word_text(path), encoding="utf-8")
+        print(f"Texto en {target} (las imágenes no se pueden leer).")
+        return 0
+    conn = dbmod.connect(config.db_path)
+    try:
+        if done is not None:
+            print(f"{mark_done(conn, done, days)} novedades marcadas como revisadas.")
+            return 0
+        rows, errors = collect(conn, load_sources(), days)
+    finally:
+        conn.close()
+    for e in errors:
+        print(f"No he podido leer {e}")
+    if not rows:
+        print(f"Nada nuevo en los últimos {days:g} días.")
+        return 0
+    print(f"Novedades de los últimos {days:g} días sin revisar ({len(rows)}):\n")
+    for n, r in enumerate(rows, 1):
+        print(f"[{n}] {time.strftime('%Y-%m-%d', time.localtime(r['published']))}  {r['source']}: {r['title']}")
+        print(f"    {r['url']}")
+        if r["summary"]:
+            print(f"    {r['summary']}")
+    print("\nCuando las hayas revisado: python -m motor fuentes --hecho (todas) o --hecho 2 5 (esas)")
     return 0
 
 
@@ -307,6 +353,11 @@ def main(argv: list[str] | None = None) -> int:
     guide.add_argument("--desde", type=int)
     guide.add_argument("--hasta", type=int)
     sub.add_parser("metodos", help="los métodos de tus guías con tus precios (datos/metodos.md)")
+    sources = sub.add_parser("fuentes", help="novedades de tus fuentes que aún no has revisado")
+    sources.add_argument("--dias", type=float, default=DEFAULT_DAYS)
+    sources.add_argument("--hecho", nargs="*", type=int, metavar="N",
+                         help="marca como revisadas las novedades con esos números, o todas sin números")
+    sources.add_argument("--texto", metavar="ARCHIVO", help="saca el texto de un .docx de fuentes/")
     args = parser.parse_args(argv)
 
     config = load_config()
@@ -316,6 +367,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_ajustes(config, args.horas_semana, args.semanas, args.legado_subida)
     if args.cmd == "metodos":
         return cmd_metodos(config)
+    if args.cmd == "fuentes":
+        return cmd_fuentes(config, args.dias, args.hecho, args.texto)
     if args.cmd == "guia":
         return cmd_guia(config, args.profesion, args.desde, args.hasta)
     if args.cmd == "chollos":

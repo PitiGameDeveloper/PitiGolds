@@ -16,6 +16,7 @@ el catálogo se puede rellenar copiando los nombres de una guía en inglés.
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import statistics
 import unicodedata
@@ -56,12 +57,87 @@ class CatalogEntry:
     added: str = ""
 
 
+class CatalogError(ValueError):
+    """El catálogo no se puede leer (JSON roto)."""
+
+
+def _read(path: Path) -> list:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise CatalogError(f"{path.name} no es un JSON válido (línea {exc.lineno}: {exc.msg})") from exc
+    methods = data.get("metodos", []) if isinstance(data, dict) else None
+    if not isinstance(methods, list):
+        raise CatalogError(f"{path.name} debe tener una lista «metodos»")
+    return methods
+
+
+def catalog_problems(path: Path = CATALOG_PATH, known_lines: set[int] | None = None) -> list[str]:
+    """Lo que está mal en el catálogo, en frases (vacío si está bien). known_lines: las
+    profesiones que existen según los datos del juego, para comprobar sus números."""
+    try:
+        methods = _read(path)
+    except CatalogError as exc:
+        return [str(exc)]
+    problems, seen = [], set()
+
+    def check_line(where: str, line) -> None:
+        if not isinstance(line, int):
+            problems.append(f"{where}: la profesión debe ser un número (393 Desollar, 182 Botánica...)")
+        elif known_lines is not None and line not in known_lines:
+            problems.append(f"{where}: no existe la profesión {line}")
+
+    for n, m in enumerate(methods, 1):
+        if not isinstance(m, dict):
+            problems.append(f"método {n}: debe ser un objeto {{...}}")
+            continue
+        where = f"«{m.get('id') or m.get('nombre') or n}»"
+        ident = m.get("id")
+        if not ident or not isinstance(ident, str) or not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", ident):
+            problems.append(f"{where}: el id debe ser minúsculas, números y guiones (ej. «perla-azul»)")
+        elif ident in seen:
+            problems.append(f"{where}: id repetido")
+        seen.add(ident)
+        if not m.get("nombre"):
+            problems.append(f"{where}: falta «nombre»")
+        if m.get("tipo") not in KINDS:
+            problems.append(f"{where}: tipo «{m.get('tipo')}» no vale; usa uno de: {', '.join(KINDS)}")
+        if "nivel" in m and not (isinstance(m["nivel"], int) and 0 <= m["nivel"] <= 80):
+            problems.append(f"{where}: «nivel» debe ser un número de 0 a 80")
+        objects = m.get("objetos", [])
+        if not isinstance(objects, list):
+            problems.append(f"{where}: «objetos» debe ser una lista")
+            objects = []
+        for o in objects:
+            if isinstance(o, dict):
+                if not o.get("nombre") or not isinstance(o.get("id", 0), int):
+                    problems.append(f"{where}: un objeto con número debe ser {{\"nombre\": ..., \"id\": 1234}}")
+            elif not isinstance(o, str) or not o.strip():
+                problems.append(f"{where}: los objetos son nombres o {{\"nombre\", \"id\"}}")
+        for p in m.get("profesiones", []):
+            if not isinstance(p, dict) or "id" not in p:
+                problems.append(f"{where}: cada profesión es {{\"id\": 182, \"nivel\": 70}}")
+            else:
+                check_line(where, p["id"])
+        for line in m.get("profesiones_alguna", []) + m.get("mejor_con", []):
+            check_line(where, line)
+        if m.get("tipo") == "vendedor" and not m.get("vendedor"):
+            problems.append(f"{where}: a un método de vendedor le falta «vendedor»")
+        if "fecha" in m and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(m["fecha"])):
+            problems.append(f"{where}: «fecha» debe ser AAAA-MM-DD")
+        if not m.get("fuente"):
+            problems.append(f"{where}: falta «fuente» (de dónde sale)")
+    return problems
+
+
 def load_catalog(path: Path = CATALOG_PATH) -> list[CatalogEntry]:
+    """Los métodos del catálogo. Se salta los que no tienen id; CatalogError si el JSON está roto."""
     if not path.is_file():
         return []
-    data = json.loads(path.read_text(encoding="utf-8"))
     entries = []
-    for m in data.get("metodos", []):
+    for m in _read(path):
+        if not isinstance(m, dict) or not m.get("id"):
+            continue
         # Un objeto es un nombre o {"nombre": ..., "id": ...} para los que no salen en los datos
         # del juego (mucho equipo antiguo solo lo conoce el servidor).
         names, ids = [], {}

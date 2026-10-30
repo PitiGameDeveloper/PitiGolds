@@ -1,0 +1,17 @@
+{
+  "_formato": "Fuentes que revisa el asesor con /buscar-metodos (python -m motor fuentes). tipo: rss (Wowhead, Reddit, blogs: url del feed) o youtube (channel_id: el código UC... del canal, que sale en la dirección youtube.com/channel/UC...). filtro (opcional): expresión regular sobre título y resumen; lo que no la cumple no sale. max (opcional): novedades como mucho por fuente, 15 si no se dice. Además salen solos los archivos nuevos de la carpeta fuentes/ (PDF, Word, texto).",
+  "fuentes": [
+    {
+      "nombre": "Wowhead: noticias de Forever",
+      "tipo": "rss",
+      "url": "https://www.wowhead.com/news/rss/forever",
+      "filtro": "\\b(gold|oro|profession\\w*|auction\\w*|crafting|crafted|farm\\w*|econom\\w*|vendor\\w*|recipe\\w*|pattern\\w*|legacy|merchant\\w*|crates?|hotfix\\w*|patch\\w*|nerf\\w*|loot\\w*|drops?|gathering|herb\\w*|mining|skinning|fishing|respec\\w*)\\b"
+    },
+    {
+      "nombre": "Reddit r/woweconomy",
+      "tipo": "rss",
+      "url": "https://www.reddit.com/r/woweconomy/new/.rss",
+      "filtro": "forever"
+    }
+  ]
+}
