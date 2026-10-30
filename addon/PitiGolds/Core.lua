@@ -1,7 +1,7 @@
 -- Núcleo de PitiGolds: base de datos, eventos, utilidades y comandos /pg.
 local ADDON, ns = ...
 
-ns.VERSION = "0.2.0"
+ns.VERSION = "0.3.0"
 ns.SCHEMA = 1
 -- Escaneos que se guardan como máximo mientras el motor no los haya leído.
 -- Un escaneo completo de un mega-reino puede ocupar varios MB y WoW carga todo
@@ -44,16 +44,17 @@ local handlers = {}
 ns.missingEvents = {}
 
 -- Registra un manejador. Si el evento no existe en este cliente no rompe nada:
--- queda anotado en el log para revisarlo.
+-- queda anotado en el log para revisarlo y devuelve false.
 function ns.On(event, fn)
   if not handlers[event] then
     if not pcall(eventFrame.RegisterEvent, eventFrame, event) then
       table.insert(ns.missingEvents, event)
-      return
+      return false
     end
     handlers[event] = {}
   end
   table.insert(handlers[event], fn)
+  return true
 end
 
 local BOOT_EVENTS = { ADDON_LOADED = true, PLAYER_LOGIN = true }
@@ -183,6 +184,8 @@ local function InitDB()
   db.recipeCategories = db.recipeCategories or {}
   db.items = db.items or {}
   db.vendorItems = db.vendorItems or {}
+  db.farmLog = db.farmLog or {}
+  db.ledger = db.ledger or {}
   db.scans = db.scans or {}
   db.discovery = db.discovery or {}
   db.log = db.log or {}

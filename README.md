@@ -6,6 +6,8 @@ Addon personal para WoW Forever que ayuda a decidir en qué gastar el tiempo par
   subasta) y guardarlos con su histórico en una base de datos.
 - **Fase 1 (hecha):** valorar lo que tienes, ver qué crafteos dan beneficio, qué recetas te convendría
   aprender y qué vender, dónde y a qué precio. Los precios salen también en el tooltip de cada objeto.
+- **Fase 2 (hecha):** señales de mercado y previsión a 7 días (con su acierto medido sobre el propio
+  historial), y registro de tus farmeos con tu oro por hora real.
 
 ## Partes
 
@@ -48,6 +50,88 @@ los más antiguos, y esos precios se pierden del histórico.
 | Precios de la subasta | Con los botones PG |
 | Lo que vende cada vendedor y a cuánto (también lo que se paga con divisas) | Al hablar con el vendedor |
 | Lo que paga un vendedor por cada objeto | Cuando el objeto pasa por tus bolsas, banco o recetas |
+
+## Mercado: tendencias y previsión
+
+Con al menos 3 escaneos repartidos en más de un día, el motor calcula para cada objeto que te afecta
+(lo que tienes, lo que farmeas y lo que entra o sale de tus recetas):
+
+- **Tendencia del precio** y lo limpia que es: una caída constante cuenta mucho; un precio que va y
+  viene, poco.
+- **Unidades a la venta y número de vendedores**: si cada vez hay más, el precio acabará cediendo.
+- **Ventas al día**: unidades que había a buen precio y desaparecen entre dos escaneos completos
+  seguidos (como mucho 12 horas de diferencia). Incluye las que alguien retiró para bajarles el precio,
+  así que es una cota alta.
+- **Días de oferta**: para cuántos días de ventas hay género.
+- **Riesgo de bajada (0-100)** y **previsión a 3 y 7 días**, que mezcla la tendencia (a mitad de fuerza)
+  con la vuelta a la mediana según lo limpia que sea la tendencia.
+
+Son reglas fijas, sin IA, y su acierto se mide repitiendo la previsión en momentos pasados: el informe
+dice qué porcentaje acertó y cuánto habría acertado decir siempre «estable». Si no supera a eso, no te
+fíes de ella. Con confianza media o alta, la previsión cambia los consejos: lo que tiende a bajar se
+vende ya aunque esté barato, y lo que sube se espera. En el tooltip aparece «baja» o «sube».
+
+## Tus farmeos
+
+El addon apunta solo lo que ganas mientras juegas: objetos que entran en las bolsas y oro, en tramos
+de 5 minutos por zona. No cuenta lo que entra con el correo, la subasta, el banco, un vendedor, un
+intercambio o la ventana de una profesión abiertos. Puedes poner nombre a lo que haces con
+`/pg farmeo <nombre>`; si no, el motor lo deduce de lo que sacas (minería, hierbas, tela, oro...).
+
+El motor une los tramos en sesiones (15 minutos sin ganar nada cortan la sesión) y calcula el **oro por
+hora real** con los precios de hoy y con los previstos a 7 días. Así sabes cuánto rinde de verdad cada
+farmeo y si va a dejar de compensar. El panel del juego enseña también lo que llevas en la última hora.
+
+## Tu negocio en la subasta
+
+Comprar materiales, fabricar y vender en la subasta también es una forma de hacer oro, pero no la
+mide el registro de farmeos (que no cuenta nada con la subasta, la profesión o el correo abiertos).
+Para eso el addon lleva una contabilidad aparte, que se apunta sola:
+
+- **Compras de materiales** en la subasta: qué, cuántos y el precio total.
+- **Crafteos**: cada vez que fabricas una receta.
+- **Lo que pones a la venta**: cuántos, a qué precio y el depósito.
+- **Ventas** (y compras de objetos que llegan por correo): al recoger el dinero o el objeto del correo,
+  con su factura (precio, comisión y depósito devuelto). Cada correo cuenta una sola vez.
+- **Tiempo de gestión**: el rato con la subasta, la profesión o el correo abiertos (como mucho 30
+  minutos seguidos por ventana, por si te ausentas).
+
+El informe saca el **beneficio real** de cada cosa que fabricas o revendes: lo cobrado menos la
+comisión, menos lo que te costaron los materiales a ti (o a precio de mercado si no los compraste) y
+menos los depósitos sin recuperar. Y el **oro por hora de gestión**, comparable con el de tus farmeos.
+Lo que vendes de lo farmeado no cuenta como negocio: ya está en tus farmeos.
+
+En los crafteos rentables, la columna **«Como mucho al día»** responde a la diferencia clave con
+farmear: un farmeo lo limita tu tiempo, pero un crafteo lo limita el mercado. Supone que puedes vender
+un 30 % de lo que se vende al día sin hundir el precio, y dice cuánto deja eso y cuánto tiempo lleva
+(10 segundos por unidad hasta que haya medidas tuyas; con 20 crafteos apuntados usa tu tiempo real).
+
+## Vendedores
+
+Dos datos distintos que conviene no mezclar:
+
+| Dato | ¿Se sabe sin hablar con el vendedor? |
+|---|---|
+| Cuánto cobraría un vendedor por un objeto | Sí: viene en los datos del juego, para todos los objetos |
+| Si algún vendedor lo vende, cuál, dónde y con qué condiciones | No: solo al abrir su ventana, o mirándolo fuera del juego |
+
+Como los datos del juego dan precio de vendedor también a objetos que no vende nadie (el paño de lino,
+por ejemplo), los costes solo usan precios de vendedores que has visto. Al abrir un vendedor se
+apunta lo que vende (con quién lo viste, porque el precio puede llevar descuentos de reputación o de
+Legacy) y se borra lo que ya no vende.
+
+El informe añade:
+- **Comprar a vendedores y revender**: lo que un vendedor que has visto vende por debajo de lo que
+  pagan en la subasta, con lo que da como mucho al día.
+- **Posibles chollos de vendedor**: objetos de tus crafteos o farmeos que en la subasta (ya sin
+  comisión) se pagan al menos un 30 % más de lo que costaría comprárselos a un vendedor, si alguno los vende. Hay que mirar fuera del juego si alguien los vende:
+  - `python -m motor chollos` lista los que toca comprobar;
+  - `python -m motor chollo <id> nadie` o `python -m motor chollo <id> vende "Grimtak (Ratchet), Honorable"`
+    apunta lo encontrado (en la Fase 4 lo hará el asesor de Claude).
+
+  Si sale «nadie», se vuelve a mirar a la semana, a las dos y a las cuatro, y después solo con
+  versiones nuevas del juego. Los materiales de botín (tela, mineral, hierbas, cuero...) y lo que
+  farmeas se miran una vez y después solo con versiones nuevas.
 
 ## Datos del juego
 
@@ -96,8 +180,17 @@ Con estos datos el informe añade:
   - **esperar** si está un 20 % o más por debajo de su mediana de 7 días;
   - **subastar** en otro caso, 1 cobre por debajo del más barato (nunca por debajo de lo que paga el
     vendedor). Avisa si tienes más de lo que hay a la venta.
-- **En la subasta** (columna de crafteos): cuántas unidades de lo fabricado hay a la venta. Si son muy
-  pocas, el beneficio es real pero el mercado es pequeño.
+- **Ritmo de venta**: se supone que puedes vender un 30 % de lo que se vende al día en toda la subasta
+  sin hundir el precio. Si tienes 100 de algo que se vende a 10 al día, el informe dice que pongas unas 3
+  al día y que tardarás unos 33 días, cuánto sacarás de media por unidad si el precio va a la baja,
+  si hay muchos vendedores que te van a rebajar el precio, y si lo que no vas a colocar en dos semanas
+  compensa vendérselo al vendedor. El total del consejo ya cuenta con ese precio medio.
+- **Crafteos con mercado pequeño**: si puedes fabricar más de lo que se vende, la columna «Ya puedes
+  hacer» dice cuántas hacer al día, y el beneficio enseña también el previsto a 7 días («ya no
+  compensa» si el precio va a dejarlo en pérdidas). Lo mismo en la reventa desde vendedores.
+- **El 30 % de los posibles chollos** es solo un filtro para decidir qué merece la pena mirar fuera del
+  juego, no una garantía de beneficio: si se confirma un vendedor, la reventa pasa por las mismas cuentas
+  de ritmo y previsión.
 
 Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 
@@ -111,6 +204,7 @@ Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 | `/pg estado` | Qué hay guardado y cuánto hace que lo leyó el motor |
 | `/pg log` | Últimas líneas del registro, con los errores si los hay |
 | `/pg panel` | Muestra u oculta el panel |
+| `/pg farmeo Cobre en Durotar` | Pone nombre a lo que farmeas desde ahora (`/pg farmeo fin` lo quita; `/pg farmeo` a secas dice cuánto llevas en la última hora) |
 
 ## Primer día de WoW Forever: qué comprobar
 

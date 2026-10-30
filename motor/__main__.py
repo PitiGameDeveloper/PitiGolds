@@ -4,6 +4,8 @@
     python -m motor estado     resumen de personajes, oro, profesiones y subasta
     python -m motor informe    qué craftear, qué aprender y qué vender
     python -m motor datos-juego  descarga las recetas y objetos del juego (wago.tools)
+    python -m motor chollos    posibles chollos de vendedor que toca comprobar fuera del juego
+    python -m motor chollo <id> nadie | vende "detalle"   apunta lo que encuentres
 """
 
 from __future__ import annotations
@@ -19,7 +21,9 @@ from .config import Config, load_config
 from .gamedata import update_game_data
 from .generated import write_generated
 from .ingest import ingest_file
+from .money import format_money
 from .report import build_advice_report, build_report
+from .vendors import record_check
 
 
 def refresh_outputs(conn: sqlite3.Connection, config: Config) -> str:
@@ -144,6 +148,37 @@ def cmd_estado(config: Config) -> int:
     return 0
 
 
+def cmd_chollos(config: Config, show_all: bool) -> int:
+    if not config.db_path.exists():
+        print("Todavía no hay base de datos. Ejecuta antes: python -m motor leer")
+        return 1
+    conn = dbmod.connect(config.db_path)
+    try:
+        candidates = analyze(conn).vendor_candidates
+    finally:
+        conn.close()
+    shown = candidates if show_all else [c for c in candidates if c.due]
+    if not shown:
+        print("No toca comprobar ninguno." if candidates else "No hay posibles chollos de vendedor.")
+        return 0
+    print("Mira si algún vendedor los vende (en Wowhead, la pestaña «Vendido por»)\n"
+          "y apúntalo con: python -m motor chollo <id> nadie | vende \"vendedor, zona y condiciones\"\n")
+    for c in shown:
+        print(f"{c.item_id:>7}  {c.name:<32} {c.why:<34} si lo vende alguien: +{format_money(c.gain)}/ud"
+              + (f"  [{c.status}{': ' + c.detail if c.detail else ''}]" if c.status != "sin comprobar" else ""))
+    return 0
+
+
+def cmd_chollo(config: Config, item_id: int, result: str, detail: str | None) -> int:
+    conn = dbmod.connect(config.db_path)
+    try:
+        record_check(conn, item_id, sold=(result == "vende"), detail=detail)
+    finally:
+        conn.close()
+    print(f"Apuntado: {item_id} {result}" + (f" ({detail})" if detail else "") + ".")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -156,11 +191,21 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("informe", help="qué craftear, qué recetas aprender y qué vender")
     game = sub.add_parser("datos-juego", help="descarga las recetas y objetos del juego de wago.tools")
     game.add_argument("--forzar", action="store_true", help="vuelve a importarlos aunque estén al día")
+    deals = sub.add_parser("chollos", help="posibles chollos de vendedor que toca comprobar fuera del juego")
+    deals.add_argument("--todos", action="store_true", help="también los que no toca comprobar todavía")
+    deal = sub.add_parser("chollo", help="apunta si algún vendedor vende un objeto")
+    deal.add_argument("item_id", type=int)
+    deal.add_argument("resultado", choices=["nadie", "vende"])
+    deal.add_argument("detalle", nargs="?", help="vendedor, zona y condiciones (si lo vende alguien)")
     args = parser.parse_args(argv)
 
     config = load_config()
     if args.cmd == "leer":
         return cmd_leer(config)
+    if args.cmd == "chollos":
+        return cmd_chollos(config, args.todos)
+    if args.cmd == "chollo":
+        return cmd_chollo(config, args.item_id, args.resultado, args.detalle)
     if args.cmd == "informe":
         return cmd_informe(config)
     if args.cmd == "datos-juego":

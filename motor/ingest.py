@@ -45,6 +45,8 @@ class IngestReport:
     recipes: int = 0
     new_scans: int = 0
     new_prices: int = 0
+    farm_buckets: int = 0
+    ledger_events: int = 0
 
 
 def ingest_file(conn: sqlite3.Connection, account: str, path: Path) -> IngestReport:
@@ -60,9 +62,37 @@ def ingest_file(conn: sqlite3.Connection, account: str, path: Path) -> IngestRep
             report.characters += 1
         _ingest_account(conn, as_dict(db.get("account")))
         report.recipes = _ingest_recipes(conn, db)
+        _ingest_vendors(conn, account, as_dict(db.get("vendorItems")))
         report.new_scans, report.new_prices = _ingest_scans(conn, account, as_list(db.get("scans")))
+        report.farm_buckets = _ingest_farm(conn, as_dict(db.get("farmLog")))
+        report.ledger_events = _ingest_ledger(conn, as_list(db.get("ledger")))
         _ingest_misc(conn, account, db, now)
     return report
+
+
+def _ingest_ledger(conn: sqlite3.Connection, events: list) -> int:
+    cur = conn.executemany(
+        "INSERT OR IGNORE INTO ledger VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [(e.get("key"), e.get("t"), e.get("char"), e.get("type"), e.get("itemID"), e.get("itemName"),
+          e.get("qty"), e.get("money"), e.get("unit"), e.get("deposit"), e.get("cut"), e.get("recipeID"),
+          e.get("kind"), e.get("seconds"))
+         for e in events if isinstance(e, dict) and e.get("key")],
+    )
+    return cur.rowcount
+
+
+def _ingest_farm(conn: sqlite3.Connection, log: dict) -> int:
+    # Los tramos van creciendo mientras juegas: se reemplazan enteros cada vez.
+    for key, b in log.items():
+        conn.execute(
+            "INSERT OR REPLACE INTO farm_buckets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (key, b.get("t"), b.get("char"), b.get("zone"), b.get("zoneName"), b.get("label"),
+             b.get("money") or 0, b.get("first"), b.get("last")),
+        )
+        conn.execute("DELETE FROM farm_items WHERE bucket_key = ?", (key,))
+        conn.executemany("INSERT INTO farm_items VALUES (?, ?, ?)",
+                         [(key, int(i), int(n)) for i, n in as_dict(b.get("items")).items()])
+    return len(log)
 
 
 # Personajes ---------------------------------------------------------------------
@@ -205,13 +235,21 @@ def _ingest_recipes(conn: sqlite3.Connection, db: dict) -> int:
         item_rows,
     )
 
-    conn.executemany(
-        "INSERT OR REPLACE INTO vendor_items VALUES (?, ?, ?, ?, ?, ?)",
-        [(iid, v.get("price"), 1 if v.get("limited") else 0, v.get("vendor"),
-          json.dumps(as_list(v.get("costs")), ensure_ascii=False) if v.get("costs") else None, v.get("time"))
-         for iid, v in as_dict(db.get("vendorItems")).items()],
-    )
     return len(recipes)
+
+
+def _ingest_vendors(conn: sqlite3.Connection, account: str, vendors: dict) -> None:
+    # El addon guarda la lista completa (y borra lo que un vendedor ya no vende): se reemplaza.
+    conn.execute("DELETE FROM vendor_items WHERE account = ? OR account IS NULL", (account,))
+    conn.executemany(
+        """INSERT OR REPLACE INTO vendor_items
+           (item_id, price, limited, vendor, costs_json, updated, account, char_key)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        [(iid, v.get("price"), 1 if v.get("limited") else 0, v.get("vendor"),
+          json.dumps(as_list(v.get("costs")), ensure_ascii=False) if v.get("costs") else None, v.get("time"),
+          account, v.get("char"))
+         for iid, v in vendors.items()],
+    )
 
 
 # Escaneos de subasta -------------------------------------------------------------------

@@ -56,9 +56,17 @@ CREATE TABLE IF NOT EXISTS recipe_categories (category_id INTEGER PRIMARY KEY, n
 -- sell_price: lo que paga un vendedor por una unidad.
 CREATE TABLE IF NOT EXISTS items (item_id INTEGER PRIMARY KEY, name TEXT, sell_price INTEGER);
 
--- Lo que venden los vendedores. price: por unidad, NULL si solo se paga con divisas (costs_json).
+-- Lo que venden los vendedores que has visto. price: por unidad, NULL si solo se paga con
+-- divisas (costs_json). char_key: quién lo vio (el precio puede llevar sus descuentos).
 CREATE TABLE IF NOT EXISTS vendor_items (
-  item_id INTEGER PRIMARY KEY, price INTEGER, limited INTEGER, vendor TEXT, costs_json TEXT, updated INTEGER
+  item_id INTEGER PRIMARY KEY, price INTEGER, limited INTEGER, vendor TEXT, costs_json TEXT, updated INTEGER,
+  account TEXT, char_key TEXT
+);
+
+-- Comprobaciones fuera del juego (Wowhead...) de si algún vendedor vende un objeto (vendors.py).
+-- status: vende o nadie; misses: veces seguidas que salió «nadie»; game_build: versión del juego entonces.
+CREATE TABLE IF NOT EXISTS vendor_checks (
+  item_id INTEGER PRIMARY KEY, status TEXT, detail TEXT, checked_at INTEGER, misses INTEGER, game_build TEXT
 );
 
 CREATE TABLE IF NOT EXISTS currencies (
@@ -103,6 +111,28 @@ CREATE INDEX IF NOT EXISTS idx_prices_item ON prices(item_id);
 
 CREATE TABLE IF NOT EXISTS addon_log (line TEXT PRIMARY KEY, account TEXT);
 
+-- Lo ganado farmeando, en tramos de 5 minutos por personaje, zona y etiqueta (farming.py).
+-- first/last: hora de la primera y la última ganancia del tramo.
+CREATE TABLE IF NOT EXISTS farm_buckets (
+  bucket_key TEXT PRIMARY KEY, t INTEGER, char_key TEXT, zone_id INTEGER, zone_name TEXT,
+  label TEXT, money INTEGER, first INTEGER, last INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_farm_buckets_t ON farm_buckets(t);
+CREATE TABLE IF NOT EXISTS farm_items (
+  bucket_key TEXT, item_id INTEGER, count INTEGER, PRIMARY KEY (bucket_key, item_id)
+);
+
+-- Contabilidad de subasta y crafteo (business.py). type: buy, post, sale, craft o time.
+-- money: lo pagado (buy), el precio de venta bruto (sale); unit_price: precio por unidad puesto (post);
+-- deposit: depósito pagado (post) o devuelto (sale); cut: comisión (sale); seconds: tiempo (time).
+-- Las ventas y compras por correo solo traen el nombre del objeto (item_name).
+CREATE TABLE IF NOT EXISTS ledger (
+  event_key TEXT PRIMARY KEY, t INTEGER, char_key TEXT, type TEXT, item_id INTEGER, item_name TEXT,
+  quantity INTEGER, money INTEGER, unit_price INTEGER, deposit INTEGER, cut INTEGER,
+  recipe_id INTEGER, kind TEXT, seconds INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_ledger_t ON ledger(t);
+
 -- Datos del juego descargados de wago.tools (gamedata.py). Se rehacen en cada importación.
 CREATE TABLE IF NOT EXISTS gd_skill_lines (skill_line INTEGER PRIMARY KEY, name TEXT, category INTEGER, parent INTEGER);
 
@@ -140,6 +170,7 @@ CREATE VIEW latest_prices AS
 ADDED_COLUMNS = {
     "prices": {"market_price": "INTEGER"},
     "items": {"sell_price": "INTEGER"},
+    "vendor_items": {"account": "TEXT", "char_key": "TEXT"},
 }
 
 

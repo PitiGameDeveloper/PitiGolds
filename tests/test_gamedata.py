@@ -101,7 +101,7 @@ class Importacion(unittest.TestCase):
         c.executemany("INSERT INTO prices VALUES ('s', ?, ?, 10, 1, 1, NULL, ?)", [
             (2840, 300, 300), (2845, 5000, 5000), (118, 60, 60), (2447, 20, 20), (765, 30, 30), (9100, 1500, 1500),
         ])
-        c.execute("INSERT INTO vendor_items VALUES (2880, 100, 0, 'Grimtak', NULL, 0)")
+        c.execute("INSERT INTO vendor_items (item_id, price, limited, vendor) VALUES (2880, 100, 0, 'Grimtak')")
         c.commit()
 
         a = analyze(c)

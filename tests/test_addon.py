@@ -242,7 +242,7 @@ class AddonMasMotor(unittest.TestCase):
             content = generated.read_text(encoding="utf-8")
             up_to = int(re.search(r"ingestedUpTo = (\d+)", content).group(1))
             self.assertGreater(up_to, 0)
-            self.assertIn('[2589] = "40,",', content)
+            self.assertIn('[2589] = "40,,",', content)
             self.assertIn('[2845] = "1900,2850",', content)
 
             # Al recargar, el addon carga Generated.lua y borra lo que el motor ya tiene.
@@ -261,3 +261,205 @@ class AddonMasMotor(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Farmeo(unittest.TestCase):
+    """Lo que entra en las bolsas farmeando se apunta; lo que se recoge del correo, no."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.lua = lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = cls.mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        lua.execute("PitiGoldsDB = nil")
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        mock.Advance(10)
+
+        mock.Slash("farmeo Cobre en Durotar")
+        mock.Loot(0, 10, 2770, 3)
+        mock.AddMoney(250)
+        mock.Advance(60)
+        mock.Loot(0, 10, 2770, 2)
+        mock.Advance(1)
+        # Lo que se recoge del correo no es farmeado.
+        mock.Fire("MAIL_SHOW")
+        mock.Loot(0, 11, 2592, 20)
+        mock.AddMoney(5000)
+        mock.Advance(2)
+        mock.Fire("MAIL_CLOSED")
+        mock.Advance(1)
+        # Sigue en otra zona.
+        lua.execute("Mock.mapID = 1413")
+        mock.Loot(0, 10, 2770, 1)
+        mock.Advance(1)
+        cls.buckets = list(lua.globals().PitiGoldsDB.farmLog.values())
+
+    def total(self, zone, item_id=None):
+        found = [b for b in self.buckets if b.zoneName == zone]
+        if item_id is None:
+            return sum(b.money for b in found)
+        return sum((b["items"][item_id] or 0) for b in found)
+
+    def test_cuenta_lo_farmeado(self):
+        self.assertEqual(self.total("Durotar", 2770), 5)
+        self.assertEqual(self.total("Durotar"), 250)
+        self.assertEqual(self.total("Los Baldíos", 2770), 1)
+        self.assertTrue(all(b.label == "Cobre en Durotar" for b in self.buckets))
+
+    def test_no_cuenta_el_correo(self):
+        self.assertEqual(sum((b["items"][2592] or 0) for b in self.buckets), 0)
+        self.assertEqual(self.total("Durotar") + self.total("Los Baldíos"), 250)
+
+    def test_oro_por_hora_en_el_juego(self):
+        per_hour = self.lua.eval("Mock.ns.FarmLastHour()")
+        per_hour = per_hour[0] if isinstance(per_hour, tuple) else per_hour
+        self.assertGreater(per_hour, 0)
+
+    def test_sesiones_en_el_motor(self):
+        saved = self.mock.Serialize("PitiGoldsDB", self.lua.globals().PitiGoldsDB)
+        with tempfile.TemporaryDirectory() as tmp:
+            sv = Path(tmp) / "PitiGolds.lua"
+            sv.write_text(saved, encoding="utf-8")
+            conn = dbmod.connect(Path(tmp) / "p.db")
+            report = ingest_file(conn, "TEST#1", sv)
+            self.assertGreater(report.farm_buckets, 0)
+            ingest_file(conn, "TEST#1", sv)  # leerlo dos veces no duplica nada
+            a = analyze(conn)
+            sessions = {s.zone: s for s in a.farms}
+            self.assertEqual(sessions["Durotar"].items, {2770: 5})
+            self.assertEqual(sessions["Durotar"].money, 250)
+            self.assertEqual(sessions["Durotar"].activity, "Cobre en Durotar")
+            self.assertEqual(sessions["Los Baldíos"].items, {2770: 1})
+            self.assertIn("Tus farmeos", build_advice_report(conn, a))
+            conn.close()
+
+
+class Contabilidad(unittest.TestCase):
+    """Comprar lingotes, fabricar hachas, ponerlas a la venta y cobrar: todo queda apuntado."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.lua = lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = cls.mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        lua.execute("PitiGoldsDB = nil; Mock.commodityPrices[2840] = 300")
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        mock.Advance(10)
+        mock.Fire("MERCHANT_SHOW")  # el flujo débil cuesta 100 en el vendedor
+        mock.Advance(1)
+        mock.Fire("MERCHANT_CLOSED")
+
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        lua.execute("C_AuctionHouse.StartCommoditiesPurchase(2840, 12)")
+        mock.Advance(1)
+        lua.execute("C_AuctionHouse.ConfirmCommoditiesPurchase(2840, 12)")
+        mock.Advance(119)
+        mock.Fire("AUCTION_HOUSE_CLOSED")
+
+        mock.Fire("TRADE_SKILL_SHOW")
+        mock.Advance(3)
+        for _ in range(2):
+            mock.Fire("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 1002)
+        mock.Fire("UNIT_SPELLCAST_SUCCEEDED", "target", "guid", 1002)  # no es tuyo
+        mock.Advance(57)
+        mock.Fire("TRADE_SKILL_CLOSE")
+
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        lua.execute("C_AuctionHouse.PostItem({ itemID = 2845 }, 1, 1, 0, 5000)")
+        lua.execute("C_AuctionHouse.PostItem({ itemID = 2845 }, 1, 1, 0, 5000)")
+        mock.Advance(30)
+        mock.Fire("AUCTION_HOUSE_CLOSED")
+
+        lua.execute('Mock.inbox = { { sender = "Casa de subastas", subject = "Subasta exitosa", money = 4800, '
+                    'invoice = { type = "seller", itemName = "Hacha de cobre", bid = 5000, deposit = 50, '
+                    'cut = 250, count = 1 } } }')
+        mock.Fire("MAIL_SHOW")
+        mock.Advance(2)
+        lua.execute("TakeInboxMoney(1); AutoLootMailItem(1)")  # el mismo correo: una sola venta
+        mock.Advance(28)
+        mock.Fire("MAIL_CLOSED")
+        cls.events = list(lua.globals().PitiGoldsDB.ledger.values())
+
+    def of(self, kind):
+        return [e for e in self.events if e.type == kind]
+
+    def test_compra_de_materiales(self):
+        (buy,) = self.of("buy")
+        self.assertEqual((buy.itemID, buy.qty, buy.money), (2840, 12, 3600))
+
+    def test_crafteos_y_lo_puesto_a_la_venta(self):
+        crafts = self.of("craft")
+        self.assertEqual([(c.recipeID, c.itemID) for c in crafts], [(1002, 2845), (1002, 2845)])
+        posts = self.of("post")
+        self.assertEqual([(p.itemID, p.qty, p.unit, p.deposit) for p in posts], [(2845, 1, 5000, 50)] * 2)
+
+    def test_venta_por_correo_una_sola_vez(self):
+        (sale,) = self.of("sale")
+        self.assertEqual((sale.itemName, sale.money, sale.cut, sale.deposit), ("Hacha de cobre", 5000, 250, 50))
+
+    def test_tiempo_de_gestion(self):
+        seconds = {}
+        for e in self.of("time"):
+            seconds[e.kind] = seconds.get(e.kind, 0) + e.seconds
+        self.assertEqual(seconds, {"subasta": 150, "profesion": 60, "correo": 30})
+
+    def test_beneficio_en_el_motor(self):
+        saved = self.mock.Serialize("PitiGoldsDB", self.lua.globals().PitiGoldsDB)
+        with tempfile.TemporaryDirectory() as tmp:
+            sv = Path(tmp) / "PitiGolds.lua"
+            sv.write_text(saved, encoding="utf-8")
+            conn = dbmod.connect(Path(tmp) / "p.db")
+            self.assertEqual(ingest_file(conn, "TEST#1", sv).ledger_events, len(self.events))
+            self.assertEqual(ingest_file(conn, "TEST#1", sv).ledger_events, 0)  # no se duplica
+            a = analyze(conn)
+            items = {e.name: e for e in a.business.items}
+            axe = items["Hacha de cobre"]
+            self.assertEqual(axe.origin, "fabricado")
+            self.assertEqual((axe.crafted, axe.posted, axe.sold), (2, 2, 1))
+            # 6 lingotes a lo que te costaron (300) + flujo del vendedor (100).
+            self.assertEqual(axe.unit_cost, 1900)
+            self.assertEqual(axe.deposits_lost, 50)
+            self.assertEqual(axe.profit, 5000 - 250 - 1900 - 50)
+            self.assertEqual(items["Barra de cobre"].origin, "material")
+            self.assertAlmostEqual(axe.seconds, 240)  # todo el tiempo de gestión es del hacha
+            self.assertEqual(a.business.per_hour, round(2800 / (240 / 3600)))
+            self.assertIn("Tu negocio en la subasta", build_advice_report(conn, a))
+            conn.close()
+
+
+class VendedorQueCambia(unittest.TestCase):
+    """Si un vendedor deja de vender algo, se borra; lo de otros vendedores se queda."""
+
+    def test_se_borra_lo_que_ya_no_vende(self):
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        lua.execute("PitiGoldsDB = nil")
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        mock.Advance(10)
+
+        def visit(npc, items_lua):
+            lua.execute(f'Mock.merchant.npc = "{npc}"; Mock.merchant.items = {items_lua}')
+            mock.Fire("MERCHANT_SHOW")
+            mock.Advance(1)
+            mock.Fire("MERCHANT_CLOSED")
+
+        visit("Grimtak", '{ { itemID = 2880, name = "Flujo débil", price = 100 }, '
+                         '{ itemID = 2320, name = "Hilo grueso", price = 10 } }')
+        visit("Otro", '{ { itemID = 2321, name = "Hilo fino", price = 50 } }')
+        visit("Grimtak", '{ { itemID = 2880, name = "Flujo débil", price = 100 } }')  # tras un parche
+
+        vendor = lua.globals().PitiGoldsDB.vendorItems
+        self.assertEqual(vendor[2880].vendor, "Grimtak")
+        self.assertIsNone(vendor[2320])
+        self.assertEqual(vendor[2321].vendor, "Otro")
+        self.assertEqual(vendor[2880].char, "Brujo-Dio")

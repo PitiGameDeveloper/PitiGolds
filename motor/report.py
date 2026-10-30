@@ -145,6 +145,142 @@ def _missing_hint(p) -> str:
     return p.name
 
 
+def _week_cell(profit: int, week: int | None) -> str:
+    if week is None:
+        return ""
+    if week <= 0:
+        return "ya no compensa"
+    return format_money(week)
+
+
+def _profit_cell(profit: int, week: int | None) -> str:
+    """Beneficio de hoy y, si va a cambiar mucho, el previsto a 7 días."""
+    text = format_money(profit)
+    if week is not None and abs(week - profit) > abs(profit) * 0.1:
+        text += " (en 7 días: " + ("ya no compensa" if week <= 0 else format_money(week)) + ")"
+    return text
+
+
+def _craftable_cell(c) -> str:
+    """Cuántas puedes hacer con lo que tienes; si son más de las que se venden, cuántas hacer al día."""
+    if not c.craftable_now:
+        return ""
+    cap = c.capacity
+    if cap is not None and c.craftable_now > cap.units_per_day * 2:
+        return f"{c.craftable_now} (haz unas {max(1, int(cap.units_per_day))} al día)"
+    return str(c.craftable_now)
+
+
+def _capacity_cell(cap) -> str:
+    if cap is None:
+        return ""
+    return f"{format_money(cap.gold_per_day)} ({cap.units_per_day:.0f} uds, {cap.minutes_per_day:.0f} min)"
+
+
+def _business_section(a: Analysis, limit: int) -> list[str]:
+    b = a.business
+    out = ["", "## Tu negocio en la subasta (últimos 14 días)", ""]
+    if not b.items and not b.seconds:
+        out.append("Todavía no hay movimientos. Se apuntan solos: compras de materiales, crafteos, lo que "
+                   "pones a la venta y las ventas al recoger el dinero del correo.")
+        return out
+    trading = b.trading
+    if trading:
+        per_hour = format_money(b.per_hour) if b.per_hour is not None else "?"
+        out.append(f"Beneficio de lo que fabricas o revendes: {format_money(b.profit)} en "
+                   f"{_duration(b.trading_hours)} de gestión = {per_hour} por hora.")
+    if b.farmed_sales:
+        out.append(f"Ventas de lo farmeado (ya cuentan en tus farmeos): {format_money(b.farmed_sales)}.")
+    out.append(f"Tiempo total con la subasta, la profesión o el correo abiertos: {_duration(b.hours)}.")
+    if trading:
+        out.append("")
+        out += _table(["Objeto", "Origen", "Fabricados", "Comprados", "Puestos", "Vendidos", "Precio medio",
+                       "Coste por unidad", "Depósitos sin recuperar", "Beneficio", "Oro/h"],
+                      [[e.name, e.origin, f"{e.crafted:.0f}" if e.crafted else "", e.bought or "", e.posted or "",
+                        e.sold or "", format_money(e.avg_sale) if e.avg_sale else "",
+                        format_money(e.unit_cost) if e.unit_cost is not None else "?",
+                        format_money(e.deposits_lost) if e.deposits_lost else "",
+                        format_money(e.profit) if e.profit is not None else "?",
+                        format_money(e.per_hour) if e.per_hour is not None else ""]
+                       for e in trading[:limit]])
+    return out
+
+
+def _vendor_sections(a: Analysis, limit: int) -> list[str]:
+    out = []
+    if a.vendor_flips:
+        out += ["", "## Comprar a vendedores y revender", "",
+                "Vendedores que has visto que venden por debajo de lo que pagan en la subasta.", ""]
+        out += _table(["Objeto", "Vendedor", "Compras a", "Vendes por", "Ganas por unidad", "En 7 días",
+                       "Como mucho al día",
+                       "Existencias"],
+                      [[f.name, f.vendor, format_money(f.buy), format_money(f.sell), format_money(f.profit),
+                        _week_cell(f.profit, f.profit_week),
+                        format_money(f.gold_per_day) if f.gold_per_day is not None else "",
+                        "limitadas" if f.limited else "sin límite"] for f in a.vendor_flips[:limit]])
+    candidates = a.vendor_candidates
+    if candidates:
+        due = sum(1 for c in candidates if c.due)
+        out += ["", "## Posibles chollos de vendedor", "",
+                "Objetos de tus crafteos o farmeos que en la subasta (ya sin comisión) se pagan al menos un 30 % más "
+                "de lo que costaría comprárselos a un vendedor. No se sabe si alguno lo vende: hay que mirarlo fuera del juego. Los materiales de "
+                "botín (tela, mineral, hierbas...) y lo que farmeas se miran una vez y después solo con versiones "
+                "nuevas del juego.",
+                "",
+                f"Toca comprobar {due}. Lista: python -m motor chollos. Para apuntar lo que encuentres: "
+                "python -m motor chollo <id> nadie, o python -m motor chollo <id> vende \"vendedor, zona y condiciones\".",
+                ""]
+        out += _table(["Objeto", "ID", "Por qué importa", "Si lo vende alguien, ganarías", "Resultado",
+                       "Siguiente comprobación"],
+                      [[c.name, c.item_id, c.why, f"{format_money(c.gain)} por unidad",
+                        c.status + (f": {c.detail}" if c.detail else ""), c.next_check]
+                       for c in candidates[:limit]])
+    return out
+
+
+def _duration(hours: float) -> str:
+    if hours < 1:
+        return f"{hours * 60:.0f} min"
+    return f"{hours:.1f} h".replace(".", ",")
+
+
+def _market_cell(listed: int | None, s) -> str:
+    parts = []
+    if listed is not None:
+        parts.append(f"{listed} en venta")
+    if s is not None and s.sales_per_day:
+        parts.append(f"~{s.sales_per_day:.0f}/día")
+    if s is not None and s.outlook in ("baja", "sube"):
+        parts.append(s.outlook)
+    return " · ".join(parts)
+
+
+def _accuracy_line(a: Analysis) -> str:
+    b = a.accuracy
+    if b.cases < 20:
+        return ("Acierto de la previsión: todavía no hay historial para medirlo "
+                f"({b.cases} casos; hacen falta 20).")
+    return (f"Acierto de la previsión a 3 días: {format_pct(b.accuracy)} en {b.cases} casos "
+            f"(decir siempre «estable» acertaría el {format_pct(b.baseline)}).")
+
+
+def _moving_items(a: Analysis) -> list[list]:
+    """Objetos que te afectan y cuyo precio se espera que cambie."""
+    rows = []
+    for item_id in a.relevant_items():
+        s = a.signals.get(item_id)
+        if s is None or s.outlook not in ("baja", "sube"):
+            continue
+        p = a.prices.get(item_id)
+        sales = f"~{s.sales_per_day:.1f}" if s.sales_per_day else ""
+        rows.append((abs(s.week_change or 0), [
+            p.name if p else f"objeto {item_id}", format_money(s.current),
+            f"{format_money(s.forecast_7d)} ({s.outlook})", s.quantity, sales, s.drop_risk, s.confidence,
+            "; ".join(s.reasons)]))
+    rows.sort(key=lambda r: r[0], reverse=True)
+    return [row for _, row in rows]
+
+
 def _other_professions(a: Analysis) -> list[list]:
     by_profession = {}
     for c in a.crafts:
@@ -174,12 +310,14 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15) 
         rows = []
         for c in known[:limit]:
             skill = c.difficulty_name if c.difficulty is not None and c.difficulty < 3 else ""
-            listed = "" if c.output_listed is None else c.output_listed
             rows.append([c.name, ", ".join(c.known_by), format_money(c.cost), format_money(c.value),
-                         format_money(c.profit), format_pct(c.margin) if c.margin is not None else "",
-                         c.craftable_now or "", skill, listed])
-        out += _table(["Receta", "Quién", "Coste", "Vendes por", "Beneficio", "Margen",
-                       "Ya puedes hacer", "Sube habilidad", "En la subasta"], rows)
+                         _profit_cell(c.profit, c.profit_week), _craftable_cell(c), skill,
+                         _market_cell(c.output_listed, c.output_signals), _capacity_cell(c.capacity)])
+        out += _table(["Receta", "Quién", "Coste", "Vendes por", "Beneficio", "Ya puedes hacer",
+                       "Sube habilidad", "Mercado", "Como mucho al día"], rows)
+        out.append("")
+        out.append("«Como mucho al día»: beneficio si vendes el 30 % de lo que se vende al día (más hunde el "
+                   "precio), y el tiempo que te lleva fabricarlo y ponerlo a la venta.")
     else:
         out.append("Ninguno todavía. Hace falta abrir la ventana de tus profesiones y un escaneo de materiales.")
 
@@ -199,14 +337,46 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15) 
         out += _table(["Profesión", "Recetas con beneficio", "La mejor", "Nivel", "Beneficio", "Otras buenas"],
                       others[:limit])
 
+    out += ["", "## Mercado: lo que se mueve", ""]
+    out.append(_accuracy_line(a))
+    moving = _moving_items(a)
+    if moving:
+        out.append("")
+        out += _table(["Objeto", "Ahora", "En 7 días", "A la venta", "Ventas al día", "Riesgo de bajada",
+                       "Confianza", "Por qué"], moving[:limit])
+    else:
+        out.append("")
+        out.append("Nada que destacar: hacen falta al menos 3 escaneos repartidos en más de un día.")
+
     useful = [s for s in a.sales if s.action != "sin precio"]
     out += ["", "## Qué hacer con lo que tienes", ""]
     if useful:
-        out += _table(["Objeto", "Cantidad", "Dónde", "Qué hacer", "Precio", "Total", "Por qué"],
+        out += _table(["Objeto", "Cantidad", "Dónde", "Qué hacer", "Precio", "Total", "Ritmo", "Por qué"],
                       [[s.name, s.count, s.places, s.action, format_money(s.unit_price),
-                        format_money(s.total), s.reason] for s in useful[:limit * 2]])
+                        format_money(s.total), s.pace, s.reason] for s in useful[:limit * 2]])
     else:
         out.append("Nada todavía: hace falta saber qué tienes y haber escaneado la subasta.")
+
+    out += ["", "## Tus farmeos (últimos 14 días)", ""]
+    if a.farms:
+        out.append("Oro por hora real: lo ganado (objetos a precio de mercado sin comisión, más el oro) "
+                   "entre la primera y la última ganancia de cada sesión, valorado con los precios de hoy "
+                   "y con los previstos dentro de 7 días.")
+        out.append("")
+        out += _table(["Actividad", "Zona", "Sesiones", "Tiempo", "Oro/h hoy", "Oro/h en 7 días"],
+                      [[g.activity, g.zone, g.sessions, _duration(g.hours), format_money(g.per_hour),
+                        format_money(g.per_hour_week)] for g in a.farm_summary[:limit]])
+        recent = sorted(a.farms, key=lambda s: s.start, reverse=True)[:10]
+        out += ["", "Últimas sesiones:", ""]
+        out += _table(["Cuándo", "Quién", "Zona", "Actividad", "Duración", "Oro/h", "Lo principal"],
+                      [[ago(s.end), s.char_key, s.zone, s.activity, _duration(s.hours),
+                        format_money(s.per_hour), ", ".join(s.top_items)] for s in recent])
+    else:
+        out.append("Todavía no hay farmeos registrados. Se apuntan solos mientras juegas; "
+                   "ponles nombre con /pg farmeo <nombre>.")
+
+    out += _business_section(a, limit)
+    out += _vendor_sections(a, limit)
 
     notes = []
     no_price = [s.name for s in a.sales if s.action == "sin precio"]

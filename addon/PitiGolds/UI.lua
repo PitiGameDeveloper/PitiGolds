@@ -18,6 +18,8 @@ function ns.RefreshUI()
   local lines = {}
   lines[#lines + 1] = ("Sin exportar: %d escaneo%s"):format(#scans, #scans == 1 and "" or "s")
   if last then lines[#lines + 1] = "Último: " .. Ago(last.time) end
+  local perHour = ns.FarmLastHour and ns.FarmLastHour()
+  if perHour then lines[#lines + 1] = "Farmeo: " .. ns.Money(perHour) .. "/h" end
   if statusText then statusText:SetText(table.concat(lines, "\n")) end
   if ahStatus then ahStatus:SetText(ns.Scan.Status() or "") end
 end
@@ -29,7 +31,7 @@ end
 
 local function CreatePanel()
   panel = CreateFrame("Frame", "PitiGoldsPanel", UIParent, "BackdropTemplate")
-  panel:SetSize(170, 74)
+  panel:SetSize(170, 88)
   local p = PitiGoldsDB.ui.point
   if p then
     panel:SetPoint(p[1], UIParent, p[2], p[3], p[4])

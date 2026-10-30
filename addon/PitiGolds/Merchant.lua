@@ -35,10 +35,13 @@ local function ScanMerchant()
   if not ns.merchantOpen or not GetMerchantNumItems then return end
   local vendor = UnitName("npc")
   local known = PitiGoldsDB.vendorItems
-  for i = 1, GetMerchantNumItems() do
+  local total = GetMerchantNumItems()
+  local sells = {}
+  for i = 1, total do
     local itemID = GetMerchantItemID(i)
     local name, price, stack, numAvailable, extended = ReadMerchantItem(i)
     if itemID and name then
+      sells[itemID] = true
       ns.NoteItem(itemID, name)
       local entry = {
         price = (price and price > 0) and math.floor(price / math.max(stack or 1, 1)) or nil,
@@ -46,6 +49,8 @@ local function ScanMerchant()
         limited = ((numAvailable or -1) >= 0) or nil,
         costs = extended and ReadCosts(i) or nil,
         vendor = vendor,
+        -- El precio puede llevar descuentos de este personaje (reputación, talentos de Legacy).
+        char = ns.charKey,
         time = time(),
       }
       local old = known[itemID]
@@ -54,6 +59,12 @@ local function ScanMerchant()
           or (entry.price and entry.price <= old.price) then
         known[itemID] = entry
       end
+    end
+  end
+  -- Lo que este vendedor vendía y ya no vende (por ejemplo, tras un parche) se borra.
+  if total > 0 then
+    for itemID, entry in pairs(known) do
+      if entry.vendor == vendor and not sells[itemID] then known[itemID] = nil end
     end
   end
 end

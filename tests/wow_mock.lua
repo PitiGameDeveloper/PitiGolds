@@ -103,14 +103,19 @@ function Mock.ClickButton(label)
   return false
 end
 
-function hooksecurefunc(name, hook)
-  local original = _G[name]
-  _G[name] = function(...)
+-- hooksecurefunc("Nombre", fn) o hooksecurefunc(tabla, "Nombre", fn), como en WoW.
+function hooksecurefunc(a, b, c)
+  local owner, name, hook = _G, a, b
+  if type(a) == "table" then owner, name, hook = a, b, c end
+  local original = owner[name]
+  owner[name] = function(...)
     local results = { original(...) }
     hook(...)
     return unpack(results)
   end
 end
+
+function InCombatLockdown() return false end
 
 function ReloadUI() Mock.reloaded = true end
 
@@ -149,10 +154,35 @@ NUM_TOTAL_EQUIPPED_BAG_SLOTS = 5
 ATTACHMENTS_MAX_RECEIVE = 16
 ATTACHMENTS_MAX_SEND = 12
 
+Mock.mapID = 1411
+Mock.mapNames = { [1411] = "Durotar", [1413] = "Los Baldíos" }
+C_Map = {
+  GetBestMapForUnit = function() return Mock.mapID end,
+  GetMapInfo = function(id) return { name = Mock.mapNames[id] or "?" } end,
+}
+function GetZoneText() return Mock.mapNames[Mock.mapID] end
+
+-- Simula que entra algo en las bolsas (o que cambia el oro) y avisa como el juego.
+function Mock.Loot(bag, slot, itemID, count)
+  Mock.bags[bag] = Mock.bags[bag] or { numSlots = 16 }
+  local current = Mock.bags[bag][slot]
+  if current and current.itemID == itemID then
+    current.stackCount = current.stackCount + count
+  else
+    Mock.bags[bag][slot] = { itemID = itemID, stackCount = count, hyperlink = "[" .. (Mock.itemNames[itemID] or "?") .. "]" }
+  end
+  Mock.Fire("BAG_UPDATE_DELAYED")
+end
+function Mock.AddMoney(copper)
+  Mock.player.money = Mock.player.money + copper
+  Mock.Fire("PLAYER_MONEY")
+end
+
 Mock.itemNames = {}
 Mock.sellPrices = {}
 C_Item = {
   GetItemNameByID = function(id) return Mock.itemNames[id] end,
+  GetItemID = function(location) return location.itemID end,
   -- Solo importan el nombre (1.º valor) y el precio de venta al vendedor (11.º).
   GetItemInfo = function(id)
     local name = Mock.itemNames[id]
@@ -253,6 +283,16 @@ function GetInboxItem(i, j)
   if it then return it.name, it.itemID, 0, it.count end
 end
 function SendMail() end
+-- Facturas de la subasta: Mock.inbox[i].invoice = { type, itemName, bid, deposit, cut, count }
+function GetInboxInvoiceInfo(i)
+  local inv = Mock.inbox[i] and Mock.inbox[i].invoice
+  if inv then
+    return inv.type, inv.itemName, "Comprador", inv.bid, inv.bid, inv.deposit, inv.cut, 0, 0, inv.count
+  end
+end
+function TakeInboxMoney() end
+function AutoLootMailItem() end
+function TakeInboxItem() end
 function GetSendMailItem(i)
   local it = Mock.sendItems[i]
   if it then return it.name, it.itemID, 0, it.count end
@@ -299,7 +339,23 @@ C_AuctionHouse = {
   end,
   GetNumOwnedAuctions = function() return #Mock.owned end,
   GetOwnedAuctionInfo = function(i) return Mock.owned[i] end,
+  -- Compra de materiales: primero el presupuesto y, al confirmar, la compra.
+  StartCommoditiesPurchase = function(itemID, quantity)
+    local unit = Mock.commodityPrices[itemID] or 0
+    Mock.Schedule(0.2, function() Mock.Fire("COMMODITY_PRICE_UPDATED", unit, unit * quantity) end)
+  end,
+  ConfirmCommoditiesPurchase = function(itemID, quantity)
+    Mock.Schedule(0.5, function()
+      Mock.player.money = Mock.player.money - (Mock.commodityPrices[itemID] or 0) * quantity
+      Mock.Fire("COMMODITY_PURCHASE_SUCCEEDED")
+    end)
+  end,
+  PostCommodity = function() end,
+  PostItem = function() end,
+  CalculateCommodityDeposit = function(_, _, quantity) return 10 * quantity end,
+  CalculateItemDeposit = function(_, _, quantity) return 50 * quantity end,
 }
+Mock.commodityPrices = {}
 
 -- Carga del addon y guardado -------------------------------------------------------------------
 

@@ -23,12 +23,17 @@ local function AddLines(tooltip, itemID)
   local craft = gen.craft and gen.craft[itemID]
 
   if price then
-    -- "mercado,mediana7d"
-    local market, median = price:match("^(%d*),(%d*)$")
+    -- "mercado,mediana7d,tendencia" (tendencia: b = baja, s = sube)
+    local market, median, trend = price:match("^(%d*),(%d*),?(%a*)$")
     if market and market ~= "" then
       local right = ns.Money(market)
       if median ~= "" and median ~= market then
         right = right .. "  |cff999999(7 días: " .. ns.Money(median) .. ")|r"
+      end
+      if trend == "b" then
+        right = right .. "  |cffff4040baja|r"
+      elseif trend == "s" then
+        right = right .. "  |cff40ff40sube|r"
       end
       tooltip:AddDoubleLine("PitiGolds subasta", right, LABEL_R, LABEL_G, LABEL_B, 1, 1, 1)
     end
