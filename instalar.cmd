@@ -17,5 +17,6 @@ if exist "%ADDONS%\PitiGolds" (
 ) else (
   mklink /J "%ADDONS%\PitiGolds" "%~dp0addon\PitiGolds"
 )
+"%PY%" -m motor datos-juego
 if not exist "addon\PitiGolds\Generated.lua" "%PY%" -m motor leer
 pause

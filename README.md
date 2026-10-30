@@ -1,8 +1,11 @@
 # PitiGolds
 
 Addon personal para WoW Forever que ayuda a decidir en qué gastar el tiempo para ganar oro.
-Ahora mismo está en la **Fase 0**: recoger datos (personajes, profesiones, recetas, inventario,
-divisas y subasta) y guardarlos con su histórico en una base de datos.
+
+- **Fase 0 (hecha):** recoger datos (personajes, profesiones, recetas, inventario, divisas, vendedores y
+  subasta) y guardarlos con su histórico en una base de datos.
+- **Fase 1 (hecha):** valorar lo que tienes, ver qué crafteos dan beneficio, qué recetas te convendría
+  aprender y qué vender, dónde y a qué precio. Los precios salen también en el tooltip de cada objeto.
 
 ## Partes
 
@@ -20,7 +23,12 @@ divisas y subasta) y guardarlos con su histórico en una base de datos.
    - **PG: Materiales**: recorre materiales, consumibles, recetas y gemas. Guarda el precio mínimo y la cantidad total de cada objeto. Se puede repetir cuando quieras.
    - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores. El servidor solo lo permite **cada 15 minutos**.
 4. Pulsa **Exportar** (hace `/reload`). WoW guarda los datos en disco y `vigilar.cmd` los lee en un par de segundos.
-5. Haz doble clic en **`estado.cmd`** para ver el resumen: oro, profesiones, valor del inventario y divisas de Forever.
+5. Haz doble clic en **`informe.cmd`** para ver qué hacer: crafteos rentables, recetas que te convendría
+   aprender y qué vender. Queda guardado también en `datos/informe.md`.
+6. Tras el siguiente `/reload`, al pasar el ratón por un objeto verás su precio de mercado y, si sabes
+   fabricarlo, cuánto cuesta y cuánto ganas.
+
+**`estado.cmd`** da el resumen general: oro, profesiones, valor del inventario y divisas de Forever.
 
 Si `vigilar.cmd` no está abierto, no pasa nada: el addon guarda hasta 5 escaneos pendientes. A partir de ahí borra
 los más antiguos, y esos precios se pierden del histórico.
@@ -38,6 +46,58 @@ los más antiguos, y esos precios se pierden del histórico.
 | Divisas (Merchant's Favor, Legacy...) y reputaciones | Al entrar y cada vez que cambian |
 | Tus subastas puestas | Al abrir la subasta |
 | Precios de la subasta | Con los botones PG |
+| Lo que vende cada vendedor y a cuánto (también lo que se paga con divisas) | Al hablar con el vendedor |
+| Lo que paga un vendedor por cada objeto | Cuando el objeto pasa por tus bolsas, banco o recetas |
+
+## Datos del juego
+
+El juego solo enseña las recetas de tus profesiones. Para conocer las de **todas**, el motor descarga
+las tablas del cliente de Forever que publica [wago.tools](https://wago.tools): recetas, materiales, lo que
+fabrica cada una, el nivel al que se aprende y al que pasa a amarilla, verde y gris, el objeto con el que
+se aprende (diseños, patrones...) y lo que cobra y paga un vendedor por cada objeto.
+
+```
+.venv\Scripts\python -m motor datos-juego
+```
+
+No hace falta acordarse: `vigilar.cmd` lo comprueba al arrancar y después una vez al día, e
+`informe.cmd` cada vez que lo abres. Solo se descarga algo cuando:
+- hay una versión nueva del juego (se usa la que tienes instalada), o
+- la última descarga tiene más de 7 días: a veces aparecen filas que antes estaban cifradas sin que
+  cambie la versión.
+
+Si no hay conexión, se sigue con los datos que haya y se reintenta una hora después. Las tablas
+quedan en `datos/juego/` y las de versiones viejas se borran solas.
+
+Lo que el addon ve en partida (recetas al abrir tus profesiones, vendedores, subasta) no depende de
+estas tablas y, si un dato está en los dos sitios, manda el del juego.
+
+Lo que **no** traen: qué PNJ vende cada receta, porque eso está en el servidor. Para tus profesiones
+lo dice el propio juego al abrir la ventana; para las demás, el informe dice si se aprende con un
+objeto (y cuánto cuesta en la subasta), con el instructor o al aprender la profesión.
+
+Con estos datos el informe añade:
+- **Recetas de tus profesiones que te convendría aprender**, con el nivel que piden y cómo se aprenden.
+- **Profesiones que no tienes**: cuántas recetas darían beneficio con los precios actuales y cuál es la mejor.
+
+## Cómo decide el informe
+
+- **Precio de mercado**: la media del 15 % más barato de las unidades a la venta. Así una sola unidad
+  regalada no hunde el precio. Con 3 escaneos o más en los últimos 7 días se usa también la **mediana**,
+  y nada se valora por encima de la mediana + 25 %.
+- **Coste de un crafteo**: cada material al precio más barato entre la subasta y un vendedor (si no tiene
+  límite de existencias). Los materiales opcionales no cuentan. Lo que se paga con divisas (Merchant's
+  Favor...) se muestra aparte.
+- **Lo que sacas**: precio de mercado de lo fabricado menos el 5 % de comisión, o lo que paga el vendedor
+  si es más.
+- **Qué hacer con cada objeto** (solo los no ligados):
+  - **guardar** si es material de una receta tuya que da beneficio;
+  - **vendedor** si el vendedor paga más que la subasta;
+  - **esperar** si está un 20 % o más por debajo de su mediana de 7 días;
+  - **subastar** en otro caso, 1 cobre por debajo del más barato (nunca por debajo de lo que paga el
+    vendedor). Avisa si tienes más de lo que hay a la venta.
+- **En la subasta** (columna de crafteos): cuántas unidades de lo fabricado hay a la venta. Si son muy
+  pocas, el beneficio es real pero el mercado es pequeño.
 
 Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 

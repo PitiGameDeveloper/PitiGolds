@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
@@ -53,7 +53,13 @@ CREATE INDEX IF NOT EXISTS idx_reagents_item ON recipe_reagents(item_id);
 
 CREATE TABLE IF NOT EXISTS recipe_categories (category_id INTEGER PRIMARY KEY, name TEXT, parent_id INTEGER);
 
-CREATE TABLE IF NOT EXISTS items (item_id INTEGER PRIMARY KEY, name TEXT);
+-- sell_price: lo que paga un vendedor por una unidad.
+CREATE TABLE IF NOT EXISTS items (item_id INTEGER PRIMARY KEY, name TEXT, sell_price INTEGER);
+
+-- Lo que venden los vendedores. price: por unidad, NULL si solo se paga con divisas (costs_json).
+CREATE TABLE IF NOT EXISTS vendor_items (
+  item_id INTEGER PRIMARY KEY, price INTEGER, limited INTEGER, vendor TEXT, costs_json TEXT, updated INTEGER
+);
 
 CREATE TABLE IF NOT EXISTS currencies (
   char_key TEXT, currency_id INTEGER, name TEXT, quantity INTEGER, max_quantity INTEGER,
@@ -87,23 +93,54 @@ CREATE TABLE IF NOT EXISTS scans (
 CREATE INDEX IF NOT EXISTS idx_scans_time ON scans(time);
 
 -- book: "precio:cantidad;precio:cantidad" con los niveles de precio más baratos.
+-- market_price: precio medio del 15 % más barato de las unidades (ver pricing.py).
 CREATE TABLE IF NOT EXISTS prices (
   scan_id TEXT, item_id INTEGER, min_price INTEGER, quantity INTEGER,
-  num_auctions INTEGER, num_owners INTEGER, book TEXT,
+  num_auctions INTEGER, num_owners INTEGER, book TEXT, market_price INTEGER,
   PRIMARY KEY (scan_id, item_id)
 );
 CREATE INDEX IF NOT EXISTS idx_prices_item ON prices(item_id);
 
 CREATE TABLE IF NOT EXISTS addon_log (line TEXT PRIMARY KEY, account TEXT);
 
-CREATE VIEW IF NOT EXISTS latest_prices AS
-  SELECT item_id, min_price, quantity, num_auctions, num_owners, time, type FROM (
-    SELECT p.item_id, p.min_price, p.quantity, p.num_auctions, p.num_owners, s.time, s.type,
+-- Datos del juego descargados de wago.tools (gamedata.py). Se rehacen en cada importación.
+CREATE TABLE IF NOT EXISTS gd_skill_lines (skill_line INTEGER PRIMARY KEY, name TEXT, category INTEGER, parent INTEGER);
+
+-- spell_id es el mismo número que el recipeID del juego.
+-- Color al fabricar: naranja hasta yellow, amarilla hasta (yellow+grey)/2, verde hasta grey.
+CREATE TABLE IF NOT EXISTS gd_recipes (
+  spell_id INTEGER PRIMARY KEY, skill_line INTEGER, name TEXT,
+  min_skill INTEGER, yellow INTEGER, grey INTEGER, num_skillups INTEGER, acquire INTEGER,
+  output_item_id INTEGER, output_qty REAL, learn_item_id INTEGER
+);
+CREATE TABLE IF NOT EXISTS gd_reagents (spell_id INTEGER, item_id INTEGER, quantity INTEGER);
+CREATE INDEX IF NOT EXISTS idx_gd_reagents_spell ON gd_reagents(spell_id);
+
+-- buy_price: lo que cobra un vendedor por vendor_stack unidades; sell_price: lo que paga por una.
+CREATE TABLE IF NOT EXISTS gd_items (
+  item_id INTEGER PRIMARY KEY, name TEXT, quality INTEGER, class_id INTEGER, subclass_id INTEGER,
+  buy_price INTEGER, sell_price INTEGER, vendor_stack INTEGER, stackable INTEGER, bonding INTEGER,
+  required_skill INTEGER, required_skill_rank INTEGER
+);
+"""
+
+# La vista se rehace siempre para que coja las columnas nuevas.
+VIEWS = """
+DROP VIEW IF EXISTS latest_prices;
+CREATE VIEW latest_prices AS
+  SELECT item_id, min_price, market_price, quantity, num_auctions, num_owners, time, type FROM (
+    SELECT p.item_id, p.min_price, p.market_price, p.quantity, p.num_auctions, p.num_owners, s.time, s.type,
            ROW_NUMBER() OVER (PARTITION BY p.item_id ORDER BY s.time DESC) AS rn
     FROM prices p JOIN scans s ON s.scan_id = p.scan_id
   )
   WHERE rn = 1;
 """
+
+# Columnas añadidas después de la primera versión: se crean en bases de datos antiguas.
+ADDED_COLUMNS = {
+    "prices": {"market_price": "INTEGER"},
+    "items": {"sell_price": "INTEGER"},
+}
 
 
 def connect(path: Path) -> sqlite3.Connection:
@@ -112,6 +149,12 @@ def connect(path: Path) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.executescript(SCHEMA)
+    for table, columns in ADDED_COLUMNS.items():
+        existing = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+        for column, kind in columns.items():
+            if column not in existing:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
+    conn.executescript(VIEWS)
     conn.execute(
         "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', ?)", (str(SCHEMA_VERSION),)
     )

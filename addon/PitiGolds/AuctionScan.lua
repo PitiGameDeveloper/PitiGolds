@@ -297,7 +297,7 @@ local function RecordOwnedAuctions()
         status = a.status,
         timeLeft = a.timeLeftSeconds,
       }
-      if a.itemLink then ns.NoteItemName(a.itemKey.itemID, a.itemLink:match("%[(.-)%]")) end
+      ns.NoteItem(a.itemKey.itemID, a.itemLink and a.itemLink:match("%[(.-)%]"))
     end
   end
   ns.Char().inventory.auctions = { list = list, updated = time() }

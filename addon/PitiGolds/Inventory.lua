@@ -47,7 +47,7 @@ local function ScanBags(bags)
       if info and info.itemID then
         local target = info.isBound and bound or items
         target[info.itemID] = (target[info.itemID] or 0) + (info.stackCount or 1)
-        if info.hyperlink then ns.NoteItemName(info.itemID, info.hyperlink:match("%[(.-)%]")) end
+        ns.NoteItem(info.itemID, info.hyperlink and info.hyperlink:match("%[(.-)%]"))
       else
         free = free + 1
       end
@@ -126,7 +126,7 @@ local function ScanInbox()
         local name, itemID, _, count = GetInboxItem(i, j)
         if itemID then
           items[itemID] = (items[itemID] or 0) + (count or 1)
-          ns.NoteItemName(itemID, name)
+          ns.NoteItem(itemID, name)
         end
       end
     end

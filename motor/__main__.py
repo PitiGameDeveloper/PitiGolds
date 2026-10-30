@@ -2,19 +2,37 @@
     python -m motor leer       lee los datos del addon una vez
     python -m motor vigilar    los lee cada vez que WoW los guarda (/reload o salir)
     python -m motor estado     resumen de personajes, oro, profesiones y subasta
+    python -m motor informe    qué craftear, qué aprender y qué vender
+    python -m motor datos-juego  descarga las recetas y objetos del juego (wago.tools)
 """
 
 from __future__ import annotations
 
 import argparse
+import sqlite3
 import sys
 import time
 
 from . import db as dbmod
+from .analysis import analyze
 from .config import Config, load_config
+from .gamedata import update_game_data
 from .generated import write_generated
 from .ingest import ingest_file
-from .report import build_report
+from .report import build_advice_report, build_report
+
+
+def refresh_outputs(conn: sqlite3.Connection, config: Config) -> str:
+    """Rehace Generated.lua (para el juego) y datos/informe.md. Devuelve un resumen de una línea."""
+    analysis = analyze(conn)
+    target = write_generated(conn, config.addon_dir, analysis)
+    if target is None:
+        print(f"Aviso: no encuentro la carpeta del addon ({config.addon_dir}); no he escrito Generated.lua.")
+    report_path = config.db_path.parent / "informe.md"
+    report_path.write_text(build_advice_report(conn, analysis), encoding="utf-8")
+    crafts = sum(1 for c in analysis.crafts if c.known and c.complete and c.profit > 0)
+    to_sell = sum(1 for s in analysis.sales if s.action in ("subastar", "vendedor"))
+    return f"{crafts} crafteos rentables, {to_sell} cosas para vender. Detalle: python -m motor informe"
 
 
 def cmd_leer(config: Config) -> int:
@@ -29,18 +47,76 @@ def cmd_leer(config: Config) -> int:
             r = ingest_file(conn, account, path)
             print(f"[{time.strftime('%H:%M:%S')}] {account}: {r.characters} personajes, {r.recipes} recetas, "
                   f"{r.new_scans} escaneos nuevos ({r.new_prices} precios)")
-        target = write_generated(conn, config.addon_dir)
-        if target is None:
-            print(f"Aviso: no encuentro la carpeta del addon ({config.addon_dir}); no he escrito Generated.lua.")
+        print("  " + refresh_outputs(conn, config))
     finally:
         conn.close()
     return 0
 
 
+def cmd_datos_juego(config: Config, force: bool) -> int:
+    conn = dbmod.connect(config.db_path)
+    try:
+        report = update_game_data(conn, config.db_path.parent / "juego", config.wow_dir, force=force)
+        if report is None:
+            print(f"Los datos del juego ya están al día (versión {dbmod.get_meta(conn, 'game_data_build')}).")
+            return 0
+        print(f"Datos del juego {report.build}: {report.recipes} recetas y {report.items} objetos.")
+        for name, n in sorted(report.by_profession.items(), key=lambda kv: -kv[1]):
+            print(f"  {name:<24} {n} recetas")
+    except (OSError, ValueError) as exc:
+        print(f"No he podido descargar los datos del juego: {exc}")
+        return 1
+    finally:
+        conn.close()
+    return 0
+
+
+def cmd_informe(config: Config) -> int:
+    if not config.db_path.exists():
+        print("Todavía no hay base de datos. Ejecuta antes: python -m motor leer")
+        return 1
+    conn = dbmod.connect(config.db_path)
+    try:
+        text = build_advice_report(conn, analyze(conn))
+    finally:
+        conn.close()
+    (config.db_path.parent / "informe.md").write_text(text, encoding="utf-8")
+    print(text)
+    return 0
+
+
+GAME_DATA_CHECK_SECONDS = 24 * 3600
+GAME_DATA_RETRY_SECONDS = 3600
+
+
+def check_game_data(config: Config) -> bool:
+    """Comprobación para vigilar: solo dice algo si hay datos nuevos. True si los ha importado."""
+    conn = dbmod.connect(config.db_path)
+    try:
+        report = update_game_data(conn, config.db_path.parent / "juego", config.wow_dir)
+        if report is None:
+            return False
+        print(f"[{time.strftime('%H:%M:%S')}] Datos del juego actualizados: versión {report.build}, "
+              f"{report.recipes} recetas.")
+        print("  " + refresh_outputs(conn, config))
+        return True
+    finally:
+        conn.close()
+
+
 def cmd_vigilar(config: Config, interval: float) -> int:
     print("Vigilando los datos del addon. Cada /reload o salida del juego se leerá solo. Ctrl+C para parar.")
+    print("Una vez al día se comprueba también si hay datos nuevos del juego.")
     seen: dict[str, float] = {}
+    next_game_check = 0.0
     while True:
+        if time.time() >= next_game_check:
+            try:
+                check_game_data(config)
+                next_game_check = time.time() + GAME_DATA_CHECK_SECONDS
+            except (OSError, ValueError) as exc:  # sin conexión o wago.tools caído
+                print(f"No he podido comprobar los datos del juego; lo reintento en una hora ({exc}).")
+                next_game_check = time.time() + GAME_DATA_RETRY_SECONDS
         changed = False
         for _, path in config.saved_variables():
             mtime = path.stat().st_mtime
@@ -77,11 +153,18 @@ def main(argv: list[str] | None = None) -> int:
     watch = sub.add_parser("vigilar", help="lee los datos cada vez que WoW los guarde")
     watch.add_argument("--intervalo", type=float, default=2.0, help="segundos entre comprobaciones")
     sub.add_parser("estado", help="resumen de personajes, oro, profesiones y subasta")
+    sub.add_parser("informe", help="qué craftear, qué recetas aprender y qué vender")
+    game = sub.add_parser("datos-juego", help="descarga las recetas y objetos del juego de wago.tools")
+    game.add_argument("--forzar", action="store_true", help="vuelve a importarlos aunque estén al día")
     args = parser.parse_args(argv)
 
     config = load_config()
     if args.cmd == "leer":
         return cmd_leer(config)
+    if args.cmd == "informe":
+        return cmd_informe(config)
+    if args.cmd == "datos-juego":
+        return cmd_datos_juego(config, args.forzar)
     if args.cmd == "vigilar":
         try:
             return cmd_vigilar(config, args.intervalo)

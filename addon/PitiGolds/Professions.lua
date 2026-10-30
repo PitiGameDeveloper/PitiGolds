@@ -34,7 +34,7 @@ local function ReadSchematic(recipeID)
     for _, r in ipairs(slot.reagents or {}) do
       if r.itemID then
         items[#items + 1] = r.itemID
-        ns.NoteItemName(r.itemID, ns.ItemNameByID(r.itemID))
+        ns.NoteItem(r.itemID, ns.ItemNameByID(r.itemID))
       elseif r.currencyID then
         currencies[#currencies + 1] = r.currencyID
       end
@@ -48,7 +48,7 @@ local function ReadSchematic(recipeID)
       required = slot.required,
     }
   end
-  if s.outputItemID then ns.NoteItemName(s.outputItemID, ns.ItemNameByID(s.outputItemID)) end
+  if s.outputItemID then ns.NoteItem(s.outputItemID, ns.ItemNameByID(s.outputItemID)) end
   return {
     output = s.outputItemID,
     qtyMin = s.quantityMin,

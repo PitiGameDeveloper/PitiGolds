@@ -14,9 +14,10 @@ from pathlib import Path
 from lupa.lua51 import LuaRuntime
 
 from motor import db as dbmod
+from motor.analysis import analyze
 from motor.generated import write_generated
 from motor.ingest import ingest_file
-from motor.report import build_report
+from motor.report import build_advice_report, build_report
 
 ROOT = Path(__file__).resolve().parent.parent
 ADDON_DIR = ROOT / "addon" / "PitiGolds"
@@ -59,6 +60,10 @@ class AddonEnPartidaSimulada(unittest.TestCase):
         mock.Fire("MAIL_SEND_SUCCESS")
         mock.Fire("MAIL_CLOSED")
 
+        mock.Fire("MERCHANT_SHOW")
+        mock.Advance(1)
+        mock.Fire("MERCHANT_CLOSED")
+
         mock.Fire("TRADE_SKILL_SHOW")
         mock.Advance(3)
 
@@ -98,7 +103,17 @@ class AddonEnPartidaSimulada(unittest.TestCase):
         self.assertEqual(self.char.inventory.bank["items"][2589], 40)
         self.assertEqual(self.char.inventory.bank["items"][2840], 10)
         self.assertEqual(self.db.account.warbandBank["items"][818], 3)
-        self.assertEqual(self.db["items"][2589], "Paño de lino")
+        self.assertEqual(self.db["items"][2589].name, "Paño de lino")
+        self.assertEqual(self.db["items"][2589].sell, 13)
+
+    def test_vendedor(self):
+        vendor = self.db.vendorItems
+        self.assertEqual(vendor[2880].price, 100)
+        self.assertEqual(vendor[2320].price, 10)  # 30 c el lote de 3
+        self.assertEqual(vendor[2880].vendor, "Grimtak")
+        self.assertIsNone(vendor[9999].price)
+        self.assertEqual(vendor[9999].costs[1].currencyID, 3001)
+        self.assertEqual(vendor[9999].costs[1].value, 50)
 
     def test_correo_sin_contra_reembolso(self):
         mail = self.char.inventory.mail
@@ -133,11 +148,12 @@ class AddonEnPartidaSimulada(unittest.TestCase):
         self.assertEqual(len(scans), 2)
         browse, full = scans[1], scans[2]
         self.assertEqual(browse.type, "browse")
-        self.assertEqual(browse.count, 6)
+        self.assertEqual(browse.count, 7)
         self.assertEqual(browse["items"][818], "2500,4")
         self.assertEqual(full.type, "full")
         self.assertEqual(full["items"][2589], "40,35,3,2|40:15;45:20")
-        self.assertEqual(full["items"][2845], "75000000000,1,1,1|75000000000:1")
+        self.assertEqual(full["items"][2845], "5000,1,1,1|5000:1")
+        self.assertEqual(full["items"][19019], "75000000000,1,1,1|75000000000:1")
         self.assertIsNone(full["items"][2592])  # solo puja, sin precio de compra
         self.assertIn("solo se puede hacer cada 15 minutos", self.chat())
 
@@ -186,23 +202,58 @@ class AddonMasMotor(unittest.TestCase):
             row = q("SELECT min_price, quantity, num_auctions, num_owners, book FROM prices p "
                     "JOIN scans s ON s.scan_id = p.scan_id WHERE s.type='full' AND item_id=2589")[0]
             self.assertEqual(tuple(row), (40, 35, 3, 2, "40:15;45:20"))
-            self.assertEqual(q("SELECT min_price FROM latest_prices WHERE item_id=2845")[0][0], 75000000000)
+            self.assertEqual(q("SELECT min_price FROM latest_prices WHERE item_id=19019")[0][0], 75000000000)
+            self.assertEqual(q("SELECT sell_price FROM items WHERE item_id=5000")[0][0], 500)
+            self.assertEqual(q("SELECT price FROM vendor_items WHERE item_id=2880")[0][0], 100)
 
             text = build_report(conn)
             self.assertIn("Brujo-Dio", text)
             self.assertIn("Favor del mercader", text)
             self.assertIn("Paño de lino", text)
 
-            generated = write_generated(conn, addon_dir)
+            a = analyze(conn)
+            crafts = {c.recipe_id: c for c in a.crafts}
+            smelt, axe, helm = crafts[1001], crafts[1002], crafts[1003]
+            self.assertEqual((smelt.cost, smelt.value, smelt.profit), (120, 285, 165))
+            self.assertEqual(smelt.craftable_now, 15)
+            self.assertEqual(smelt.difficulty_name, "amarilla")
+            # 6 barras a 300 en la subasta + flujo a 100 del vendedor; el paño opcional no cuenta.
+            self.assertEqual((axe.cost, axe.value, axe.profit), (1900, 4750, 2850))
+            self.assertEqual([r.source for r in axe.reagents], ["subasta", "vendedor"])
+            self.assertFalse(helm.known)
+            self.assertEqual([m.name for m in helm.missing], ["Barra de bronce"])
+            self.assertEqual(helm.currencies, ["10 Favor del mercader"])
+
+            sales = {s.item_id: s for s in a.sales}
+            self.assertEqual((sales[2589].action, sales[2589].unit_price), ("subastar", 39))
+            self.assertIn("poco a poco", sales[2589].reason)  # 65 tuyos frente a 35 a la venta
+            self.assertEqual((sales[5000].action, sales[5000].total), ("vendedor", 2000))
+            self.assertEqual(sales[2770].action, "guardar")
+            self.assertEqual(sales[2840].action, "guardar")
+            self.assertIn("correo en camino 5", sales[2840].places)
+            self.assertNotIn(6948, sales)  # ligado: no se puede vender
+
+            advice = build_advice_report(conn, a)
+            self.assertIn("Hacha de cobre", advice)
+            self.assertIn("Profesiones sin abrir todavía", advice)  # minería y cocina
+
+            generated = write_generated(conn, addon_dir, a)
             conn.close()
             content = generated.read_text(encoding="utf-8")
             up_to = int(re.search(r"ingestedUpTo = (\d+)", content).group(1))
             self.assertGreater(up_to, 0)
+            self.assertIn('[2589] = "40,",', content)
+            self.assertIn('[2845] = "1900,2850",', content)
 
             # Al recargar, el addon carga Generated.lua y borra lo que el motor ya tiene.
             lua.execute(f'dofile("{generated.as_posix()}")')
             mock.ns.PruneScans()
             self.assertEqual(len(lua.globals().PitiGoldsDB.scans), 0)
+
+            tooltip = mock.Tooltip(2840)
+            self.assertIn("PitiGolds subasta = 3p 0c", tooltip)
+            self.assertIn("PitiGolds fabricar = 1p 20c  |cff40ff40+1p 65c|r", tooltip)
+            self.assertEqual(mock.Tooltip(123456), "")
 
             mock.ClickButton("Exportar")
             self.assertTrue(mock.reloaded)

@@ -12,6 +12,7 @@ from typing import Any
 
 from .db import set_meta
 from .luaparse import as_dict, as_list, parse_saved_variables
+from .pricing import market_price
 
 WARBAND_KEY = "_warband"
 AUCTION_STATUS_ACTIVE = 0  # Enum.AuctionStatus.Active
@@ -177,7 +178,9 @@ def _ingest_recipes(conn: sqlite3.Connection, db: dict) -> int:
         conn.execute("DELETE FROM recipe_reagents WHERE recipe_id = ?", (rid,))
         rows = []
         for slot in as_list(r.get("reagents")):
-            base = (slot.get("qty"), slot.get("type"), 1 if slot.get("required") else 0)
+            # Si la API no dice si es obligatorio se guarda NULL, que se trata como obligatorio.
+            required = None if slot.get("required") is None else int(bool(slot["required"]))
+            base = (slot.get("qty"), slot.get("type"), required)
             for item_id in as_list(slot.get("items")):
                 rows.append((rid, slot.get("slot"), item_id, None, *base))
             for currency_id in as_list(slot.get("currencies")):
@@ -188,9 +191,25 @@ def _ingest_recipes(conn: sqlite3.Connection, db: dict) -> int:
         "INSERT OR REPLACE INTO recipe_categories VALUES (?, ?, ?)",
         [(cid, cat.get("name"), cat.get("parent")) for cid, cat in as_dict(db.get("recipeCategories")).items()],
     )
+    item_rows = []
+    for iid, entry in as_dict(db.get("items")).items():
+        if isinstance(entry, str):  # formato de la versión 0.1 del addon: solo el nombre
+            item_rows.append((iid, entry, None))
+        elif isinstance(entry, dict):
+            item_rows.append((iid, entry.get("name"), entry.get("sell")))
     conn.executemany(
-        "INSERT OR REPLACE INTO items VALUES (?, ?)",
-        [(iid, name) for iid, name in as_dict(db.get("items")).items() if isinstance(name, str)],
+        """INSERT INTO items (item_id, name, sell_price) VALUES (?, ?, ?)
+           ON CONFLICT(item_id) DO UPDATE SET
+             name = COALESCE(excluded.name, items.name),
+             sell_price = COALESCE(excluded.sell_price, items.sell_price)""",
+        item_rows,
+    )
+
+    conn.executemany(
+        "INSERT OR REPLACE INTO vendor_items VALUES (?, ?, ?, ?, ?, ?)",
+        [(iid, v.get("price"), 1 if v.get("limited") else 0, v.get("vendor"),
+          json.dumps(as_list(v.get("costs")), ensure_ascii=False) if v.get("costs") else None, v.get("time"))
+         for iid, v in as_dict(db.get("vendorItems")).items()],
     )
     return len(recipes)
 
@@ -223,8 +242,10 @@ def _ingest_scans(conn: sqlite3.Connection, account: str, scans: list) -> tuple[
         rows = []
         for item_id, entry in as_dict(s.get("items")).items():
             if isinstance(entry, str):
-                rows.append((scan_id, int(item_id), *_parse_price(entry)))
-        conn.executemany("INSERT OR REPLACE INTO prices VALUES (?, ?, ?, ?, ?, ?, ?)", rows)
+                min_price, quantity, auctions, owners, book = _parse_price(entry)
+                rows.append((scan_id, int(item_id), min_price, quantity, auctions, owners, book,
+                             market_price(min_price, quantity, book)))
+        conn.executemany("INSERT OR REPLACE INTO prices VALUES (?, ?, ?, ?, ?, ?, ?, ?)", rows)
         new_scans += 1
         new_prices += len(rows)
     return new_scans, new_prices

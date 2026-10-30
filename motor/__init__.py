@@ -1,3 +1,3 @@
 """Motor de PitiGolds: lee los datos del addon y los guarda en SQLite."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

@@ -1,7 +1,21 @@
 -- Datos de prueba: un brujo con herrería y minería, un alter y una subasta pequeña.
 
 Mock.itemNames = {
+  [2589] = "Paño de lino", [2592] = "Paño de lana", [818] = "Ojo de tigre", [5000] = "Basura gris",
   [2840] = "Barra de cobre", [2845] = "Hacha de cobre", [2770] = "Mineral de cobre", [2841] = "Barra de bronce",
+  [2880] = "Flujo débil", [2320] = "Hilo grueso", [19019] = "Furia del Viento",
+}
+-- Lo que paga el vendedor por unidad.
+Mock.sellPrices = {
+  [2589] = 13, [2592] = 33, [818] = 150, [5000] = 500, [2840] = 10, [2845] = 18, [2770] = 5,
+}
+
+Mock.merchant.items = {
+  { itemID = 2880, name = "Flujo débil", price = 100 },
+  { itemID = 2320, name = "Hilo grueso", price = 30, stack = 3 },
+  { itemID = 9999, name = "Diseño: Yelmo de bronce", price = 0, costs = {
+    { value = 50, link = "|cffffffff|Hcurrency:3001|h[Favor del mercader]|h|r", currencyName = "Favor del mercader" },
+  } },
 }
 
 local function link(name) return "|cffffffff|Hitem:1::::::::60:::::|h[" .. name .. "]|h|r" end
@@ -12,6 +26,7 @@ Mock.bags = {
     [1] = { itemID = 2589, stackCount = 20, hyperlink = link("Paño de lino") },
     [2] = { itemID = 2770, stackCount = 15, hyperlink = link("Mineral de cobre") },
     [3] = { itemID = 6948, stackCount = 1, isBound = true, hyperlink = link("Piedra de hogar") },
+    [5] = { itemID = 5000, stackCount = 4, hyperlink = link("Basura gris") },
   },
   [1] = { numSlots = 10, [4] = { itemID = 2589, stackCount = 5, hyperlink = link("Paño de lino") } },
   [-1] = { numSlots = 28, [1] = { itemID = 2589, stackCount = 40, hyperlink = link("Paño de lino") } },
@@ -55,6 +70,8 @@ Mock.tradeSkill.schematics = {
   } },
   [1002] = { outputItemID = 2845, quantityMin = 1, quantityMax = 1, reagentSlotSchematics = {
     { reagents = { { itemID = 2840 } }, quantityRequired = 6, reagentType = 1, slotIndex = 1, required = true },
+    { reagents = { { itemID = 2880 } }, quantityRequired = 1, reagentType = 1, slotIndex = 2, required = true },
+    { reagents = { { itemID = 2589 } }, quantityRequired = 1, reagentType = 0, slotIndex = 3, required = false },
   } },
   [1003] = { outputItemID = 2846, quantityMin = 1, quantityMax = 1, reagentSlotSchematics = {
     { reagents = { { itemID = 2841 } }, quantityRequired = 6, reagentType = 1, slotIndex = 1, required = true },
@@ -79,7 +96,8 @@ Mock.replicate = {
   { itemID = 2589, count = 10, buyout = 10 * 40, owner = "Vendedor2", name = "Paño de lino" },
   { itemID = 2589, count = 5, buyout = 5 * 40, owner = "Vendedor1", name = "Paño de lino" },
   { itemID = 2770, count = 20, buyout = 20 * 120, owner = "Minero", name = "Mineral de cobre" },
-  { itemID = 2845, count = 1, buyout = 75000000000, owner = "Herrero", name = "Hacha de cobre" },
+  { itemID = 2845, count = 1, buyout = 5000, owner = "Herrero", name = "Hacha de cobre" },
+  { itemID = 19019, count = 1, buyout = 75000000000, owner = "Rico", name = "Furia del Viento" },
   { itemID = 2592, count = 1, buyout = 0, owner = "Pujador", name = "Paño de lana" },
 }
 
@@ -90,6 +108,7 @@ Mock.browseData = {
     { itemKey = { itemID = 2770 }, minPrice = 120, totalQuantity = 20 },
     { itemKey = { itemID = 2840 }, minPrice = 300, totalQuantity = 50 },
     { itemKey = { itemID = 818 }, minPrice = 2500, totalQuantity = 4 },
+    { itemKey = { itemID = 5000 }, minPrice = 300, totalQuantity = 50 },
   },
   [0] = { { itemKey = { itemID = 118 }, minPrice = 50, totalQuantity = 200 } },
 }

@@ -119,7 +119,10 @@ function ReloadUI() Mock.reloaded = true end
 Mock.player = { name = "Brujo", realm = "Dio", money = 1234567 }
 
 function GetBuildInfo() return "1.60.1", "70532", "Oct 28 2026", 16001 end
-function UnitName() return Mock.player.name end
+function UnitName(unit)
+  if unit == "npc" then return Mock.merchant.npc end
+  return Mock.player.name
+end
 function GetRealmName() return Mock.player.realm end
 function GetNormalizedRealmName() return (Mock.player.realm:gsub("%s", "")) end
 function UnitFactionGroup() return "Horde" end
@@ -136,7 +139,8 @@ Enum = {
     BankBag_1 = 6, BankBag_2 = 7, BankBag_3 = 8, BankBag_4 = 9, BankBag_5 = 10, BankBag_6 = 11, BankBag_7 = 12,
     AccountBankTab_1 = 13, AccountBankTab_2 = 14, AccountBankTab_3 = 15, AccountBankTab_4 = 16, AccountBankTab_5 = 17,
   },
-  PlayerInteractionType = { Banker = 8, MailInfo = 17, Auctioneer = 21, AccountBanker = 68 },
+  PlayerInteractionType = { Merchant = 5, Banker = 8, MailInfo = 17, Auctioneer = 21, AccountBanker = 68 },
+  TooltipDataType = { Item = 0 },
   ItemClass = { Consumable = 0, Reagent = 5, Tradegoods = 7, Gem = 3, ItemEnhancement = 8, Recipe = 9, Profession = 19 },
   AuctionHouseSortOrder = { Price = 0, Name = 1 },
   BankType = { Character = 0, Guild = 1, Account = 2 },
@@ -146,7 +150,47 @@ ATTACHMENTS_MAX_RECEIVE = 16
 ATTACHMENTS_MAX_SEND = 12
 
 Mock.itemNames = {}
-C_Item = { GetItemNameByID = function(id) return Mock.itemNames[id] end }
+Mock.sellPrices = {}
+C_Item = {
+  GetItemNameByID = function(id) return Mock.itemNames[id] end,
+  -- Solo importan el nombre (1.º valor) y el precio de venta al vendedor (11.º).
+  GetItemInfo = function(id)
+    local name = Mock.itemNames[id]
+    if name then return name, nil, nil, nil, nil, nil, nil, nil, nil, nil, Mock.sellPrices[id] or 0 end
+  end,
+}
+
+-- Vendedor: Mock.merchant.items = { { itemID, name, price, stack, numAvailable, costs } }
+Mock.merchant = { npc = "Grimtak", items = {} }
+function GetMerchantNumItems() return #Mock.merchant.items end
+function GetMerchantItemID(i) return Mock.merchant.items[i].itemID end
+function GetMerchantItemInfo(i)
+  local it = Mock.merchant.items[i]
+  return it.name, 0, it.price, it.stack or 1, it.numAvailable or -1, true, true, it.costs ~= nil
+end
+function GetMerchantItemCostInfo(i)
+  local costs = Mock.merchant.items[i].costs
+  return costs and #costs or 0
+end
+function GetMerchantItemCostItem(i, j)
+  local c = Mock.merchant.items[i].costs[j]
+  return 0, c.value, c.link, c.currencyName
+end
+
+-- Tooltips: Mock.Tooltip(itemID) devuelve las líneas que añadiría el addon.
+Mock.tooltipCallbacks = {}
+TooltipDataProcessor = {
+  AddTooltipPostCall = function(_, fn) table.insert(Mock.tooltipCallbacks, fn) end,
+}
+function Mock.Tooltip(itemID)
+  local lines = {}
+  local tooltip = {
+    AddLine = function(_, text) lines[#lines + 1] = text end,
+    AddDoubleLine = function(_, left, right) lines[#lines + 1] = left .. " = " .. right end,
+  }
+  for _, fn in ipairs(Mock.tooltipCallbacks) do fn(tooltip, { id = itemID }) end
+  return table.concat(lines, "\n")
+end
 
 -- Bolsas: Mock.bags[bag] = { numSlots = n, [slot] = { itemID, stackCount, hyperlink, isBound } }
 Mock.bags = {}

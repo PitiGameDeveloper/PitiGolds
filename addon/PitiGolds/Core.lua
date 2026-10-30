@@ -1,7 +1,7 @@
 -- Núcleo de PitiGolds: base de datos, eventos, utilidades y comandos /pg.
 local ADDON, ns = ...
 
-ns.VERSION = "0.1.0"
+ns.VERSION = "0.2.0"
 ns.SCHEMA = 1
 -- Escaneos que se guardan como máximo mientras el motor no los haya leído.
 -- Un escaneo completo de un mega-reino puede ocupar varios MB y WoW carga todo
@@ -125,19 +125,33 @@ function ns.Char()
   return c
 end
 
--- Guarda el nombre de un objeto para que el motor pueda mostrarlo.
-function ns.NoteItemName(itemID, name)
-  if not itemID or not name or name == "" then return end
-  local items = PitiGoldsDB.items
-  if not items[itemID] then items[itemID] = name end
-end
-
 function ns.ItemNameByID(itemID)
   if C_Item and C_Item.GetItemNameByID then
     return C_Item.GetItemNameByID(itemID)
   elseif GetItemInfo then
     return (GetItemInfo(itemID))
   end
+end
+
+-- Lo que paga un vendedor por una unidad. nil si el objeto aún no está en la caché.
+function ns.ItemSellPrice(itemID)
+  local getInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
+  if not getInfo then return nil end
+  local name, _, _, _, _, _, _, _, _, _, sellPrice = getInfo(itemID)
+  if name then return sellPrice or 0 end
+end
+
+-- Guarda el nombre y el precio de venta al vendedor de un objeto para el motor.
+function ns.NoteItem(itemID, name)
+  if not itemID then return end
+  local items = PitiGoldsDB.items
+  local entry = items[itemID]
+  if type(entry) ~= "table" then
+    entry = {}
+    items[itemID] = entry
+  end
+  if name and name ~= "" then entry.name = name end
+  if entry.sell == nil then entry.sell = ns.ItemSellPrice(itemID) end
 end
 
 function ns.AddScan(scan)
@@ -168,6 +182,7 @@ local function InitDB()
   db.recipes = db.recipes or {}
   db.recipeCategories = db.recipeCategories or {}
   db.items = db.items or {}
+  db.vendorItems = db.vendorItems or {}
   db.scans = db.scans or {}
   db.discovery = db.discovery or {}
   db.log = db.log or {}
