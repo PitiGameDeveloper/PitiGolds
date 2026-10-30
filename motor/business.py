@@ -10,7 +10,8 @@ Las ventas de lo que has farmeado no cuentan aquí como negocio: ya están en «
 
 También calcula la capacidad de cada crafteo rentable: un farmeo lo limita tu tiempo, pero un
 crafteo lo limita el mercado. Si se venden 12 al día y te puedes llevar un 30 % sin hundir el
-precio, da igual que puedas fabricar 200.
+precio, da igual que puedas fabricar 200. Y si la receta tiene espera (tela lunar,
+transmutaciones), tampoco se pueden hacer más de las que deja la espera.
 """
 
 from __future__ import annotations
@@ -204,15 +205,22 @@ class Capacity:
     gold_per_day: int
     minutes_per_day: float
     gold_per_hour: int
+    by_cooldown: bool = False   # lo limita la espera de la receta, no el mercado
 
 
 def craft_capacity(craft: CraftResult, seconds_per_unit: float | None = None) -> Capacity | None:
-    """Lo máximo que da al día un crafteo rentable según lo que se vende, y el tiempo que lleva."""
+    """Lo máximo que da al día un crafteo rentable según lo que se vende y la espera de la
+    receta, y el tiempo que lleva. Con espera basta con ella: es tan poco que el mercado lo absorbe."""
     s = craft.output_signals
-    if not craft.complete or craft.profit <= 0 or s is None or not s.sales_per_day:
+    if not craft.complete or craft.profit <= 0:
         return None
+    by_market = s.sales_per_day * MARKET_SHARE if s is not None and s.sales_per_day else None
+    by_cooldown = craft.crafts_per_day * craft.output_qty if craft.crafts_per_day else None
+    if by_market is None and by_cooldown is None:
+        return None
+    units = min(u for u in (by_market, by_cooldown) if u is not None)
     seconds = seconds_per_unit or SECONDS_PER_UNIT
     per_unit = craft.profit / craft.output_qty
-    units = s.sales_per_day * MARKET_SHARE
     return Capacity(units_per_day=units, gold_per_day=round(per_unit * units),
-                    minutes_per_day=units * seconds / 60, gold_per_hour=round(per_unit * 3600 / seconds))
+                    minutes_per_day=units * seconds / 60, gold_per_hour=round(per_unit * 3600 / seconds),
+                    by_cooldown=by_cooldown is not None and units == by_cooldown)

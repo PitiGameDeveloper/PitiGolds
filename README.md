@@ -8,6 +8,86 @@ Addon personal para WoW Forever que ayuda a decidir en qué gastar el tiempo par
   aprender y qué vender, dónde y a qué precio. Los precios salen también en el tooltip de cada objeto.
 - **Fase 2 (hecha):** señales de mercado y previsión a 7 días (con su acierto medido sobre el propio
   historial), y registro de tus farmeos con tu oro por hora real.
+- **Fase 3 (hecha):** comparador de métodos, guía de subida de profesión con su coste y cuándo se
+  recupera la inversión según las horas que juegas. Además, los métodos de tus guías valorados con
+  tus precios y tus personajes, las esperas de las recetas y el talento de Legacy de subir profesión.
+
+## Qué te conviene hacer (comparador)
+
+Es lo primero del informe. Tu **referencia** es tu mejor farmeo medido, y cada método se compara con
+ella a lo largo de 4 semanas según las horas que juegas (por defecto 10 a la semana):
+
+```
+.venv\Scripts\python -m motor ajustes --horas-semana 12 --semanas 4
+```
+
+Entran tus farmeos, tus crafteos rentables, la reventa desde vendedores, las mejores recetas de tus
+profesiones que aún no sabes y la mejor receta de cada profesión que no tienes. Para cada uno: oro por
+hora hoy y en 7 días, máximo al día (crafteos y reventas), **inversión** (oro y horas de subir la
+profesión y aprender la receta), **en cuánto se recupera**, **cuánto ganas** frente a tu referencia en
+esas semanas y un **veredicto**.
+
+Las cuentas:
+- Un **farmeo** ocupa tu tiempo: las horas de preparación no dan nada y el oro invertido se resta.
+- Un **crafteo o una reventa** los limita el mercado, no tu tiempo, así que se hacen además de farmear:
+  suman lo que el mercado absorbe cada día y restan el rato que le quitan a tu farmeo.
+- El oro por hora va del de hoy al previsto a 7 días. Si tu farmeo actual va a bajar, un método nuevo
+  puede compensar aunque hoy dé casi lo mismo.
+
+Ejemplo: farmeas a 10 o/h y otro farmeo da 12 o/h, pero hay que invertir 300 o y 8 horas. Jugando 10 h a
+la semana no compensa en 4 semanas (se recuperaría en unas 198 h de juego). Si tu farmeo va a bajar a
+6 o/h, una preparación más barata sí compensa.
+
+## Guía de subida de profesión
+
+```
+.venv\Scripts\python -m motor guia herreria --desde 50 --hasta 150
+```
+
+Elige en cada nivel la receta con menor coste esperado por punto: coste de los materiales menos lo que
+paga un vendedor por lo fabricado, dividido por la probabilidad de subir (siempre en naranja; en
+amarilla y verde baja hasta 0 al volverse gris). Da los tramos («del 1 al 36: Piedra de afilar férrea,
+unas 44 veces»), la **lista de la compra** descontando lo que ya tienes entre todos tus personajes, el
+**oro que tienes que gastar**, el coste real y el tiempo. Queda guardada en `datos/guias/`. No incluye lo
+que cobra el instructor por enseñar recetas y subir de rango, porque no viene en los datos del juego.
+Las recetas con espera de una hora o más (tela lunar, transmutaciones) no se usan para subir.
+
+**Talento de Legacy que sube la probabilidad de subir habilidad.** Si lo tienes, dile cuánto suma:
+
+```
+.venv\Scripts\python -m motor ajustes --legado-subida 20
+```
+
+Se aplica a las recetas amarillas y verdes, multiplicando su probabilidad (sin pasar del 100 %): con
++20 %, una receta al 50 % pasa al 60 %. Cómo funciona exactamente el talento está por confirmar en el juego.
+
+## Métodos de tus guías
+
+`conocimiento/metodos.json` es un catálogo de métodos sacados de guías, vídeos y otras fuentes: qué se
+farmea, dónde, a qué nivel, con qué profesión y qué objetos dan el dinero. El primero es la guía de
+Studen (v1.0): 68 métodos entre farmeos, pesca, mazmorras, crafteos, inversiones, vendedores con
+existencias limitadas y el talento de Legacy Estudio dedicado.
+
+El motor **no usa las cifras de oro de las guías** (cada servidor es distinto). Cada método se valora
+con lo tuyo:
+- lo que valen hoy sus objetos en la subasta, o lo que paga el vendedor si es más;
+- **mercado al día**: lo que podrías sacar al día vendiendo sus objetos sin hundir el precio;
+- si alguno de tus personajes puede hacerlo ya, o qué te falta (nivel o profesión);
+- y tu oro por hora de verdad cuando lo mides: `/pg farmeo <id>` al empezar (por ejemplo
+  `/pg farmeo tuercespina-basiliscos`) y `/pg farmeo fin` al acabar. Desde ahí pasa al comparador.
+
+Los diez mejores salen en el informe y todos en `datos/metodos.md`:
+
+```
+.venv\Scripts\python -m motor metodos
+```
+
+Los objetos se reconocen por su nombre en inglés o en español, así que se puede copiar el nombre de una
+guía en inglés. Lo que no aparece en los datos del juego (mucho equipo antiguo solo lo conoce el
+servidor) se puede dar con su número: `{"nombre": "Shadowfang", "id": 1482}`. Para añadir métodos basta
+con seguir el formato del archivo; en la Fase 4 lo hará el asesor con lo que encuentre.
+
+Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 
 ## Partes
 
@@ -16,6 +96,8 @@ Addon personal para WoW Forever que ayuda a decidir en qué gastar el tiempo par
 | `addon/PitiGolds/` | El addon. Está enlazado dentro de WoW (`_forever_\Interface\AddOns\PitiGolds`), así que cualquier cambio aquí se ve en el juego tras un `/reload`. |
 | `motor/` | Programa en Python, sin IA, que lee lo que guarda el addon y lo pasa a `datos/pitigolds.db` (SQLite). |
 | `tests/` | Un WoW simulado para probar el addon fuera del juego. |
+| `conocimiento/` | Métodos de tus guías (`metodos.json`), con tus palabras: sin copiar las guías. |
+| `fuentes/` | Las guías tal cual (PDF, Word...). Solo en tu PC: no se suben a GitHub. |
 
 ## Uso diario
 
@@ -138,7 +220,12 @@ El informe añade:
 El juego solo enseña las recetas de tus profesiones. Para conocer las de **todas**, el motor descarga
 las tablas del cliente de Forever que publica [wago.tools](https://wago.tools): recetas, materiales, lo que
 fabrica cada una, el nivel al que se aprende y al que pasa a amarilla, verde y gris, el objeto con el que
-se aprende (diseños, patrones...) y lo que cobra y paga un vendedor por cada objeto.
+se aprende (diseños, patrones...), la **espera** de las que la tienen y lo que cobra y paga un vendedor
+por cada objeto. Los nombres de los objetos se bajan también en inglés, para reconocer los de las guías.
+
+Esperas según los datos de Forever: tela lunar, 4 días; transmutar arcanita, 2 días; el resto de
+transmutaciones, 23 h, y todas comparten la misma espera. El pellejo basto curado no tiene espera en estos
+datos, aunque en el Classic original sí la tenía.
 
 ```
 .venv\Scripts\python -m motor datos-juego
@@ -188,6 +275,8 @@ Con estos datos el informe añade:
 - **Crafteos con mercado pequeño**: si puedes fabricar más de lo que se vende, la columna «Ya puedes
   hacer» dice cuántas hacer al día, y el beneficio enseña también el previsto a 7 días («ya no
   compensa» si el precio va a dejarlo en pérdidas). Lo mismo en la reventa desde vendedores.
+- **Crafteos con espera** (tela lunar, transmutaciones): el máximo al día es lo que deja la espera, una por
+  cada personaje que sabe la receta. Por eso compensa tener varios alters con la misma profesión.
 - **El 30 % de los posibles chollos** es solo un filtro para decidir qué merece la pena mirar fuera del
   juego, no una garantía de beneficio: si se confirma un vendedor, la reventa pasa por las mismas cuentas
   de ritmo y previsión.

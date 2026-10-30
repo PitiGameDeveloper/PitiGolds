@@ -1,0 +1,572 @@
+{
+  "_formato": "Métodos para ganar oro sacados de guías, vídeos y otras fuentes. El motor no se fía de lo que dicen: los cruza con los precios de tu subasta, tus personajes y lo que mides al farmear. objetos: nombres en inglés o en español, como salen en el juego. profesiones: id de la profesión (393 Desollar, 182 Botánica, 186 Minería, 356 Pesca, 197 Costura, 165 Peletería, 171 Alquimia, 333 Encantamiento, 202 Ingeniería, 164 Herrería, 185 Cocina, 129 Primeros auxilios) y nivel mínimo. tipo: farmeo, pesca, mazmorra, crafteo, inversion, vendedor o diario. id: el nombre que le das al medirlo con /pg farmeo <id>.",
+  "metodos": [
+    {
+      "id": "desollar-al-subir",
+      "nombre": "Desollar todo lo que matas mientras subes",
+      "tipo": "farmeo", "nivel": 1, "zona": "Cualquiera",
+      "profesiones": [{"id": 393, "nivel": 1}],
+      "objetos": ["Light Leather", "Light Hide", "Medium Leather", "Medium Hide", "Heavy Leather"],
+      "notas": "Al principio nadie compra cuero: véndelo al vendedor. Da para pagar los hechizos del instructor. No te pares a desollar lo que matan otros.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "tirisfal-humanoides",
+      "nombre": "Humanoides y no-muertos que reaparecen rápido",
+      "tipo": "farmeo", "nivel": 7, "zona": "Claros de Tirisfal",
+      "objetos": ["Linen Cloth"],
+      "notas": "Oro suelto y tela; buena experiencia.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "dunmorogh-espias",
+      "nombre": "Espías Hierro Negro",
+      "tipo": "farmeo", "nivel": 8, "zona": "Dun Morogh",
+      "objetos": ["Linen Cloth"],
+      "notas": "Son de misión y reaparecen muy rápido en poco espacio. Tela, bolsas y verdes.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "durotar-cueva",
+      "nombre": "Cueva de humanoides",
+      "tipo": "farmeo", "nivel": 8, "zona": "Durotar",
+      "objetos": ["Linen Cloth"],
+      "notas": "Reaparecen rápido; la guía da unos 14 000 de experiencia por hora.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "baldios-ventura",
+      "nombre": "Goblins de Ventura y Cía.",
+      "tipo": "farmeo", "nivel": 14, "zona": "Los Baldíos",
+      "objetos": ["Linen Cloth", "Wool Cloth"],
+      "notas": "Reaparecen sin parar y mueren rápido. Tela, verdes y cajas extraviadas (Waylaid Crates).",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "baldios-arpias",
+      "nombre": "Arpías",
+      "tipo": "farmeo", "nivel": 14, "zona": "Los Baldíos",
+      "objetos": ["Linen Cloth", "Wool Cloth"],
+      "notas": "Tela, verdes y cajas extraviadas; unos 18 000 de experiencia por hora.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "cardo-veloz",
+      "nombre": "Cardo veloz recogiendo Marregal y Brezospina",
+      "tipo": "farmeo", "nivel": 13, "zona": "Norte de Los Baldíos (Horda); Loch Modan o Costa Oscura, y Bosque del Ocaso a partir de 20 (Alianza)",
+      "profesiones": [{"id": 182, "nivel": 70}],
+      "objetos": ["Swiftthistle", "Mageroyal", "Briarthorn"],
+      "notas": "No tiene nodo propio: sale al recoger Marregal (20-30 %) y Brezospina (35-40 %). Se usa para pociones de rapidez y té de cardo, así que aguanta el precio.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "argenteos-humanoides",
+      "nombre": "Humanoides en dos campamentos densos",
+      "tipo": "farmeo", "nivel": 16, "zona": "Bosque de Argénteos",
+      "objetos": ["Linen Cloth", "Wool Cloth"],
+      "notas": "Tela y equipo ligado al equipar.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "condores",
+      "nombre": "Cóndores feroces",
+      "tipo": "farmeo", "nivel": 16, "zona": "Montañas Crestagrana (según el mapa de la guía)",
+      "objetos": ["Tough Condor Meat", "Small Egg", "Light Feather"],
+      "notas": "Lo que da dinero es la carne dura de cóndor: la piden una misión y la cocina.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "bael-modan",
+      "nombre": "Enanos de Bael Modan",
+      "tipo": "farmeo", "nivel": 20, "zona": "Sur de Los Baldíos",
+      "objetos": ["Wool Cloth", "Linen Cloth"],
+      "notas": "Reaparecen sin parar; tela y verdes.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "vastagos-dragon",
+      "nombre": "Vástagos de dragón",
+      "tipo": "farmeo", "nivel": 24, "zona": "Los Humedales",
+      "objetos": ["Small Flame Sac", "Sharp Claw", "Large Fang", "Tiny Crimson Whelpling"],
+      "notas": "Depende de vender en la subasta. Hay una pequeña probabilidad de mascota.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "trabalomas-gnolls",
+      "nombre": "Gnolls Hociclodo",
+      "tipo": "farmeo", "nivel": 26, "zona": "Laderas de Trabalomas",
+      "objetos": ["Wool Cloth", "Silk Cloth"],
+      "notas": "Muy densos y con cofres en la zona.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "mil-agujas-arpias",
+      "nombre": "Arpías que reaparecen sin parar",
+      "tipo": "farmeo", "nivel": 28, "zona": "Las Mil Agujas",
+      "objetos": ["Vibrant Plume", "Silk Cloth", "Wool Cloth"],
+      "notas": "Oro de vendedor: la pluma vibrante se vende al vendedor. No se pueden desollar.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "ocaso-ogros",
+      "nombre": "Cueva de ogros con cofres y vetas",
+      "tipo": "farmeo", "nivel": 28, "zona": "Bosque del Ocaso",
+      "mejor_con": [186],
+      "objetos": ["Silk Cloth", "Wool Cloth", "Iron Ore", "Tin Ore"],
+      "notas": "Ogros que reaparecen rápido, muchos sitios de cofre y vetas dentro y fuera de la cueva.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "tuercespina-bestias",
+      "nombre": "Bestias del norte de Tuercespina",
+      "tipo": "farmeo", "nivel": 30, "zona": "Vega de Tuercespina",
+      "mejor_con": [393],
+      "objetos": ["Bristly Whisker", "Medium Leather", "Heavy Leather"],
+      "notas": "Todas se desuellan y sueltan grises que paga bien el vendedor. Se combina con las misiones de Nesingwary.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "tuercespina-basiliscos",
+      "nombre": "Basiliscos Espinacristal",
+      "tipo": "farmeo", "nivel": 30, "zona": "Vega de Tuercespina",
+      "mejor_con": [393],
+      "objetos": ["Intact Basilisk Spine", "Squishy Basilisk Eye", "Curved Basilisk Claw", "Large Basilisk Tail"],
+      "notas": "El mejor oro de vendedor de la guía para este nivel; con Desollar, más.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "perla-azul",
+      "nombre": "Almejas gigantes bajo el agua",
+      "tipo": "farmeo", "nivel": 30, "zona": "Vega de Tuercespina",
+      "objetos": ["Blue Pearl"],
+      "notas": "La perla azul la pide una misión y se vende muy bien. Cuidado con los élites de al lado.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "arathi-witherbark",
+      "nombre": "Trols Secacorteza (fórmula de guantes)",
+      "tipo": "farmeo", "nivel": 30, "zona": "Tierras Altas de Arathi",
+      "objetos": ["Formula: Enchant Gloves - Skinning", "Silk Cloth"],
+      "notas": "Cualquier Secacorteza puede soltar la fórmula, que vale bastante. Mientras, oro suelto y tela.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "inhospitas-elementales",
+      "nombre": "Elementales de roca",
+      "tipo": "farmeo", "nivel": 37, "zona": "Tierras Inhóspitas",
+      "objetos": ["Elemental Earth"],
+      "notas": "Oro de vendedor con los grises que sueltan. El autor sacaba unos 10 o/h en el Classic original sin competencia.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "cableado-fundido",
+      "nombre": "Trituradoras de Ventura y Cía.",
+      "tipo": "farmeo", "nivel": 37, "zona": "Vega de Tuercespina",
+      "objetos": ["Fused Wiring"],
+      "notas": "Ve a por las trituradoras: el cableado fundido lo usan los ingenieros (robots de reparación, cables de arranque).",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "inhospitas-vastagos",
+      "nombre": "Vástagos (bolsa de llamas)",
+      "tipo": "farmeo", "nivel": 40, "zona": "Tierras Inhóspitas",
+      "objetos": ["Small Flame Sac"],
+      "notas": "Solo compensa cuando la gente empiece con el Núcleo de Magma: la bolsa de llamas pequeña es para la poción de protección contra el fuego.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "tanaris-tortugas",
+      "nombre": "Tortugas de la playa",
+      "tipo": "farmeo", "nivel": 42, "zona": "Tanaris",
+      "objetos": ["Speckled Shell Fragment"],
+      "notas": "Oro de vendedor; el autor lo combina con la pesca de cajas de la misma costa.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "tanaris-errantes",
+      "nombre": "Humanoides Errantes",
+      "tipo": "farmeo", "nivel": 42, "zona": "Tanaris",
+      "objetos": ["Mageweave Cloth", "Wastewander Water Pouch"],
+      "notas": "La bolsa de agua es para una misión repetible que usa mucha gente para subir alters.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "tuercespina-sur",
+      "nombre": "Sur de Tuercespina con almejas y cofres",
+      "tipo": "farmeo", "nivel": 43, "zona": "Vega de Tuercespina",
+      "objetos": ["Golden Pearl", "Iridescent Pearl", "Mageweave Cloth"],
+      "notas": "Reaparecen muy rápido, buen oro suelto, perlas de las almejas y algún cofre.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "feralas-ciervos",
+      "nombre": "Ciervos alados Plumagris",
+      "tipo": "farmeo", "nivel": 45, "zona": "Feralas",
+      "objetos": [],
+      "notas": "Fáciles de matar, reaparecen muy rápido y sueltan muchos grises para el vendedor.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "tierras-devastadas",
+      "nombre": "Bestias para la misión repetible de consumibles",
+      "tipo": "farmeo", "nivel": 45, "zona": "Las Tierras Devastadas",
+      "mejor_con": [393],
+      "objetos": ["Blasted Boar Lung", "Vulture Gizzard", "Scorpok Pincer", "Snickerfang Jowl", "Basilisk Brain"],
+      "notas": "Se entregan en una misión repetible que da consumibles de +25 a una característica, así que los compra mucha gente. También oro de grises y pieles.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "interior-trolls",
+      "nombre": "Trols de las Tierras del Interior",
+      "tipo": "farmeo", "nivel": 45, "zona": "Tierras del Interior (Jintha'Alor a nivel 60)",
+      "objetos": ["Wildvine", "Mageweave Cloth", "Flask of Mojo"],
+      "notas": "Grises, verdes y vid salvaje (Tejesueños para sastres y Lente verde para ingenieros). A nivel 60 se hacen también los élites de Jintha'Alor.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "silithus-escorpiones",
+      "nombre": "Escórpidos",
+      "tipo": "farmeo", "nivel": 53, "zona": "Silithus",
+      "mejor_con": [393],
+      "objetos": ["Glowing Scorpid Blood", "Huge Venom Sac", "Rugged Leather"],
+      "notas": "Sangre y bolsa de veneno se venden bien al vendedor; con Desollar, cuero basto.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "perla-iridiscente",
+      "nombre": "Perlas iridiscentes",
+      "tipo": "farmeo", "nivel": 20, "zona": "Los Humedales (norte a 20, sur a 25); nagas del sur de Tuercespina a 43",
+      "objetos": ["Iridescent Pearl"],
+      "notas": "Ahora sirven: varias recetas nuevas de Peletería ligadas al recogerlas piden bastantes. Bajarán hacia el final, porque las piden sobre todo los que suben.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "esencia-agua",
+      "nombre": "Esencia de agua",
+      "tipo": "farmeo", "nivel": 50, "zona": "Frondavil (sin bucear, con competencia) o Tierras de la Peste del Este (buceando)",
+      "objetos": ["Essence of Water"],
+      "notas": "Las esencias suelen dar muy buen oro por hora y en Forever tienen recetas nuevas.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "esencia-fuego",
+      "nombre": "Esencia de fuego",
+      "tipo": "farmeo", "nivel": 52, "zona": "Cráter de Un'Goro (bichos 53-56) o Frondavil",
+      "objetos": ["Essence of Fire"],
+      "notas": "En Frondavil cae menos que en Un'Goro.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "esencia-aire-tierra",
+      "nombre": "Esencias de aire y tierra",
+      "tipo": "farmeo", "nivel": 55, "zona": "Noroeste de Silithus",
+      "objetos": ["Essence of Air", "Essence of Earth"],
+      "notas": "Caen a menudo y reaparecen bien.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "esencia-vida",
+      "nombre": "Esencia de vida",
+      "tipo": "farmeo", "nivel": 50, "zona": "Frondavil (también en la cueva)",
+      "objetos": ["Living Essence"],
+      "notas": "La Masacre da muchas más, así que suele valer menos que las otras esencias.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "esencia-no-muerte",
+      "nombre": "Esencia de no-muerte",
+      "tipo": "farmeo", "nivel": 55, "zona": "Lago de Cuna del Invierno",
+      "objetos": ["Essence of Undeath"],
+      "notas": "Buena al principio; baja cuando la gente empieza a repetir Stratholme.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "carne-gusano",
+      "nombre": "Gusanos de arena",
+      "tipo": "farmeo", "nivel": 55, "zona": "Silithus (mejor los del norte)",
+      "objetos": ["Sandworm Meat"],
+      "notas": "Para las albóndigas del desierto ahumadas, que usan los que hacen bandas.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "furbolgs-invierno",
+      "nombre": "Pueblo de los Fauces de Invierno",
+      "tipo": "farmeo", "nivel": 53, "zona": "Cuna del Invierno, al este de Vista Eterna",
+      "objetos": ["Winterfall Firewater", "Winterfall E'ko", "Runecloth"],
+      "notas": "Mucha tela y equipo ligado al equipar; el agua de fuego y el e'ko son para los poderes Juju.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "seda-arana",
+      "nombre": "Arañas",
+      "tipo": "farmeo", "nivel": 50, "zona": "Tierras de la Peste del Oeste",
+      "objetos": ["Ironweb Spider Silk"],
+      "notas": "Cae bastante y la piden muchas recetas de Costura y Peletería.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "champinon-fantasma",
+      "nombre": "Cueva del champiñón fantasma",
+      "tipo": "farmeo", "nivel": 47, "zona": "Tierras del Interior (cueva con mocos de nivel 47+)",
+      "profesiones": [{"id": 182, "nivel": 245}],
+      "objetos": ["Ghost Mushroom"],
+      "notas": "La cueva está llena de puntos de champiñón fantasma.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "perla-dorada",
+      "nombre": "Nagas de la cueva de la Isla del Terror",
+      "tipo": "farmeo", "nivel": 44, "zona": "Feralas",
+      "objetos": ["Golden Pearl"],
+      "notas": "La perla dorada sale de almejas con muy poca probabilidad, pero siempre se vende. Las nagas son de nivel 44 y reaparecen rápido.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "tela-vil",
+      "nombre": "Sátiros (tela vil)",
+      "tipo": "farmeo", "nivel": 50, "zona": "Azshara (tres campamentos) o Frondavil",
+      "objetos": ["Felcloth", "Runecloth", "Mageweave Cloth"],
+      "notas": "En Frondavil la zona buena es la más disputada; algunos dan tejido mágico en vez de tela rúnica.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "formula-fuerza-superior",
+      "nombre": "Brujos del Paso de la Muerte",
+      "tipo": "farmeo", "nivel": 55, "zona": "Paso de la Muerte",
+      "objetos": ["Formula: Enchant Bracer - Superior Strength", "Runecloth"],
+      "notas": "La fórmula solo cae de los brujos y se pide mucho. Mata a todos: tela rúnica y opción de azules y épicos.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "formula-escalofrio",
+      "nombre": "Altonato angustiado del lago",
+      "tipo": "farmeo", "nivel": 55, "zona": "Cuna del Invierno",
+      "objetos": ["Formula: Enchant Weapon - Icy Chill", "Essence of Undeath"],
+      "notas": "Además de la fórmula, esencias de no-muerte y tres cofres que reaparecen a menudo.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "formula-intelecto",
+      "nombre": "Chamanes oscuros Vilrama",
+      "tipo": "farmeo", "nivel": 47, "zona": "Tierras del Interior (Jintha'Alor)",
+      "objetos": ["Formula: Enchant Bracer - Greater Intellect", "Mageweave Cloth", "Wildvine"],
+      "notas": "Mucho tejido mágico, vid salvaje y cofres.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "formula-cruzado",
+      "nombre": "Vinculahechizos Escarlata",
+      "tipo": "farmeo", "nivel": 58, "zona": "Tierras de la Peste del Oeste",
+      "objetos": ["Formula: Enchant Weapon - Crusader"],
+      "notas": "Hay muy pocos. Cuanto antes, mejor: luego los acampa todo el mundo.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "acido-larva",
+      "nombre": "Gusanos larva",
+      "tipo": "farmeo", "nivel": 53, "zona": "Tierras de la Peste del Este",
+      "objetos": ["Larval Acid"],
+      "notas": "Se pide desde el principio (capa de sanador de La Masacre) y otra vez con Ahn'Qiraj (equipo de resistencia a la naturaleza).",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "ungoro-mocos",
+      "nombre": "Mocos de Un'Goro",
+      "tipo": "farmeo", "nivel": 50, "zona": "Cráter de Un'Goro",
+      "objetos": ["Pattern: Devilsaur Leggings", "Oozing Bag"],
+      "notas": "El patrón se vende en la subasta y la bolsa puede traer una mascota.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "rutas-60",
+      "nombre": "Rutas de Botánica y Minería a nivel 60",
+      "tipo": "farmeo", "nivel": 55, "zona": "Silithus, Cuna del Invierno, Tierras de la Peste del Este, Las Estepas Ardientes",
+      "profesiones_alguna": [182, 186],
+      "objetos": ["Black Lotus", "Arcane Crystal", "Thorium Ore", "Dreamfoil", "Plaguebloom", "Mountain Silversage", "Icecap"],
+      "notas": "El oro lo hacen el loto y los cristales arcanos. Con GatherMate2 ves dónde salen. El talento de Legacy Bountiful Harvest es prioritario si vas a recolectar en serio. La guía habla de un «Fel Lotus» que no está en los datos del juego; los que sí están y son nuevos son Star Lotus, Death Lotus y Crimson Lotus (por ver dónde salen).",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "pesca-cajas",
+      "nombre": "Pesca de cajas en la costa de Tanaris",
+      "tipo": "pesca", "nivel": 20, "zona": "Tanaris, costa este alrededor de Puerto Bonvapor",
+      "profesiones": [{"id": 356, "nivel": 205}],
+      "objetos": ["Bolt of Mageweave", "Iron Bar", "Mithril Bar"],
+      "notas": "Pesca solo en restos flotantes, no en agua abierta. Hace falta 205 efectivo para lanzar y 300 para que no se escape nada: 225 de habilidad (libro de Pesca experta de Bahía del Botín), caña de +20/+25 y cebo de +75/+100. Los bichos de la costa son neutrales.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "pesca-desviado",
+      "nombre": "Pez desviado",
+      "tipo": "pesca", "nivel": 10, "zona": "Los Baldíos",
+      "profesiones": [{"id": 356, "nivel": 50}],
+      "objetos": ["Deviate Fish", "Savory Deviate Delight"],
+      "notas": "Con 150 de Pesca no se escapa ninguno. Con Cocina 85 y la receta (botín del mundo) lo conviertes en delicia de desviado, que siempre se vende.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "pesca-whimsyfin",
+      "nombre": "Delicia sabrosa de Whimsyfin (nueva en Forever)",
+      "tipo": "pesca", "nivel": 15, "zona": "Montañas Crestagrana",
+      "profesiones": [{"id": 356, "nivel": 1}, {"id": 185, "nivel": 1}],
+      "objetos": ["Savory Whimsyfin Delight"],
+      "notas": "La receta cae en Crestagrana y el pez se pesca en bancos de la zona. Te convierte en múrloc u ogro.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "mazmorra-colmillo-oscuro",
+      "nombre": "Castillo de Colmillo Oscuro",
+      "tipo": "mazmorra", "nivel": 60, "zona": "Bosque de Argénteos",
+      "objetos": ["Necrology Robes", "Gloomshroud Armor"],
+      "notas": "Para el rango de twinks de nivel 19: azules raros y algún verde con buenas características.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "mazmorra-lamentos",
+      "nombre": "Cuevas de los Lamentos",
+      "tipo": "mazmorra", "nivel": 60, "zona": "Los Baldíos",
+      "mejor_con": [393, 165, 333],
+      "objetos": ["Perfect Deviate Scale", "Deviate Scale Belt", "Gloves of the Fang"],
+      "notas": "Rápida y fácil. Mejor con Desollar (escamas desviadas perfectas), Peletería (cinturón de escamas desviadas) y Encantamiento para desencantar.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "mazmorra-escarlata",
+      "nombre": "Monasterio Escarlata",
+      "tipo": "mazmorra", "nivel": 60, "zona": "Claros de Tirisfal",
+      "objetos": ["Silk Cloth"],
+      "notas": "Seda, azules ligados al equipar para transfiguración y para subir, y objetos muy raros para coleccionistas. La Catedral es la mejor ala para juntar muchos.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "mazmorra-zulfarrak",
+      "nombre": "Cementerio de Zul'Farrak",
+      "tipo": "mazmorra", "nivel": 60, "zona": "Tanaris",
+      "objetos": ["Mageweave Cloth", "Heavy Mageweave Bandage"],
+      "notas": "Mucho oro de vendedor. Si el tejido mágico baja, conviértelo en vendas gruesas y véndelas al vendedor (el motor ya calcula cuándo compensa).",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "mazmorra-maraudon",
+      "nombre": "Maraudon por el atajo del cetro de Celebras",
+      "tipo": "mazmorra", "nivel": 60, "zona": "Desolace",
+      "mejor_con": [393, 182, 186],
+      "objetos": ["Ghost Mushroom", "Blindweed", "Mithril Ore"],
+      "notas": "Grupos de barrenadores y tortugas en el interior; desuella las tortugas y recoge hierbas y minerales por el camino.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "mazmorra-stratholme",
+      "nombre": "Stratholme",
+      "tipo": "mazmorra", "nivel": 60, "zona": "Tierras de la Peste del Este",
+      "objetos": ["Runecloth", "Righteous Orb", "Essence of Undeath"],
+      "notas": "Tela rúnica en el lado vivo (y orbes justos), esencias de no-muerte en el lado muerto. Lo fácil es la entrada de cada lado.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "mazmorra-masacre-este",
+      "nombre": "La Masacre Este saltando (Botánica y Minería)",
+      "tipo": "mazmorra", "nivel": 60, "zona": "Feralas",
+      "profesiones_alguna": [182, 186],
+      "objetos": ["Thorium Ore", "Arcane Crystal", "Dreamfoil", "Gromsblood", "Ghost Mushroom"],
+      "notas": "Dos o tres vetas de torio enriquecido pasado Alzzin y hierbas por toda la mazmorra. Mira antes los precios de cristal arcano y hierbas.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "crafteos-costura",
+      "nombre": "Costura con lo que farmeas",
+      "tipo": "crafteo",
+      "objetos": ["Runecloth Bag", "Dreamweave Gloves", "Dreamweave Vest", "Dreamweave Circlet", "Felcloth Hood", "Felcloth Boots", "Mooncloth"],
+      "notas": "Bolsas de tela rúnica (comprando la tela y haciendo los rollos) y piezas de Tejesueños y tela vil. La tela lunar tiene espera de varios días: cada personaje con Costura hace una.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "crafteos-peleteria",
+      "nombre": "Peletería",
+      "tipo": "crafteo",
+      "objetos": ["Devilsaur Leggings", "Devilsaur Gauntlets", "Wolfshead Helm", "Deviate Scale Belt", "Cured Rugged Hide"],
+      "notas": "En Forever hay kits de armadura nuevos (defensa, poder con hechizos y poder de ataque) y muchas recetas nuevas con buenas características, aún sin destripar del todo.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "crafteos-herreria",
+      "nombre": "Herrería",
+      "tipo": "crafteo",
+      "objetos": ["Mithril Spurs", "Green Iron Hauberk", "Lionheart Helm"],
+      "notas": "",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "crafteos-alquimia",
+      "nombre": "Transmutaciones de Alquimia",
+      "tipo": "crafteo",
+      "objetos": ["Arcanite Bar", "Essence of Fire", "Essence of Earth", "Essence of Water", "Essence of Air", "Living Essence", "Essence of Undeath"],
+      "notas": "Tienen espera y comparten la misma: una transmutación por personaje cada vez. Por eso compensa tener varios personajes con Alquimia.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "antifaz-bandido",
+      "nombre": "Antifaz de bandido blanco para el vendedor",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 197, "nivel": 215}],
+      "objetos": ["White Bandit Mask"],
+      "notas": "Se fabrica con tejido mágico y se vende al vendedor: oro seguro sin comisión ni esperas cuando el tejido mágico está barato. El patrón es botín del mundo.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "varitas-encantamiento",
+      "nombre": "Varitas mágicas al empezar",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 333, "nivel": 10}],
+      "objetos": ["Lesser Magic Wand", "Greater Magic Wand"],
+      "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "invertir-al-principio",
+      "nombre": "Comprar ahora lo que casi nadie usa y venderlo cuando la gente llegue a 60",
+      "tipo": "inversion",
+      "objetos": ["Tough Condor Meat", "Swiftthistle", "Elemental Earth", "Elemental Fire", "Elemental Water", "Elemental Air", "Larval Acid", "Golden Pearl", "Ironweb Spider Silk", "Staff of Jordan"],
+      "notas": "Con el tiempo entra más oro en la economía y los materiales suben. También los épicos ligados al equipar.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "twinks",
+      "nombre": "Objetos para twinks (19, 29 y 39)",
+      "tipo": "inversion",
+      "objetos": ["Shadowfang", "Feet of the Lynx", "Twisted Chanter's Staff", "Keller's Girdle", "Sanguine Sandals", "Sentry Cloak",
+                  "Tigerstrike Mantle", "Cobalt Crusher", "Zealot Blade", "Staff of the Blessed Seer", "Mantle of Thieves", "Gloomshroud Armor", "Forest Tracker Epaulets", "Hotshot Pilot's Gloves",
+                  "Pendulum of Doom", "Staff of Jordan", "Krol Blade", "Bow of Searing Arrows", "Underworld Band"],
+      "notas": "Al principio están baratos porque hay poco oro. Ojo: con los cambios de equipo de Forever puede que no sean los mejores esta vez.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "patron-guanteletes-demosaurio",
+      "nombre": "Patrón de guanteletes de demosaurio",
+      "tipo": "vendedor", "nivel": 50, "zona": "Cráter de Un'Goro, Refugio de Marshal",
+      "vendedor": "Nergal",
+      "objetos": ["Pattern: Devilsaur Gauntlets"],
+      "notas": "Existencias limitadas que se reponen con el tiempo: cómpralos y revéndelos.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "patron-bolsa-runica",
+      "nombre": "Patrón de bolsa de tela rúnica",
+      "tipo": "vendedor", "nivel": 50, "zona": "Cuna del Invierno, Vista Eterna",
+      "vendedor": "Qia",
+      "objetos": ["Pattern: Runecloth Bag"],
+      "notas": "Existencias limitadas. Si lo compras siempre tú al principio, se gana muchísimo.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    },
+    {
+      "id": "estudio-dedicado",
+      "nombre": "Estudio dedicado (talento de Legacy)",
+      "tipo": "diario",
+      "cantidad": 3,
+      "requisito": "todas las profesiones del personaje (las dos principales y las tres secundarias) a 300",
+      "objetos": ["Essence of Fire", "Essence of Water", "Essence of Earth", "Essence of Air"],
+      "notas": "Una vez al día (23 h, 25 s de lanzamiento): sube un punto tu profesión más baja; con todo a 300 da 2-4 esencias elementales al azar. Cada alter con todo a 300 es otra tirada diaria. Antes de gastar Legacy en esto, la guía aconseja los talentos que aceleran subir de nivel.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+    }
+  ]
+}

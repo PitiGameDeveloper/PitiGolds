@@ -8,3 +8,6 @@ datos/
 config.json
 addon/PitiGolds/Generated.lua
 *.tmp
+
+# Guías compradas: solo para uso personal, nunca en GitHub
+fuentes/

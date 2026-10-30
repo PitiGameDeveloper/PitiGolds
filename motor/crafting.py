@@ -60,6 +60,8 @@ class CraftResult:
     output_signals: object | None = None  # MarketSignals de lo fabricado (lo rellena analysis)
     capacity: object | None = None        # business.Capacity: cuánto da al día como máximo
     profit_week: int | None = None        # beneficio con el precio previsto a 7 días
+    cooldown_hours: float | None = None   # espera entre fabricaciones (tela lunar, transmutaciones...)
+    cooldown_category: int | None = None  # las recetas de la misma categoría comparten la espera
 
     @property
     def known(self) -> bool:
@@ -86,8 +88,27 @@ class CraftResult:
         return (self.yellow + self.grey) // 2
 
     @property
+    def crafts_per_day(self) -> float | None:
+        """Fabricaciones al día que permite la espera, contando a todos los que saben hacerla
+        (o a uno solo si nadie la sabe todavía). None si no tiene espera."""
+        if not self.cooldown_hours:
+            return None
+        return max(1, len(self.known_by)) * 24 / self.cooldown_hours
+
+    @property
     def difficulty_name(self) -> str | None:
         return DIFFICULTY.get(self.difficulty) if self.difficulty is not None else None
+
+
+def profession_levels(conn: sqlite3.Connection) -> dict[int, list[tuple[str, int]]]:
+    """Por profesión (skill line), qué personajes la tienen y a qué nivel, del más alto al más bajo."""
+    levels: dict[int, dict[str, int]] = {}
+    for r in conn.execute("SELECT char_key, skill_line, rank FROM profession_summary"):
+        levels.setdefault(r["skill_line"], {})[r["char_key"]] = r["rank"] or 0
+    for r in conn.execute("SELECT char_key, parent_id, skill FROM professions WHERE parent_id IS NOT NULL"):
+        current = levels.setdefault(r["parent_id"], {})
+        current[r["char_key"]] = max(current.get(r["char_key"], 0), r["skill"] or 0)
+    return {line: sorted(chars.items(), key=lambda kv: -kv[1]) for line, chars in levels.items()}
 
 
 def recipe_item_ids(conn: sqlite3.Connection) -> set[int]:
@@ -165,6 +186,8 @@ def evaluate_recipes(conn: sqlite3.Connection, prices: dict[int, ItemPrice],
         if game_row is not None:
             result.skill_line = game_row["skill_line"]
             result.yellow, result.grey = game_row["yellow"], game_row["grey"]
+            result.cooldown_hours = game_row["cooldown_hours"]
+            result.cooldown_category = game_row["cooldown_category"]
             required = game_row["min_skill"] or 0
             learn_id = game_row["learn_item_id"]
             if learn_id:

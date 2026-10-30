@@ -138,19 +138,22 @@ CREATE TABLE IF NOT EXISTS gd_skill_lines (skill_line INTEGER PRIMARY KEY, name 
 
 -- spell_id es el mismo número que el recipeID del juego.
 -- Color al fabricar: naranja hasta yellow, amarilla hasta (yellow+grey)/2, verde hasta grey.
+-- cooldown_hours: espera entre fabricaciones; las de la misma cooldown_category la comparten.
 CREATE TABLE IF NOT EXISTS gd_recipes (
   spell_id INTEGER PRIMARY KEY, skill_line INTEGER, name TEXT,
   min_skill INTEGER, yellow INTEGER, grey INTEGER, num_skillups INTEGER, acquire INTEGER,
-  output_item_id INTEGER, output_qty REAL, learn_item_id INTEGER
+  output_item_id INTEGER, output_qty REAL, learn_item_id INTEGER,
+  cooldown_hours REAL, cooldown_category INTEGER
 );
 CREATE TABLE IF NOT EXISTS gd_reagents (spell_id INTEGER, item_id INTEGER, quantity INTEGER);
 CREATE INDEX IF NOT EXISTS idx_gd_reagents_spell ON gd_reagents(spell_id);
 
 -- buy_price: lo que cobra un vendedor por vendor_stack unidades; sell_price: lo que paga por una.
+-- name_en: el nombre en inglés, para reconocer los objetos que citan guías y vídeos.
 CREATE TABLE IF NOT EXISTS gd_items (
   item_id INTEGER PRIMARY KEY, name TEXT, quality INTEGER, class_id INTEGER, subclass_id INTEGER,
   buy_price INTEGER, sell_price INTEGER, vendor_stack INTEGER, stackable INTEGER, bonding INTEGER,
-  required_skill INTEGER, required_skill_rank INTEGER
+  required_skill INTEGER, required_skill_rank INTEGER, name_en TEXT
 );
 """
 
@@ -171,6 +174,8 @@ ADDED_COLUMNS = {
     "prices": {"market_price": "INTEGER"},
     "items": {"sell_price": "INTEGER"},
     "vendor_items": {"account": "TEXT", "char_key": "TEXT"},
+    "gd_items": {"name_en": "TEXT"},
+    "gd_recipes": {"cooldown_hours": "REAL", "cooldown_category": "INTEGER"},
 }
 
 

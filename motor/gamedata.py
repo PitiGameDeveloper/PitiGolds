@@ -2,8 +2,10 @@
 
 Traen todas las recetas de todas las profesiones (también de las que no tienes), con
 el nivel al que se aprenden y al que pasan a amarilla, verde y gris, sus materiales, lo
-que fabrican, el objeto con el que se aprenden y lo que cobra y paga un vendedor por
-cada objeto. No traen qué PNJ vende cada cosa: eso vive en el servidor.
+que fabrican, el objeto con el que se aprenden, la espera de las que tienen (tela lunar,
+transmutaciones...) y lo que cobra y paga un vendedor por cada objeto. Los nombres de los
+objetos se bajan también en inglés, para reconocer lo que citan guías y vídeos. No traen qué
+PNJ vende cada cosa: eso vive en el servidor.
 """
 
 from __future__ import annotations
@@ -24,7 +26,9 @@ PRODUCT = "wowf"
 LOCALE = "esES"
 USER_AGENT = "PitiGolds (addon personal; https://github.com/PitiGameDeveloper)"
 TABLES = ["SkillLine", "SkillLineAbility", "SpellName", "SpellEffect", "SpellReagents",
-          "ItemSparse", "Item", "ItemEffect", "ItemXItemEffect"]
+          "ItemSparse", "Item", "ItemEffect", "ItemXItemEffect", "SpellCooldowns", "SpellCategories"]
+ENGLISH_TABLES = ["ItemSparse"]  # se bajan también en inglés: <tabla>.enUS.csv
+FORMAT = 2  # sube cuando se importan datos nuevos: obliga a reimportar aunque la versión no cambie
 
 PROFESSION_CATEGORIES = {9, 11}  # SkillLine.CategoryID: secundarias (cocina, pesca...) y principales
 EFFECT_CREATE_ITEM = 24
@@ -70,10 +74,11 @@ def pick_build(builds: list[str], installed: str | None) -> str:
 def download(build: str, dest: Path, refresh: bool = False) -> Path:
     """Baja las tablas a dest. Sin refresh, las que ya estén descargadas no se vuelven a pedir."""
     dest.mkdir(parents=True, exist_ok=True)
-    for table in TABLES:
-        target = dest / f"{table}.csv"
+    wanted = [(t, LOCALE, f"{t}.csv") for t in TABLES] + [(t, "enUS", f"{t}.enUS.csv") for t in ENGLISH_TABLES]
+    for table, locale, filename in wanted:
+        target = dest / filename
         if refresh or not target.is_file():
-            data = _get(f"{WAGO}/db2/{table}/csv?build={build}&locale={LOCALE}")
+            data = _get(f"{WAGO}/db2/{table}/csv?build={build}&locale={locale}")
             tmp = target.with_suffix(".tmp")
             tmp.write_bytes(data)
             tmp.replace(target)
@@ -83,7 +88,10 @@ def download(build: str, dest: Path, refresh: bool = False) -> Path:
 # Importación ---------------------------------------------------------------------------
 
 def _rows(folder: Path, table: str):
-    with open(folder / f"{table}.csv", encoding="utf-8", newline="") as f:
+    path = folder / f"{table}.csv"
+    if not path.is_file():  # tablas añadidas después: la importación sigue sin ellas
+        return
+    with open(path, encoding="utf-8", newline="") as f:
         yield from csv.DictReader(f)
 
 
@@ -136,16 +144,27 @@ def import_tables(conn: sqlite3.Connection, folder: Path, build: str) -> ImportR
         if recipe and (recipe not in learn_item or item < learn_item[recipe]):
             learn_item[recipe] = item
 
+    # Espera entre fabricaciones (en milisegundos): la propia o la de su categoría, que
+    # comparten varias recetas (todas las transmutaciones, por ejemplo).
+    cooldowns: dict[int, float] = {}
+    for r in _rows(folder, "SpellCooldowns"):
+        ms = max(_int(r["CategoryRecoveryTime"]), _int(r["RecoveryTime"]))
+        if ms > 0 and _int(r["DifficultyID"]) == 0:
+            cooldowns[_int(r["SpellID"])] = ms / 3_600_000
+    categories = {_int(r["SpellID"]): _int(r["Category"]) for r in _rows(folder, "SpellCategories")
+                  if _int(r["Category"]) and _int(r["DifficultyID"]) == 0}
+
     recipes = {}
     for r in _rows(folder, "SkillLineAbility"):
         line, spell = _int(r["SkillLine"]), _int(r["Spell"])
         if line not in skill_lines or spell in recipes:
             continue
         output = outputs.get(spell, (None, 1.0))
+        cooldown = cooldowns.get(spell)
         recipes[spell] = (spell, line, spell_names.get(spell), _int(r["MinSkillLineRank"]),
                           _int(r["TrivialSkillLineRankLow"]), _int(r["TrivialSkillLineRankHigh"]),
                           _int(r["NumSkillUps"]), _int(r["AcquireMethod"]), output[0], output[1],
-                          learn_item.get(spell))
+                          learn_item.get(spell), cooldown, categories.get(spell) if cooldown else None)
 
     reagents = []
     for r in _rows(folder, "SpellReagents"):
@@ -166,6 +185,7 @@ def import_tables(conn: sqlite3.Connection, folder: Path, build: str) -> ImportR
     skill_lines = {k: v for k, v in skill_lines.items() if k in used_lines}
 
     classes = {_int(r["ID"]): (_int(r["ClassID"]), _int(r["SubclassID"])) for r in _rows(folder, "Item")}
+    english = {_int(r["ID"]): r["Display_lang"] for r in _rows(folder, "ItemSparse.enUS")}
     items = []
     for r in _rows(folder, "ItemSparse"):
         item = _int(r["ID"])
@@ -173,18 +193,25 @@ def import_tables(conn: sqlite3.Connection, folder: Path, build: str) -> ImportR
         items.append((item, r["Display_lang"], _int(r["OverallQualityID"]), cls[0], cls[1],
                       _int(r["BuyPrice"]), _int(r["SellPrice"]), max(1, _int(r["VendorStackCount"])),
                       _int(r["Stackable"]), _int(r["Bonding"]), _int(r["RequiredSkill"]),
-                      _int(r["RequiredSkillRank"])))
+                      _int(r["RequiredSkillRank"]), english.get(item)))
 
     with conn:
         for table in ("gd_skill_lines", "gd_recipes", "gd_reagents", "gd_items"):
             conn.execute(f"DELETE FROM {table}")
         conn.executemany("INSERT INTO gd_skill_lines VALUES (?, ?, ?, ?)",
                          [(k, *v) for k, v in skill_lines.items()])
-        conn.executemany("INSERT INTO gd_recipes VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recipes.values())
+        conn.executemany(
+            "INSERT INTO gd_recipes (spell_id, skill_line, name, min_skill, yellow, grey, num_skillups, acquire, "
+            "output_item_id, output_qty, learn_item_id, cooldown_hours, cooldown_category) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recipes.values())
         conn.executemany("INSERT INTO gd_reagents VALUES (?, ?, ?)", reagents)
-        conn.executemany("INSERT INTO gd_items VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", items)
+        conn.executemany(
+            "INSERT INTO gd_items (item_id, name, quality, class_id, subclass_id, buy_price, sell_price, "
+            "vendor_stack, stackable, bonding, required_skill, required_skill_rank, name_en) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", items)
         set_meta(conn, "game_data_build", build)
         set_meta(conn, "game_data_updated", str(int(time.time())))
+        set_meta(conn, "game_data_format", str(FORMAT))
 
     report.recipes = len(recipes)
     report.items = len(items)
@@ -209,10 +236,12 @@ def update_game_data(conn: sqlite3.Connection, cache_dir: Path, wow_dir: Path,
     estaban cifradas sin que cambie la versión). None si ya estaban al día."""
     build = pick_build(available_builds(), installed_build(wow_dir))
     same_build = get_meta(conn, "game_data_build") == build
-    age = time.time() - int(get_meta(conn, "game_data_updated") or 0)
-    if not force and same_build and age < max_age_days * 86400:
+    stale = time.time() - int(get_meta(conn, "game_data_updated") or 0) >= max_age_days * 86400
+    old_format = get_meta(conn, "game_data_format") != str(FORMAT)
+    if not force and same_build and not stale and not old_format:
         return None
-    folder = download(build, cache_dir / build, refresh=force or same_build)
+    # Con un formato nuevo basta con bajar las tablas que falten.
+    folder = download(build, cache_dir / build, refresh=force or (same_build and stale))
     report = import_tables(conn, folder, build)
     _remove_old_builds(cache_dir, keep=build)
     return report

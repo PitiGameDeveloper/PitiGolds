@@ -56,6 +56,12 @@ TABLES = {
         [9100, "Diseño: hacha de cobre", 2, 500, 125, 1, 1, 2, 164, 1],
         [2881, "Diseño: peto de cobre con runas", 2, 600, 150, 1, 1, 2, 164, 100],
     ]),
+    "ItemSparse.enUS": (["ID", "Display_lang"], [[2840, "Copper Bar"], [118, "Minor Healing Potion"]]),
+    "SpellCooldowns": (["ID", "DifficultyID", "CategoryRecoveryTime", "RecoveryTime", "SpellID"], [
+        [1, 0, 82800000, 0, 2330],   # 23 h compartidas con su categoría
+        [2, 0, 0, 1500, 2738],       # solo la espera global: no cuenta
+    ]),
+    "SpellCategories": (["ID", "DifficultyID", "Category", "SpellID"], [[1, 0, 310, 2330]]),
 }
 
 
@@ -93,6 +99,14 @@ class Importacion(unittest.TestCase):
                      "WHERE spell_id = 2738")[0]
         self.assertEqual(tuple(row), (1, 60, 100, 2845, 9100))  # el diseño enseña la receta directamente
         self.assertEqual(self.q("SELECT learn_item_id FROM gd_recipes WHERE spell_id = 2662")[0][0], 2881)
+
+    def test_esperas_y_nombres_en_ingles(self):
+        rows = dict((r[0], (r[1], r[2])) for r in self.q("SELECT spell_id, cooldown_hours, cooldown_category FROM gd_recipes"))
+        self.assertEqual(rows[2330], (23.0, 310))
+        self.assertAlmostEqual(rows[2738][0], 1500 / 3_600_000)
+        self.assertEqual(rows[2662], (None, None))
+        self.assertEqual(self.q("SELECT name_en FROM gd_items WHERE item_id = 2840")[0][0], "Copper Bar")
+        self.assertIsNone(self.q("SELECT name_en FROM gd_items WHERE item_id = 2880")[0][0])
 
     def test_en_el_informe(self):
         c = self.conn
@@ -168,6 +182,13 @@ class Actualizacion(unittest.TestCase):
         self.conn.commit()
         self.assertIsNotNone(self.update(["1.0.2"]))
         self.assertEqual(self.downloads[-1], ("1.0.2", True))
+
+    def test_formato_nuevo_reimporta_sin_volver_a_bajar_todo(self):
+        self.update(["1.0.2"])
+        set_meta(self.conn, "game_data_format", "1")
+        self.conn.commit()
+        self.assertIsNotNone(self.update(["1.0.2"]))
+        self.assertEqual(self.downloads[-1], ("1.0.2", False))   # solo las tablas que falten
 
     def test_version_nueva_borra_la_vieja(self):
         self.update(["1.0.2"])
