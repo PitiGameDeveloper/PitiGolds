@@ -78,7 +78,7 @@ def cmd_leer(config: Config) -> int:
     files = config.saved_variables()
     if not files:
         print(f"No encuentro PitiGolds.lua en {config.wow_dir / 'WTF' / 'Account'}.")
-        print("Entra en el juego con el addon activado y pulsa Exportar (o sal del juego).")
+        print("Entra en el juego con el addon activado y cambia de personaje, sal del juego o haz /reload.")
         return 1
     conn = dbmod.connect(config.db_path)
     try:

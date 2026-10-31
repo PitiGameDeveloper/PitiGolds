@@ -36,7 +36,7 @@ def lua_path(path: Path) -> str:
 
 
 class AddonEnPartidaSimulada(unittest.TestCase):
-    """Una sesión completa: entrar, abrir banco, correo, profesión y subasta, y exportar."""
+    """Una sesión completa: entrar, abrir banco, correo, profesión y subasta, y recargar."""
 
     @classmethod
     def setUpClass(cls):
@@ -296,9 +296,6 @@ class AddonMasMotor(unittest.TestCase):
             self.assertIn("Conéctate con Alt.", text)
             self.assertIn("Fabrica x2 Yelmo de cobre con Alt.", text)
 
-            mock.ClickButton("Exportar")
-            self.assertTrue(mock.reloaded)
-
 
 if __name__ == "__main__":
     unittest.main()
@@ -376,6 +373,98 @@ class Farmeo(unittest.TestCase):
             self.assertEqual(sessions["Los Baldíos"].items, {2770: 1})
             self.assertIn("Tus farmeos", build_advice_report(conn, a))
             conn.close()
+
+
+class SesionEnVivo(unittest.TestCase):
+    """El panel y la ventana de sesión se ponen al día al lootear, con el precio más reciente."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.lua = lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = cls.mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        lua.execute('PitiGoldsDB = nil; PitiGoldsGenerated = { prices = { [2770] = "200,," } }')
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        mock.Advance(10)
+        cls.ns = lua.globals().Mock.ns
+
+        mock.Loot(0, 10, 2770, 3)
+        mock.AddMoney(250)
+        mock.Advance(1)
+        mock.Fire("MAIL_SHOW")
+        mock.Loot(0, 11, 2592, 20)
+        mock.AddMoney(5000)
+        mock.Advance(2)
+        mock.Fire("MAIL_CLOSED")
+        mock.Advance(1)
+        session = lua.globals().PitiGoldsDB.characters["Brujo-Dio"].session
+        cls.items = dict(session["items"].items())
+        cls.money = session.money
+        cls.panel = cls.ns.PanelText()
+
+    def value(self, item_id):
+        unit, source = self.lua.eval(f"Mock.ns.ItemValue({item_id})")
+        return unit, source
+
+    def test_cuenta_lo_farmeado_y_no_el_correo(self):
+        self.assertEqual(self.items, {2770: 3})
+        self.assertEqual(self.money, 250)
+        # 250 c sueltos + 3 minerales a 190 c (200 en la subasta menos la comisión).
+        self.assertIn("Sesión (0 min): 8p 20c", self.panel)
+
+    def test_el_panel_cambia_en_cuanto_looteas(self):
+        before = self.ns.PanelText()
+        self.mock.Loot(0, 12, 818, 1)   # Ojo de tigre: 150 c en el vendedor
+        self.mock.Advance(1)            # menos que el reloj del panel (60 s)
+        after = self.ns.PanelText()
+        self.assertNotEqual(before, after)
+        self.assertIn("Sesión (", after)
+        self.assertIn("Última hora:", after)
+
+    def test_precio_del_escaneo_que_el_motor_no_ha_leido(self):
+        self.assertEqual(self.value(2770), (190, "subasta"))
+        self.assertEqual(self.value(818), (150, "vendedor"))
+        # Escaneo completo: el mercado es la media del 15 % más barato (2 de 10 a 100 c).
+        self.lua.execute('Mock.ns.AddScan({ time = time(), items = { [2770] = "100,10,2,2|100:2;120:8" } })')
+        self.assertEqual(self.value(2770), (95, "escaneo"))
+        self.mock.Advance(5)
+        self.lua.execute('Mock.ns.AddScan({ time = time(), items = { [2770] = "300,5" } })')
+        self.assertEqual(self.value(2770), (285, "escaneo"))   # manda el más reciente
+        self.lua.execute('Mock.ns.AddScan({ time = time(), items = { [818] = "100,4" } })')
+        self.assertEqual(self.value(818), (150, "vendedor"))   # el vendedor paga más
+
+    def test_ventana_y_reiniciar(self):
+        S = self.ns.Session
+        S.Reset()
+        self.mock.Loot(0, 10, 2770, 2)
+        self.mock.Advance(1)
+        self.assertTrue(self.mock.ClickButton("Sesión"))
+        self.assertIn("Mineral de cobre ×2", S.RowTexts())
+        self.assertIn("Llevas 0 min:", S.SummaryText())
+        self.mock.Loot(0, 10, 2770, 1)   # con la ventana abierta, también al momento
+        self.mock.Advance(1)
+        self.assertIn("Mineral de cobre ×3", S.RowTexts())
+        self.assertTrue(self.mock.ClickButton("Reiniciar"))
+        self.assertIn("Aún no has farmeado nada", S.RowTexts())
+
+    def test_sigue_tras_un_reload_y_empieza_otra_al_rato(self):
+        S = self.ns.Session
+        S.Reset()
+        self.mock.Loot(0, 10, 2770, 1)
+        self.mock.Advance(1)
+        session = self.lua.globals().PitiGoldsDB.characters["Brujo-Dio"].session
+        session.seen = session.seen - 120   # dos minutos fuera (un /reload, otro personaje)
+        S.OnLogin()
+        session = self.lua.globals().PitiGoldsDB.characters["Brujo-Dio"].session
+        self.assertEqual(session["items"][2770], 1)
+        self.assertGreaterEqual(session.away, 120)   # el rato fuera no cuenta
+        session.seen = session.seen - 3600
+        S.OnLogin()
+        session = self.lua.globals().PitiGoldsDB.characters["Brujo-Dio"].session
+        self.assertIsNone(session["items"][2770])
 
 
 class Contabilidad(unittest.TestCase):

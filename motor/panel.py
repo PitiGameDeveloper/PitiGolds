@@ -693,12 +693,13 @@ def _verdict(farms: list[FarmRow], crafts: list[CraftRow], best_value: int | Non
     if not usable:
         lines = []
         if not a.last_scan:
-            lines.append("Escanea la subasta (botón «PG: Completo») y pulsa Exportar.")
+            lines.append("Escanea la subasta (botón «PG: Completo»).")
         if not any(r.per_hour is not None for r in farms):
             lines.append("Los métodos guardados aún no tienen estimación por hora: pídele al asesor que los revise.")
         return Verdict("sin_datos", "Aún no puedo decirte el mejor farmeo", lines)
     if not has_chars:
-        lines = ["Entra con cada personaje y pulsa Exportar: así sabré quién puede hacer cada farmeo."]
+        lines = ["Entra con cada personaje (sus datos se guardan al cambiar de uno a otro): así sabré quién "
+                 "puede hacer cada farmeo."]
         if not a.last_scan:
             lines.append("Escanea también la subasta (botón «PG: Completo»): sin ella solo cuento lo que paga el vendedor.")
         lines.append("Mientras, los que más rinden sobre el papel:")

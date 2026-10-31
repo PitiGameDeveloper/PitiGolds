@@ -50,7 +50,8 @@ Piti para que lo pida allí.
 3. **Las cifras salen del motor.** El oro por hora de una guía o un vídeo es de su servidor: dalo solo
    como orientación y propón medirlo con `/pg farmeo <id>`.
 4. **Si falta un dato, di cómo conseguirlo en el juego**: escanear la subasta, abrir la profesión,
-   pasar por un vendedor y abrir su ventana, pulsar Exportar...
+   pasar por un vendedor y abrir su ventana, entrar con ese personaje... El addon lo apunta solo y
+   WoW lo guarda al cambiar de personaje, al salir o con `/reload`: no hay que exportar nada.
 5. **Ahorra tokens.** `fuentes` enseña solo lo nuevo; abre a fondo como mucho 5 cosas por búsqueda y no
    leas archivos enteros si basta una sección.
 6. **No copies las fuentes.** Escribe con tus palabras; como mucho, una frase corta citada.

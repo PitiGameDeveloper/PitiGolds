@@ -22,8 +22,8 @@ def build_report(conn: sqlite3.Connection, top: int = 10) -> str:
         "SELECT * FROM characters WHERE char_key != ? ORDER BY level DESC, char_key", (WARBAND_KEY,)
     ).fetchall()
     if not chars:
-        return ("Todavía no hay datos. Entra en el juego con el addon activado, pulsa Exportar "
-                "y ejecuta: python -m motor leer")
+        return ("Todavía no hay datos. Entra en el juego con el addon activado, cambia de personaje "
+                "o sal del juego (o haz /reload) y ejecuta: python -m motor leer")
 
     out.append(f"PitiGolds: datos leídos {ago(int(get_meta(conn, 'last_ingest') or 0))}")
     out.append("")

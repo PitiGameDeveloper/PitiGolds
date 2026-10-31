@@ -209,14 +209,6 @@ ns.On("PLAYER_LOGIN", function()
   ns.ready = true
 end)
 
--- Exportar: recoge lo último y recarga la interfaz, que es cuando WoW escribe
--- los datos en disco para que los lea el motor.
-function ns.Export()
-  if ns.CollectMoney then pcall(ns.CollectMoney) end
-  if ns.ScanCarried then pcall(ns.ScanCarried) end
-  ReloadUI()
-end
-
 -- Comandos /pg ----------------------------------------------------------------
 
 local commands, commandOrder = {}, {}
@@ -242,10 +234,6 @@ SlashCmdList.PITIGOLDS = function(msg)
   end
 end
 
-ns.Command("export", "guarda los datos en disco (hace /reload)", function()
-  ns.Export()
-end)
-
 ns.Command("estado", "resumen de lo que hay guardado", function()
   local db = PitiGoldsDB
   local nChars, nRecipes = 0, 0
@@ -254,10 +242,10 @@ ns.Command("estado", "resumen de lo que hay guardado", function()
   ns.Print(("personaje: %s | personajes: %d | recetas vistas: %d"):format(ns.charKey or "?", nChars, nRecipes))
   local last = db.scans[#db.scans]
   if last then
-    ns.Print(("escaneos sin exportar: %d | último: %s, %d objetos, hace %d min"):format(
+    ns.Print(("escaneos por leer en el PC: %d | último: %s, %d objetos, hace %d min"):format(
       #db.scans, last.type, last.count or 0, math.floor((time() - last.time) / 60)))
   else
-    ns.Print("no hay escaneos pendientes de exportar")
+    ns.Print("no hay escaneos por leer en el PC")
   end
   local gen = PitiGoldsGenerated
   if type(gen) == "table" and (gen.generatedAt or 0) > 0 then

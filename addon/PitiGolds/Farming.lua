@@ -6,7 +6,6 @@ local ADDON, ns = ...
 
 local BUCKET_SECONDS = 300
 local MAX_BUCKETS = 2000
-local AH_CUT = 0.05
 
 local pauses = {}   -- motivo -> true
 local snapshot      -- objetos en las bolsas la última vez que se miró
@@ -63,8 +62,11 @@ local function OnBagsChanged()
       if gained > 0 then
         b = b or Bucket()
         b.items[itemID] = (b.items[itemID] or 0) + gained
+        if ns.Session then ns.Session.AddItem(itemID, gained) end
       end
     end
+    -- El panel se pone al día en cuanto entra algo, sin esperar a nada.
+    if b and ns.RefreshUI then ns.RefreshUI() end
   end
   snapshot = counts
 end
@@ -74,8 +76,12 @@ local function OnMoneyChanged()
   if lastMoney and money > lastMoney and not Paused() then
     local b = Bucket()
     b.money = b.money + (money - lastMoney)
+    if ns.Session then ns.Session.AddMoney(money - lastMoney) end
+    lastMoney = money
+    if ns.RefreshUI then ns.RefreshUI() end
+  else
+    lastMoney = money
   end
-  lastMoney = money
 end
 
 local function Pause(reason)
@@ -165,21 +171,16 @@ ns.On("PLAYER_LOGIN", function()
   C_Timer.After(3, function() snapshot = CountCarried() end)
 end)
 
--- Lo ganado en la última hora, valorado con los precios del motor.
+-- Lo ganado en la última hora, valorado como la sesión (ns.ItemValue, en Session.lua).
 function ns.FarmLastHour()
   local since = time() - 3600
-  local gen = PitiGoldsGenerated
-  local prices = type(gen) == "table" and gen.prices or {}
   local money, value, first = 0, 0, nil
   for _, b in pairs(PitiGoldsDB.farmLog or {}) do
     if b.char == ns.charKey and (b.last or 0) >= since then
       money = money + (b.money or 0)
       first = math.min(first or b.first, b.first)
       for itemID, n in pairs(b.items) do
-        local market = prices[itemID] and tonumber(prices[itemID]:match("^(%d+)"))
-        local entry = PitiGoldsDB.items[itemID]
-        local unit = market and market * (1 - AH_CUT) or (type(entry) == "table" and entry.sell) or 0
-        value = value + unit * n
+        value = value + (ns.ItemValue(itemID) or 0) * n
       end
     end
   end

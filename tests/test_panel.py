@@ -138,7 +138,7 @@ class Panel(unittest.TestCase):
         self.assertEqual(panel.verdict.state, "sin_datos")
         self.assertEqual(panel.verdict.title, "Aún no conozco tus personajes")
         text = "\n".join(panel.verdict.lines)
-        self.assertIn("pulsa Exportar", text)
+        self.assertIn("Entra con cada personaje", text)
         self.assertIn("- Pieles: ~", text)
         self.assertIn("(Desollar 175, nivel 45).", text)
         self.assertNotIn("None", text)

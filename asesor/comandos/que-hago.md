@@ -17,8 +17,8 @@ Piti va a jugar: $ARGUMENTS (si no dice cuánto, supón 2 horas).
    3. **El resto del tiempo**: el mejor farmeo del panel, con «Medir este farmeo» si es estimado. Si el
       panel dice «preparar», di qué preparar y cuánto cuesta; si dice «investigar», propón una sesión de
       investigación (`comandos/buscar-metodos.md`).
-   4. **Antes de salir**: escaneo de la subasta (PG: Materiales; PG: Completo si han pasado 15 min) y
-      Exportar, para que mañana los precios estén al día.
+   4. **Antes de salir**: escaneo de la subasta (PG: Materiales; PG: Completo si han pasado 15 min),
+      para que mañana los precios estén al día.
 4. Responde corto: una lista numerada con un tiempo aproximado por paso (que sumen las horas) y, en cada
    paso, el porqué en una línea con la cifra del informe. Termina con lo que falte («Faltan datos») en
    una línea.

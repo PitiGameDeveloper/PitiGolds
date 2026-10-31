@@ -218,11 +218,15 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 ## Uso diario
 
 1. Haz doble clic en **`vigilar.cmd`** y deja esa ventana abierta mientras juegas.
-2. En el juego verás un panel pequeño, **PitiGolds**, con los botones **Mejor farmeo** y **Exportar**. Puedes moverlo arrastrándolo.
+2. En el juego verás un panel pequeño, **PitiGolds**, con lo que llevas ganado en la sesión y los botones
+   **Mejor farmeo** y **Sesión**. Se pone al día en cuanto looteas. Puedes moverlo arrastrándolo.
 3. En la casa de subastas aparecen dos botones encima de la ventana:
    - **PG: Materiales**: recorre materiales, consumibles, recetas y gemas. Guarda el precio mínimo y la cantidad total de cada objeto. Se puede repetir cuando quieras.
    - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores. El servidor solo lo permite **cada 15 minutos**.
-4. Pulsa **Exportar** (hace `/reload`). WoW guarda los datos en disco y `vigilar.cmd` los lee en un par de segundos.
+4. No hace falta exportar nada: el addon apunta solo lo que pasa (al entrar con cada personaje, al lootear,
+   al escanear...) y WoW lo guarda en disco al cambiar de personaje, al salir del juego o con `/reload`.
+   `vigilar.cmd` lo lee en un par de segundos, y el addon lo enseña al entrar con el siguiente personaje o
+   tras otro `/reload`.
 5. Haz doble clic en **`informe.cmd`** para ver qué hacer: crafteos rentables, recetas que te convendría
    aprender y qué vender. Queda guardado también en `datos/informe.md`.
 6. Tras el siguiente `/reload`, al pasar el ratón por un objeto verás su precio de mercado y, si sabes
@@ -278,7 +282,17 @@ intercambio o la ventana de una profesión abiertos. Puedes poner nombre a lo qu
 
 El motor une los tramos en sesiones (15 minutos sin ganar nada cortan la sesión) y calcula el **oro por
 hora real** con los precios de hoy y con los previstos a 7 días. Así sabes cuánto rinde de verdad cada
-farmeo y si va a dejar de compensar. El panel del juego enseña también lo que llevas en la última hora.
+farmeo y si va a dejar de compensar.
+
+**En el juego, al momento.** El panel pequeño se pone al día en cuanto entra algo en las bolsas o cambia
+tu oro: lo que llevas en la sesión, a cuánto sale por hora y lo de la última hora. El botón **Sesión**
+(o `/pg sesion`) abre la lista de lo farmeado: cada objeto con cuántos llevas, su precio y el total, de
+más a menos valioso. **Reiniciar** empieza a contar desde cero (`/pg sesion reiniciar`).
+- La sesión es de cada personaje. Sigue tras un `/reload` o un cambio rápido de personaje, sin contar el
+  rato fuera; si pasas más de 30 minutos sin jugar con él, empieza otra.
+- Cada objeto vale lo que da en la subasta quitando la comisión, o lo que paga el vendedor si paga más
+  (sale con «(v)»). El precio de la subasta es el del último escaneo si el motor aún no lo ha leído, así
+  que si escaneas a media sesión, la cuenta cambia en ese momento; si no, el del motor.
 
 ## Tu negocio en la subasta
 
@@ -403,12 +417,12 @@ Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 
 | Comando | Qué hace |
 |---|---|
-| `/pg export` | Igual que el botón Exportar |
 | `/pg materiales` | Escaneo de materiales (con la subasta abierta) |
 | `/pg completo` | Escaneo completo (con la subasta abierta) |
 | `/pg estado` | Qué hay guardado y cuánto hace que lo leyó el motor |
 | `/pg log` | Últimas líneas del registro, con los errores si los hay |
 | `/pg panel` | Muestra u oculta el panel |
+| `/pg sesion` | Abre la lista de lo farmeado en la sesión (igual que el botón Sesión); `/pg sesion reiniciar` empieza otra |
 | `/pg metodos` | Abre la ventana de métodos (igual que el botón Mejor farmeo) |
 | `/pg farmeo Cobre en Durotar` | Pone nombre a lo que farmeas desde ahora (`/pg farmeo fin` lo quita; `/pg farmeo` a secas dice cuánto llevas en la última hora) |
 

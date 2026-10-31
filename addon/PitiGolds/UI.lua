@@ -1,6 +1,12 @@
--- Interfaz mínima: un panel movible con los botones Mejor farmeo (abre la ventana de
--- métodos) y Exportar, y dos botones de escaneo encima de la ventana de la subasta.
+-- Interfaz mínima: un panel movible con lo que llevas ganado en la sesión y los botones
+-- Mejor farmeo (ventana de métodos) y Sesión (lista de lo farmeado), y dos botones de
+-- escaneo encima de la ventana de la subasta. Se pone al día en cuanto entra algo en las
+-- bolsas o cambia tu oro. No hace falta exportar: WoW guarda los datos al cambiar de
+-- personaje, al salir o con /reload.
 local ADDON, ns = ...
+
+local CLOCK_SECONDS = 60   -- sin botín, solo cambian los minutos y el oro por hora
+local LINE_HEIGHT = 12
 
 local panel, statusText
 local ahBar, ahStatus
@@ -12,16 +18,37 @@ local function Ago(t)
   return ("hace %d h"):format(math.floor(minutes / 60))
 end
 
+local function Silver(copper)
+  return ns.Money(math.floor(copper / 100) * 100)
+end
+
 function ns.RefreshUI()
+  local lines = {}
+  local s = ns.Session and ns.Session.Summary()
+  if s then
+    local total = s.total > 0 and ns.Money(s.total) or "nada todavía"
+    lines[#lines + 1] = ("Sesión (%s): %s"):format(ns.Session.Duration(s.elapsed), total)
+    if s.total > 0 then lines[#lines + 1] = "Por hora: " .. Silver(s.perHour) end
+  end
+  local perHour = ns.FarmLastHour and ns.FarmLastHour()
+  if perHour then lines[#lines + 1] = "Última hora: " .. Silver(perHour) .. "/h" end
   local scans = PitiGoldsDB and PitiGoldsDB.scans or {}
   local last = scans[#scans]
-  local lines = {}
-  lines[#lines + 1] = ("Sin exportar: %d escaneo%s"):format(#scans, #scans == 1 and "" or "s")
-  if last then lines[#lines + 1] = "Último: " .. Ago(last.time) end
-  local perHour = ns.FarmLastHour and ns.FarmLastHour()
-  if perHour then lines[#lines + 1] = "Farmeo: " .. ns.Money(perHour) .. "/h" end
-  if statusText then statusText:SetText(table.concat(lines, "\n")) end
+  if last then
+    lines[#lines + 1] = ("Por leer en el PC: %d escaneo%s"):format(#scans, #scans == 1 and "" or "s")
+    lines[#lines + 1] = "Último: " .. Ago(last.time)
+  end
+  if statusText then
+    statusText:SetText(table.concat(lines, "\n"))
+    panel:SetHeight(30 + LINE_HEIGHT * #lines + 52)
+  end
   if ahStatus then ahStatus:SetText(ns.Scan.Status() or "") end
+  if ns.Session then ns.Session.Refresh() end
+end
+
+-- Para las pruebas.
+function ns.PanelText()
+  return statusText and statusText:GetText() or ""
 end
 
 local function SavePosition(frame)
@@ -31,7 +58,7 @@ end
 
 local function CreatePanel()
   panel = CreateFrame("Frame", "PitiGoldsPanel", UIParent, "BackdropTemplate")
-  panel:SetSize(170, 112)
+  panel:SetSize(190, 120)
   local p = PitiGoldsDB.ui.point
   if p then
     panel:SetPoint(p[1], UIParent, p[2], p[3], p[4])
@@ -62,17 +89,17 @@ local function CreatePanel()
   statusText:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -3)
   statusText:SetJustifyH("LEFT")
 
-  local export = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-  export:SetSize(154, 20)
-  export:SetPoint("BOTTOM", 0, 6)
-  export:SetText("Exportar")
-  export:SetScript("OnClick", ns.Export)
-
   local best = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-  best:SetSize(154, 20)
+  best:SetSize(174, 20)
   best:SetPoint("BOTTOM", 0, 28)
   best:SetText("Mejor farmeo")
   best:SetScript("OnClick", function() ns.Methods.Toggle() end)
+
+  local session = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+  session:SetSize(174, 20)
+  session:SetPoint("BOTTOM", 0, 6)
+  session:SetText("Sesión")
+  session:SetScript("OnClick", function() ns.Session.Toggle() end)
 
   if PitiGoldsDB.ui.hidden then panel:Hide() end
 end
@@ -115,7 +142,7 @@ end
 
 local function RefreshLoop()
   ns.RefreshUI()
-  C_Timer.After(30, RefreshLoop)
+  C_Timer.After(CLOCK_SECONDS, RefreshLoop)
 end
 
 ns.On("PLAYER_LOGIN", function()

@@ -42,7 +42,7 @@ local function Finish(kind, items, count)
   Scan.state = "idle"
   Scan.token = Scan.token + 1
   ns.Log(("Escaneo %s: %d objetos en %d s"):format(kind, count, time() - Scan.startedAt))
-  ns.Print(("escaneo %s terminado: %d objetos en %d s. Pulsa Exportar o escribe /pg export para guardarlo.")
+  ns.Print(("escaneo %s terminado: %d objetos en %d s. Se guarda al cambiar de personaje, al salir o con /reload.")
     :format(kind == "full" and "completo" or "de materiales", count, time() - Scan.startedAt))
   if ns.RefreshUI then ns.RefreshUI() end
 end

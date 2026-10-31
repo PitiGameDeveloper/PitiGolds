@@ -16,5 +16,6 @@ Merchant.lua
 Tooltip.lua
 Farming.lua
 Ledger.lua
+Session.lua
 Methods.lua
 UI.lua

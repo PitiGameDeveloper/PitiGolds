@@ -361,14 +361,14 @@ function M.Refresh()
     for _, line in ipairs(v.lines or {}) do lines[#lines + 1] = line end
     verdictText:SetText(table.concat(lines, "\n"))
   else
-    verdictText:SetText("|cffaaaaaaEl motor aún no ha calculado los métodos.|r\nAbre vigilar.cmd en el PC, pulsa Exportar"
-      .. " y, cuando termine, haz /reload.")
+    verdictText:SetText("|cffaaaaaaEl motor aún no ha calculado los métodos.|r\nDeja vigilar.cmd abierto en el PC y cambia"
+      .. " de personaje (o haz /reload dos veces: uno guarda tus datos y el otro carga lo calculado).")
   end
   local made = type(gen) == "table" and gen.generatedAt or 0
   local scan = type(gen) == "table" and gen.lastScan or nil
   local fresh = ("Calculado %s · último escaneo de la subasta %s"):format(Ago(made), Ago(scan))
   if not scan or time() - scan > 12 * 3600 then
-    fresh = fresh .. " · |cffff8040escanea la subasta y pulsa Exportar para recalcular|r"
+    fresh = fresh .. " · |cffff8040escanea la subasta: se recalcula al cambiar de personaje|r"
   end
   freshText:SetText(fresh)
 
