@@ -1,5 +1,5 @@
 -- Interfaz mínima: un panel movible con lo que llevas ganado en la sesión y los botones
--- Mejor farmeo (ventana de métodos) y Sesión (lista de lo farmeado), y dos botones de
+-- Mejor farmeo (ventana de métodos), Sesión (lista de lo farmeado) y Farmeos activos, y dos botones de
 -- escaneo encima de la ventana de la subasta. Se pone al día en cuanto entra algo en las
 -- bolsas o cambia tu oro. No hace falta exportar: WoW guarda los datos al cambiar de
 -- personaje, al salir o con /reload.
@@ -40,10 +40,11 @@ function ns.RefreshUI()
   end
   if statusText then
     statusText:SetText(table.concat(lines, "\n"))
-    panel:SetHeight(30 + LINE_HEIGHT * #lines + 52)
+    panel:SetHeight(30 + LINE_HEIGHT * #lines + 74)
   end
   if ahStatus then ahStatus:SetText(ns.Scan.Status() or "") end
   if ns.Session then ns.Session.Refresh() end
+  if ns.Tracker then ns.Tracker.Refresh() end
 end
 
 -- Para las pruebas.
@@ -58,7 +59,7 @@ end
 
 local function CreatePanel()
   panel = CreateFrame("Frame", "PitiGoldsPanel", UIParent, "BackdropTemplate")
-  panel:SetSize(190, 120)
+  panel:SetSize(190, 142)
   local p = PitiGoldsDB.ui.point
   if p then
     panel:SetPoint(p[1], UIParent, p[2], p[3], p[4])
@@ -91,15 +92,21 @@ local function CreatePanel()
 
   local best = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
   best:SetSize(174, 20)
-  best:SetPoint("BOTTOM", 0, 28)
+  best:SetPoint("BOTTOM", 0, 50)
   best:SetText("Mejor farmeo")
   best:SetScript("OnClick", function() ns.Methods.Toggle() end)
 
   local session = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
   session:SetSize(174, 20)
-  session:SetPoint("BOTTOM", 0, 6)
+  session:SetPoint("BOTTOM", 0, 28)
   session:SetText("Sesión")
   session:SetScript("OnClick", function() ns.Session.Toggle() end)
+
+  local active = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+  active:SetSize(174, 20)
+  active:SetPoint("BOTTOM", 0, 6)
+  active:SetText("Farmeos activos")
+  active:SetScript("OnClick", function() ns.Tracker.Toggle() end)
 
   if PitiGoldsDB.ui.hidden then panel:Hide() end
 end

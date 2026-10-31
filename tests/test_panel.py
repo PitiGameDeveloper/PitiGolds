@@ -8,7 +8,7 @@ from pathlib import Path
 from motor import db as dbmod
 from motor.analysis import Analysis
 from motor.business import Capacity
-from motor.catalogo import CatalogEntry, catalog_problems, evaluate_catalog, resolve_items
+from motor.catalogo import CatalogEntry, catalog_problems, evaluate_catalog, load_catalog, resolve_items
 from motor.crafting import CraftResult, Reagent
 from motor.farming import FarmSummary
 from motor.fuentes import first_link
@@ -190,6 +190,18 @@ class Panel(unittest.TestCase):
         self.assertIn("| 100 | Prenda 100 (Costura) |", text)
         self.assertIn("## Sin revisar por el asesor", text)
 
+    def test_lo_que_necesita_la_ventana_de_farmeos_activos(self):
+        pieles = self.pieles(point={"map": 1444, "x": 0.5, "y": 0.25}, mobs=["Ciervo alado"])
+        perlas = entry("perlas", items=["Blue Pearl", "Algo que no existe"])
+        farms = {f["key"]: f for f in panel_export(self.build([pieles, perlas]))["farms"]}
+        self.assertEqual(farms["pieles"]["items"], [4304])
+        self.assertTrue(farms["pieles"]["coins"])
+        self.assertEqual(farms["pieles"]["point"], {"map": 1444, "x": 0.5, "y": 0.25})
+        self.assertEqual(farms["pieles"]["mobs"], ["Ciervo alado"])
+        self.assertEqual(farms["perlas"]["items"], [4611])   # lo que no se reconoce no se cuenta
+        self.assertFalse(farms["perlas"]["coins"])
+        self.assertIsNone(farms["perlas"]["point"])
+
 
 class Conocimiento(unittest.TestCase):
     def setUp(self):
@@ -228,6 +240,24 @@ class Conocimiento(unittest.TestCase):
         self.assertIn("cada «por_hora» es", problems)
         self.assertIn("«oro_hora» es el oro por hora", problems)
         self.assertIn("«enlace» debe empezar por http", problems)
+
+    def test_punto_y_bichos_en_el_catalogo(self):
+        path = self.write("metodos.json", {"metodos": [
+            {"id": "a", "nombre": "A", "tipo": "farmeo", "fuente": "x", "punto": {"mapa": 1413, "x": 56, "y": 8},
+             "bichos": ["Arpía"]},
+            {"id": "b", "nombre": "B", "tipo": "farmeo", "fuente": "x", "punto": {"mapa": 1413}},
+            {"id": "c", "nombre": "C", "tipo": "farmeo", "fuente": "x", "punto": {"mapa": "Baldíos", "x": 150},
+             "bichos": "Arpía"}]})
+        problems = "\n".join(catalog_problems(path))
+        self.assertNotIn("«a»", problems)
+        self.assertNotIn("«b»", problems)
+        self.assertIn("«c»: «punto» es", problems)
+        self.assertIn("«c»: «bichos» es una lista", problems)
+        entries = {e.id: e for e in load_catalog(path)}
+        self.assertEqual(entries["a"].point, {"map": 1413, "x": 0.56, "y": 0.08})
+        self.assertEqual(entries["a"].mobs, ["Arpía"])
+        self.assertEqual(entries["b"].point, {"map": 1413})
+        self.assertIsNone(entries["c"].point)
 
     def test_rutas_de_recoleccion(self):
         self.assertAlmostEqual(gathering_hours(ROUTES, 393, 100, 200), 50 / 75 + 50 / 50)

@@ -1,6 +1,6 @@
 -- Registro de farmeos: apunta lo que ganas (objetos que entran en las bolsas y oro) en
 -- tramos de 5 minutos por zona, para que el motor calcule tu oro por hora real en cada
--- sitio y actividad. No cuenta lo que entra con el correo, la subasta, el banco, un
+-- sitio y actividad. Mientras hay farmeos activos en marcha, el tramo lleva su id. No cuenta lo que entra con el correo, la subasta, el banco, un
 -- vendedor, un intercambio o la ventana de una profesión abiertos: eso no es lo farmeado.
 local ADDON, ns = ...
 
@@ -40,7 +40,7 @@ local function Bucket()
   local now = time()
   local start = now - now % BUCKET_SECONDS
   local mapID, zoneName = CurrentZone()
-  local label = PitiGoldsDB.farmLabel
+  local label = (ns.Tracker and ns.Tracker.Label()) or PitiGoldsDB.farmLabel
   local key = table.concat({ start, ns.charKey or "?", mapID, label or "" }, "|")
   local log = PitiGoldsDB.farmLog
   local b = log[key]
@@ -56,17 +56,24 @@ end
 local function OnBagsChanged()
   local counts = CountCarried()
   if snapshot and not Paused() then
-    local b
+    local gains, b, tracked = {}, nil, false
     for itemID, n in pairs(counts) do
       local gained = n - (snapshot[itemID] or 0)
-      if gained > 0 then
-        b = b or Bucket()
-        b.items[itemID] = (b.items[itemID] or 0) + gained
-        if ns.Session then ns.Session.AddItem(itemID, gained) end
-      end
+      if gained > 0 then gains[itemID] = gained end
+    end
+    -- Antes que el tramo: el primer botín pone en marcha el farmeo activo que lo espera, y así
+    -- el tramo ya lleva su id.
+    for itemID, gained in pairs(gains) do
+      if ns.Tracker and ns.Tracker.AddItem(itemID, gained) then tracked = true end
+    end
+    for itemID, gained in pairs(gains) do
+      b = b or Bucket()
+      b.items[itemID] = (b.items[itemID] or 0) + gained
+      if ns.Session then ns.Session.AddItem(itemID, gained) end
     end
     -- El panel se pone al día en cuanto entra algo, sin esperar a nada.
     if b and ns.RefreshUI then ns.RefreshUI() end
+    if tracked then ns.Tracker.Changed() end
   end
   snapshot = counts
 end
@@ -77,6 +84,7 @@ local function OnMoneyChanged()
     local b = Bucket()
     b.money = b.money + (money - lastMoney)
     if ns.Session then ns.Session.AddMoney(money - lastMoney) end
+    if ns.Tracker then ns.Tracker.AddMoney(money - lastMoney) end
     lastMoney = money
     if ns.RefreshUI then ns.RefreshUI() end
   else

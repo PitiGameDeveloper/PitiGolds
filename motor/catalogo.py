@@ -7,8 +7,11 @@ cada servidor es distinto, así que cada método se valora con tus precios:
   - qué valen hoy sus objetos en la subasta (o lo que paga el vendedor por ellos),
   - cuánto se vende de ellos al día (lo máximo que el mercado te deja sacar),
   - si alguno de tus personajes puede hacerlo ya (nivel y profesiones),
-  - cuántos objetos da por hora (`por_hora`, estimado al investigar) y, cuando lo mides con
-    /pg farmeo <id>, tu oro por hora de verdad.
+  - cuántos objetos da por hora (`por_hora`, estimado al investigar) y, cuando lo mides
+    («Farmear este» en el addon, o /pg farmeo <id>), tu oro por hora de verdad.
+
+También apunta dónde se farmea (`punto`, para la flecha del addon) y qué bichos (`bichos`, para
+su macro y sus marcas).
 
 Los objetos se buscan por su nombre en inglés o en español en los datos del juego, así que
 el catálogo se puede rellenar copiando los nombres de una guía en inglés.
@@ -61,6 +64,8 @@ class CatalogEntry:
     coins_per_hour: int = 0              # cobre por hora de monedas y basura de vendedor
     link: str = ""
     pending: str = ""                    # pregunta sin resolver: no se recomienda hasta resolverla
+    point: dict | None = None            # {"map": 1413, "x": 0.56, "y": 0.08}; sin x/y, la zona entera
+    mobs: list[str] = field(default_factory=list)   # cómo empieza su nombre en el juego
 
 
 class CatalogError(ValueError):
@@ -141,6 +146,17 @@ def catalog_problems(path: Path = CATALOG_PATH, known_lines: set[int] | None = N
                                 " (y si hace falta \"id\": 1234)")
         if "oro_hora" in m and not (isinstance(m["oro_hora"], (int, float)) and m["oro_hora"] >= 0):
             problems.append(f"{where}: «oro_hora» es el oro por hora de monedas y basura, un número")
+        point = m.get("punto")
+        if point is not None:
+            coords = [point.get(k) for k in ("x", "y")] if isinstance(point, dict) else []
+            if (not isinstance(point, dict) or not isinstance(point.get("mapa"), int)
+                    or (coords != [None, None]
+                        and not all(isinstance(c, (int, float)) and 0 <= c <= 100 for c in coords))):
+                problems.append(f"{where}: «punto» es {{\"mapa\": 1413, \"x\": 56, \"y\": 8}} (x e y en %, "
+                                "o sin ellas para la zona entera)")
+        mobs = m.get("bichos", [])
+        if not isinstance(mobs, list) or not all(isinstance(b, str) and b.strip() for b in mobs):
+            problems.append(f"{where}: «bichos» es una lista de nombres, [\"Arpía\"]")
         if m.get("enlace") and not str(m["enlace"]).startswith("http"):
             problems.append(f"{where}: «enlace» debe empezar por http")
         if m.get("tipo") == "vendedor" and not m.get("vendedor"):
@@ -187,8 +203,19 @@ def load_catalog(path: Path = CATALOG_PATH) -> list[CatalogEntry]:
             requirement=m.get("requisito", ""), notes=m.get("notas", ""), source=m.get("fuente", ""),
             added=m.get("fecha", ""), min_level=m.get("nivel_minimo", 0), per_hour=per_hour,
             coins_per_hour=round(float(m.get("oro_hora", 0)) * 10000), link=m.get("enlace", ""),
-            pending=m.get("pendiente", "")))
+            pending=m.get("pendiente", ""), point=_point(m.get("punto")),
+            mobs=[b.strip() for b in m.get("bichos", []) if isinstance(b, str) and b.strip()]))
     return entries
+
+
+def _point(value) -> dict | None:
+    """«punto» del catálogo en el formato del addon: coordenadas de 0 a 1."""
+    if not isinstance(value, dict) or not isinstance(value.get("mapa"), int):
+        return None
+    x, y = value.get("x"), value.get("y")
+    if isinstance(x, (int, float)) and isinstance(y, (int, float)):
+        return {"map": value["mapa"], "x": round(x / 100, 4), "y": round(y / 100, 4)}
+    return {"map": value["mapa"]}
 
 
 def normalize(name: str) -> str:

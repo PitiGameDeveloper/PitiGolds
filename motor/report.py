@@ -520,7 +520,8 @@ def build_guides_section(a: Analysis, limit: int | None = 10, heading: str = "##
            f"{len(methods)} métodos de conocimiento/metodos.json, valorados con los precios de tu subasta "
            "(las cifras de las guías no se usan: cada servidor es distinto). «Mercado al día»: lo que podrías "
            "sacar al día vendiendo sus objetos en la subasta sin hundir el precio. Para medir uno, "
-           "/pg farmeo <id> al empezar y /pg farmeo fin al acabar: pasa a «Tus farmeos» y al comparador."]
+           "pulsa «Farmear este» en la ventana de métodos (o /pg farmeo <id> al empezar y /pg farmeo fin al "
+           "acabar): pasa a «Tus farmeos» y al comparador."]
 
     def cut(rows):
         return rows if limit is None else rows[:limit]

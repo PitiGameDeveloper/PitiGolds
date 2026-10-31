@@ -69,7 +69,17 @@ function Frame:GetText() return self.text end
 function Frame:SetPoint(...) self.point = { ... } end
 function Frame:GetPoint() return unpack(self.point or { "CENTER", nil, "CENTER", 0, 0 }) end
 function Frame:CreateFontString() return Mock.NewFrame() end
-function Frame:CreateTexture() return Mock.NewFrame() end
+function Frame:CreateTexture()
+  local t = Mock.NewFrame()
+  t.parent = self
+  return t
+end
+function Frame:SetTexture(path)
+  self.texture = path
+  -- Para las pruebas: la calavera que el addon pone sobre las placas.
+  if path == "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8" then self.marksPlate = true end
+end
+function Frame:SetRotation(angle) self.rotation = angle end
 
 function Mock.NewFrame(name)
   local f = setmetatable({ events = {}, scripts = {}, shown = true, name = name }, FrameMeta)
@@ -125,17 +135,25 @@ function ReloadUI() Mock.reloaded = true end
 Mock.player = { name = "Brujo", realm = "Dio", money = 1234567 }
 
 function GetBuildInfo() return "1.60.1", "70532", "Oct 28 2026", 16001 end
+-- Otras unidades (target, mouseover, nameplate1...): Mock.units[unidad] = { name, guid, dead }
+Mock.units = {}
 function UnitName(unit)
   if unit == "npc" then return Mock.merchant.npc end
+  if Mock.units[unit] then return Mock.units[unit].name end
   return Mock.player.name
 end
+function UnitIsDead(unit) return Mock.units[unit] ~= nil and Mock.units[unit].dead == true end
+function GetCVar(name) return Mock.cvars and Mock.cvars[name] end
 function GetRealmName() return Mock.player.realm end
 function GetNormalizedRealmName() return (Mock.player.realm:gsub("%s", "")) end
 function UnitFactionGroup() return "Horde" end
 function UnitClass() return "Brujo", "WARLOCK" end
 function UnitRace() return "Orco", "Orc" end
 function UnitLevel() return 60 end
-function UnitGUID() return "Player-1-00000001" end
+function UnitGUID(unit)
+  if Mock.units[unit] then return Mock.units[unit].guid end
+  if unit == "player" then return "Player-1-00000001" end
+end
 function GetMoney() return Mock.player.money end
 
 Enum = {
@@ -157,10 +175,24 @@ ATTACHMENTS_MAX_SEND = 12
 
 Mock.mapID = 1411
 Mock.mapNames = { [1411] = "Durotar", [1413] = "Los Baldíos" }
+-- Posición: cada mapa ocupa 1000 x 1000 metros del continente 1, con su esquina noroeste en
+-- Mock.mapCorners[mapa] = { norte, oeste }. Mock.position = { norte, oeste }.
+Mock.mapCorners = { [1411] = { 1000, 5000 }, [1413] = { 0, 5000 } }
+Mock.position = { 500, 4500 }
+Mock.facing = 0
 C_Map = {
   GetBestMapForUnit = function() return Mock.mapID end,
   GetMapInfo = function(id) return { name = Mock.mapNames[id] or "?" } end,
+  GetWorldPosFromMapPos = function(id, pos)
+    local corner = Mock.mapCorners[id]
+    if not corner then return nil end
+    local north, west = corner[1] - pos.y * 1000, corner[2] - pos.x * 1000
+    return 1, { GetXY = function() return north, west end }
+  end,
 }
+function CreateVector2D(x, y) return { x = x, y = y } end
+function UnitPosition() return Mock.position[1], Mock.position[2], 0, 1 end
+function GetPlayerFacing() return Mock.facing end
 function GetZoneText() return Mock.mapNames[Mock.mapID] end
 
 -- Simula que entra algo en las bolsas (o que cambia el oro) y avisa como el juego.
@@ -181,7 +213,22 @@ end
 
 Mock.itemNames = {}
 Mock.sellPrices = {}
+local function CountItem(itemID, bags)
+  local n = 0
+  for _, bag in ipairs(bags) do
+    for slot, info in pairs(Mock.bags[bag] or {}) do
+      if type(slot) == "number" and info.itemID == itemID then n = n + info.stackCount end
+    end
+  end
+  return n
+end
+
 C_Item = {
+  GetItemCount = function(itemID, includeBank)
+    local n = CountItem(itemID, { 0, 1, 2, 3, 4, 5 })
+    if includeBank then n = n + CountItem(itemID, { -1, 6, 7, 8, 9, 10, 11, 12 }) end
+    return n
+  end,
   GetItemNameByID = function(id) return Mock.itemNames[id] end,
   GetItemID = function(location) return location.itemID end,
   -- Solo importan el nombre (1.º valor) y el precio de venta al vendedor (11.º).
@@ -222,6 +269,64 @@ function Mock.Tooltip(itemID)
   for _, fn in ipairs(Mock.tooltipCallbacks) do fn(tooltip, { id = itemID }) end
   return table.concat(lines, "\n")
 end
+
+-- Macros: Mock.macros[i] = { name, icon, body }
+Mock.macros = {}
+function GetMacroIndexByName(name)
+  for i, m in ipairs(Mock.macros) do
+    if m.name == name then return i end
+  end
+  return 0
+end
+function CreateMacro(name, icon, body)
+  table.insert(Mock.macros, { name = name, icon = icon, body = body })
+  return #Mock.macros
+end
+function EditMacro(index, name, icon, body)
+  local m = Mock.macros[index]
+  m.name, m.icon, m.body = name or m.name, icon or m.icon, body or m.body
+  return index
+end
+
+-- Placas de nombre: Mock.AddPlate("nameplate1", { name, guid }) avisa como el juego.
+Mock.plates = {}
+C_NamePlate = {
+  GetNamePlateForUnit = function(unit) return Mock.plates[unit] end,
+  GetNamePlates = function()
+    local list = {}
+    for _, plate in pairs(Mock.plates) do list[#list + 1] = plate end
+    return list
+  end,
+}
+function Mock.AddPlate(unit, info)
+  Mock.units[unit] = info
+  Mock.plates[unit] = Mock.NewFrame()
+  Mock.plates[unit].namePlateUnitToken = unit
+  Mock.Fire("NAME_PLATE_UNIT_ADDED", unit)
+end
+function Mock.RemovePlate(unit)
+  Mock.Fire("NAME_PLATE_UNIT_REMOVED", unit)
+  Mock.plates[unit] = nil
+  Mock.units[unit] = nil
+end
+-- Cuántas calaveras se ven ahora sobre las placas.
+function Mock.MarkedPlates()
+  local n = 0
+  for _, f in ipairs(Mock.frames) do
+    local parent = rawget(f, "parent")
+    if rawget(f, "marksPlate") and parent and parent.shown then n = n + 1 end
+  end
+  return n
+end
+
+-- Botín abierto: Mock.loot[i] = { itemID, sources = { guid, cantidad, ... } }
+Mock.loot = {}
+function GetNumLootItems() return #Mock.loot end
+function GetLootSlotLink(slot)
+  local it = Mock.loot[slot]
+  return it and ("|cffffffff|Hitem:" .. it.itemID .. "::::::::60:::::|h[x]|h|r")
+end
+function GetLootSourceInfo(slot) return unpack(Mock.loot[slot].sources) end
 
 -- Bolsas: Mock.bags[bag] = { numSlots = n, [slot] = { itemID, stackCount, hyperlink, isBound } }
 Mock.bags = {}

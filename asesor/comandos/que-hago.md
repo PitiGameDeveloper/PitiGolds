@@ -14,7 +14,7 @@ Piti va a jugar: $ARGUMENTS (si no dice cuánto, supón 2 horas).
    2. **Craftear**: los crafteos en verde del panel, sin pasar de lo que absorbe el mercado al día. Las
       recetas con espera (tela lunar, transmutaciones), una con cada personaje que las sabe. Los pasos
       exactos los tiene el addon (ventana de métodos, pestaña Crafteos).
-   3. **El resto del tiempo**: el mejor farmeo del panel, con «Medir este farmeo» si es estimado. Si el
+   3. **El resto del tiempo**: el mejor farmeo del panel, con «Farmear este» (se mide solo) si es estimado. Si el
       panel dice «preparar», di qué preparar y cuánto cuesta; si dice «investigar», propón una sesión de
       investigación (`comandos/buscar-metodos.md`).
    4. **Antes de salir**: escaneo de la subasta (PG: Materiales; PG: Completo si han pasado 15 min),

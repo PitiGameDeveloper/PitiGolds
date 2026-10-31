@@ -5,6 +5,7 @@ Necesita lupa:  .venv\\Scripts\\python -m pip install -r requirements-dev.txt
 
 from __future__ import annotations
 
+import math
 import re
 import sqlite3
 import tempfile
@@ -465,6 +466,215 @@ class SesionEnVivo(unittest.TestCase):
         S.OnLogin()
         session = self.lua.globals().PitiGoldsDB.characters["Brujo-Dio"].session
         self.assertIsNone(session["items"][2770])
+
+
+ACTIVE_METHODS = """
+PitiGoldsDB = nil
+PitiGoldsGenerated = {
+  prices = { [2770] = "200,,", [2589] = "40,," },
+  methods = {
+    verdict = { state = "mejor", title = "Arpías", lines = {}, best = "baldios-arpias" },
+    farms = {
+      { key = "baldios-arpias", name = "Arpías", kind = "farmeo", gph = 20000, items = { 2589 }, coins = true,
+        point = { map = 1413, x = 0.5, y = 0.5 }, mobs = { "Arpía" }, zone = "Los Baldíos", details = {}, req = "" },
+      { key = "cobre", name = "Cobre en Durotar", kind = "farmeo", items = { 2770 }, coins = false,
+        point = { map = 1411 }, mobs = {}, details = {}, req = "" },
+    },
+    crafts = {
+      { recipe = 1002, name = "Hacha de cobre", prof = "Herrería", craftsDay = 2, profit = 500, outputQty = 1,
+        color = "verde", knownBy = {}, details = {}, reagents = {
+          { id = 2840, name = "Barra de cobre", qty = 6, src = "subasta" },
+          { id = 2880, name = "Flujo débil", qty = 1, src = "vendedor" } } },
+    },
+  },
+}
+"""
+
+
+class FarmeosActivos(unittest.TestCase):
+    """Elegir farmeos en la ventana de métodos, su recuadro con reloj, el macro, las marcas y la flecha."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.lua = lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = cls.mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        lua.execute(ACTIVE_METHODS)
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        mock.Advance(10)
+        cls.ns = mock.ns
+        cls.T = mock.ns.Tracker
+
+    def setUp(self):
+        self.lua.execute("""
+          PitiGoldsDB.characters["Brujo-Dio"].activeFarms = {}
+          Mock.macros = {}
+          for unit in pairs(Mock.plates) do Mock.RemovePlate(unit) end
+          Mock.units = {}
+          Mock.loot = {}
+        """)
+        self.T.Changed()
+
+    def farm(self, key):
+        return self.T.Find(key)[0]
+
+    def activate_from_window(self, tab, index):
+        self.ns.Methods.Open(tab)
+        self.ns.Methods.Select(index)
+        label = "Craftear este" if tab == "crafts" else "Farmear este"
+        self.assertTrue(self.mock.ClickButton(label))
+
+    def test_activar_desde_la_ventana_de_metodos(self):
+        self.activate_from_window("farms", 1)
+        self.assertTrue(self.T.IsActive("baldios-arpias"))
+        self.assertTrue(self.T.IsShown())
+        self.assertIn("Empieza solo con el primer botín", self.T.BoxTexts())
+        self.assertIn("Paño de lino ×0", self.T.BoxTexts())
+        # El macro se crea con el bicho del catálogo y el botón cambia.
+        self.assertEqual(self.mock.macros[1].name, "PG Objetivo")
+        self.assertEqual(self.mock.macros[1].body, "/cleartarget\n/tar Arpía\n/cleartarget [dead]")
+        self.assertTrue(self.mock.ClickButton("Quitar de activos"))
+        self.assertFalse(self.T.IsActive("baldios-arpias"))
+        self.assertEqual(self.mock.macros[1].body, "/pg objetivo")
+
+    def test_el_primer_botin_pone_en_marcha_el_reloj_y_cuenta_lo_suyo(self):
+        self.activate_from_window("farms", 1)
+        self.mock.Loot(0, 10, 2589, 3)     # paño de lino: es de las arpías
+        self.mock.Loot(0, 11, 2770, 2)     # mineral de cobre: no
+        self.mock.AddMoney(250)            # monedas: este farmeo las da
+        self.mock.Advance(1)
+        f = self.farm("baldios-arpias")
+        self.assertIsNotNone(f.started)
+        self.assertEqual(dict(f["items"].items()), {2589: 3})
+        self.assertEqual(f.money, 250)
+        texts = self.T.BoxTexts()
+        self.assertIn("Paño de lino ×3", texts)
+        self.assertNotIn("Mineral de cobre", texts)
+        # Lo farmeado queda apuntado con su id para que el motor lo mida.
+        labels = {b.label for b in self.lua.globals().PitiGoldsDB.farmLog.values()}
+        self.assertIn("baldios-arpias", labels)
+
+    def test_parar_reiniciar_y_acabar(self):
+        self.activate_from_window("farms", 1)
+        self.T.StartStop("baldios-arpias")
+        self.mock.Advance(90)
+        self.T.StartStop("baldios-arpias")   # parado
+        self.mock.Advance(600)
+        f = self.farm("baldios-arpias")
+        self.assertEqual(self.T.Elapsed(f), 90)
+        self.mock.Loot(0, 10, 2589, 1)       # en pausa no cuenta
+        self.mock.Advance(1)
+        self.assertIsNone(f["items"][2589])
+        self.T.StartStop("baldios-arpias")
+        self.mock.Loot(0, 10, 2589, 4)
+        self.mock.Advance(1)
+        self.T.Reset("baldios-arpias")
+        self.assertEqual((self.T.Elapsed(f), f["items"][2589]), (0, None))
+        self.mock.Loot(0, 10, 2589, 2)
+        self.mock.Advance(60)
+        self.T.Finish("baldios-arpias")
+        self.assertFalse(self.T.IsActive("baldios-arpias"))
+        self.assertIn("Arpías: ", self.mock.chat[len(self.mock.chat)])
+
+    def test_sigue_tras_un_reload_sin_contar_el_rato_fuera(self):
+        self.activate_from_window("farms", 1)
+        self.T.StartStop("baldios-arpias")
+        self.mock.Advance(100)
+        self.T.OnLogout()
+        self.mock.Advance(50)
+        self.T.OnLogin()
+        f = self.farm("baldios-arpias")
+        self.assertIsNotNone(f.started)
+        self.mock.Advance(10)
+        self.assertEqual(self.T.Elapsed(f), 110)
+        self.T.OnLogout()
+        self.mock.Advance(3600)              # una hora fuera: queda en pausa
+        self.T.OnLogin()
+        self.assertIsNone(f.started)
+        self.assertEqual(self.T.Elapsed(f), 110)
+
+    def test_crafteo_con_los_materiales_que_tienes(self):
+        self.activate_from_window("crafts", 1)
+        texts = self.T.BoxTexts()
+        self.assertIn("Puedes fabricar |cffffd1000|r de 2", texts)
+        self.assertIn("Barra de cobre |cffff40400/12|r", texts)   # 10 en el banco no valen
+        self.assertIn("Flujo débil |cffff40400/2|r", texts)
+        self.mock.Loot(0, 12, 2840, 12)
+        self.mock.Loot(0, 13, 2880, 1)
+        self.mock.Advance(1)
+        texts = self.T.BoxTexts()
+        self.assertIn("Barra de cobre |cff33dd3312/12|r", texts)
+        self.assertIn("Flujo débil |cffffd11a1/2|r", texts)
+        self.assertIn("Puedes fabricar |cffffd1001|r de 2", texts)
+        self.T.ToggleOpen("receta:1002")
+        self.assertIn("En el banco: Barra de cobre ×10", self.T.BoxTexts())
+        self.T.SetCrafts("receta:1002", 1)
+        self.assertIn("Barra de cobre |cffffd11a12/18|r", self.T.BoxTexts())
+        self.lua.execute("Mock.bags[0][12] = nil; Mock.bags[0][13] = nil")
+
+    def test_calavera_sobre_los_bichos_del_farmeo(self):
+        self.activate_from_window("farms", 1)
+        self.mock.AddPlate("nameplate1", self.lua.eval('{ name = "Arpía Alabruja", guid = "Creature-0-1-0-1-3276-01" }'))
+        self.mock.AddPlate("nameplate2", self.lua.eval('{ name = "Jabalí", guid = "Creature-0-1-0-1-3099-02" }'))
+        self.assertEqual(self.mock.MarkedPlates(), 1)
+        self.mock.RemovePlate("nameplate1")
+        self.assertEqual(self.mock.MarkedPlates(), 0)
+
+    def test_aprende_el_bicho_al_lootear_y_lo_anade_al_macro(self):
+        self.activate_from_window("farms", 1)    # arpías
+        self.activate_from_window("farms", 2)    # cobre: sin bichos en el catálogo
+        self.T.StartStop("cobre")
+        self.lua.execute("""
+          Mock.units.target = { name = "Peón de Ventura", guid = "Creature-0-1-0-1-3284-0002" }
+          Mock.loot = { { itemID = 2770, sources = { "Creature-0-1-0-1-3284-0002", 1 } } }
+        """)
+        self.mock.Fire("LOOT_OPENED")
+        self.assertEqual(self.farm("cobre").mobs[3284], "Peón de Ventura")
+        self.assertEqual(self.mock.macros[1].body,
+                         "/cleartarget\n/tar Arpía\n/tar [noexists] Peón de Ventura\n/cleartarget [dead]")
+        # Si el de la segunda línea está a la vista, va primero.
+        self.mock.AddPlate("nameplate3", self.lua.eval('{ name = "Peón de Ventura", guid = "Creature-0-1-0-1-3284-0003" }'))
+        self.mock.Advance(2)
+        self.assertTrue(self.mock.macros[1].body.startswith("/cleartarget\n/tar Peón de Ventura\n"))
+        # Lo que suelta otro bicho que empieza como uno del catálogo no hace falta apuntarlo.
+        self.lua.execute("""
+          Mock.units.target = { name = "Arpía Alabruja", guid = "Creature-0-1-0-1-3276-0004" }
+          Mock.loot = { { itemID = 2589, sources = { "Creature-0-1-0-1-3276-0004", 1 } } }
+        """)
+        self.T.StartStop("baldios-arpias")
+        self.mock.Fire("LOOT_OPENED")
+        self.assertIsNone(self.farm("baldios-arpias").mobs[3276])
+
+    def test_anadir_y_quitar_el_objetivo(self):
+        self.activate_from_window("farms", 2)
+        self.lua.execute('Mock.units.target = { name = "Kobold", guid = "Creature-0-1-0-1-40-0001" }')
+        self.T.ToggleOpen("cobre")
+        self.assertTrue(self.mock.ClickButton("Añadir objetivo"))
+        self.assertEqual(self.farm("cobre").mobs[40], "Kobold")
+        self.assertIn("Bichos: Kobold", self.T.BoxTexts())
+        self.assertTrue(self.mock.ClickButton("Quitar objetivo"))
+        self.assertIsNone(self.farm("cobre").mobs[40])
+
+    def test_flecha(self):
+        A = self.ns.Arrow
+        self.activate_from_window("farms", 1)
+        # El centro de Los Baldíos está 1000 m al sur: mirando al norte, la flecha apunta atrás.
+        state = A.Compute(self.lua.eval("{ map = 1413, x = 0.5, y = 0.5 }"))
+        self.assertAlmostEqual(state.distance, 1000)
+        self.assertAlmostEqual(state.angle, math.pi)
+        self.lua.execute("Mock.facing = math.pi")
+        state = A.Compute(self.lua.eval("{ map = 1413, x = 0.5, y = 0.5 }"))
+        self.assertAlmostEqual(state.angle, 0)
+        self.lua.execute("Mock.facing = math.pi / 2")    # mirando al oeste: el sur queda a la izquierda
+        state = A.Compute(self.lua.eval("{ map = 1413, x = 0.5, y = 0.5 }"))
+        self.assertAlmostEqual(state.angle, math.pi / 2)
+        self.lua.execute("Mock.facing = 0")
+        self.assertIn("Arpías\n1000 m", A.Text())
+        # Solo la zona: dentro de ella, avisa.
+        self.assertEqual(A.Compute(self.lua.eval("{ map = 1411 }")).text, "Estás en Durotar")
 
 
 class Contabilidad(unittest.TestCase):

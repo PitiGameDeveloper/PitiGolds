@@ -55,7 +55,9 @@ cada método guardado se vuelve a comprobar con tus últimos precios. Lo nuevo s
 **Al pulsar un método** se despliega lo que se sabe de él: la opinión del asesor y sus pasos, de dónde
 sale el oro, quién puede hacerlo y, si nadie, qué le falta al más cercano y cómo prepararlo. Para subir
 Botánica, Minería, Desollar o Pesca, la ruta por zonas según tu facción (`conocimiento/recoleccion.json`).
-En los farmeos, **Medir este farmeo** empieza a medirlo con su id.
+**Farmear este** (o **Craftear este** en los crafteos) lo pasa a la ventana de farmeos activos; los
+activos llevan » delante y el botón cambia a **Quitar de activos**. Puedes tener varios a la vez, de las
+dos pestañas.
 
 En los crafteos salen los pasos exactos con tus personajes:
 - **Si nadie sabe la receta**: «Conéctate con tu Mago (Sastrería 235), viaja a X y cómprale la receta
@@ -66,6 +68,51 @@ En los crafteos salen los pasos exactos con tus personajes:
 
 La zona de cada vendedor se apunta al abrir su ventana. `datos/panel.md` tiene lo mismo que la ventana,
 para leerlo en el PC.
+
+## Farmeos activos
+
+Una ventana pequeña para tenerla abierta mientras juegas, como la lista de misiones: se arrastra por el
+título, cambia de tamaño con la esquina de abajo a la derecha y se cierra con la X (la vuelve a abrir el
+botón **Farmeos activos** del panel o `/pg activos`). Cada farmeo activo va en su recuadro, uno debajo
+de otro:
+- **Farmeos**: lo que llevas de sus objetos (por ejemplo, las pieles) con lo que vale cada uno, el total
+  y el oro por hora. Solo cuenta lo suyo: sus objetos y, si da monedas, el oro suelto y la basura gris.
+  Si el catálogo no dice qué da (o es uno que mediste tú), cuenta todo.
+- **Crafteos**: los materiales que tienes en las bolsas de los que hacen falta (5/8, en verde si ya
+  llega) para las que absorbe el mercado en un día, y cuántas puedes fabricar ya.
+
+Cada recuadro tiene su reloj con **Empezar/Parar**, **Reiniciar** (reloj y cuenta a cero) y **Acabar**
+(dice en el chat cuánto has sacado y lo quita). El reloj se pone en marcha solo con el primer botín del
+farmeo, y solo cuenta lo que entra mientras corre. Tras un `/reload` o un cambio rápido de personaje
+sigue en marcha sin contar el rato fuera; si pasa más de media hora, queda parado. Lo que farmeas con un
+farmeo en marcha queda apuntado con su id, así el motor mide tu oro por hora real de ese método (ya no
+hace falta `/pg farmeo`).
+
+**Al pulsar el nombre** se despliega el resto: lo esperado por hora, el precio y total de cada objeto, las
+monedas, la zona y los bichos; en los crafteos, el beneficio, lo que tienes en el banco, los pasos y
+**-**/**+** para cambiar cuántas fabricar.
+
+**Flecha.** Lleva al sitio del primer farmeo activo que esté en marcha (o, si no hay ninguno, del
+primero), como TomTom: gira según hacia dónde miras y dice los metros. Si el catálogo solo da la zona,
+lleva hasta ella y avisa al entrar. Además pone el punto en el mapa del juego si el cliente lo permite.
+Se mueve arrastrándola; clic derecho la esconde y `/pg flecha` la vuelve a enseñar.
+
+**Bichos.** Sobre la placa de cada bicho de tus farmeos sale una calavera (hacen falta las placas de
+enemigos, tecla **V**). No es una marca de banda: esas no se pueden poner desde un addon, así que la
+dibuja el addon y solo la ves tú. Los bichos salen del catálogo (`bichos`) y de lo que aprende el addon:
+- al lootear un objeto de un farmeo en marcha, apunta el bicho que lo soltó (hasta 6 por farmeo; los
+  de «cualquier zona», como desollar mientras subes, no aprenden);
+- **Añadir objetivo** en el recuadro desplegado apunta el bicho que tengas seleccionado (y **Quitar
+  objetivo**, si ya estaba).
+
+**Macro «PG Objetivo».** Al activar el primer farmeo con bichos el addon crea un macro general con ese
+nombre (Esc > Macros). Ponlo en tu barra: cada vez que lo pulsas selecciona el bicho más cercano de tus
+farmeos activos. Es uno solo para todo: el addon le reescribe los `/target` al activar o acabar un
+farmeo, o al aprender un bicho. `/target` elige el más cercano cuyo nombre **empieza** por lo que le das,
+así que «Arpía» vale para todas las arpías; con nombres distintos los prueba uno detrás de otro, primero
+los que tienes a la vista. Cada pulsación selecciona un bicho y nada más (no ataca ni hace nada por ti).
+En combate WoW no deja cambiar macros: si toca cambiarlo, se hace al salir del combate. `/pg objetivo`
+dice qué busca.
 
 ## El asesor (Fase 4)
 
@@ -187,9 +234,9 @@ con lo tuyo:
 - si alguno de tus personajes puede hacerlo ya, o qué te falta (nivel o profesión);
 - **lo que da por hora** (`por_hora`: cuántos objetos y cuánto oro suelto), que apunta el asesor al
   investigar y el motor valora con tus precios;
-- y tu oro por hora de verdad cuando lo mides: `/pg farmeo <id>` al empezar (por ejemplo
-  `/pg farmeo tuercespina-basiliscos`), o **Medir este farmeo** en la ventana de métodos, y
-  `/pg farmeo fin` al acabar. Desde ahí manda tu medida.
+- y tu oro por hora de verdad cuando lo mides: pulsa **Farmear este** en la ventana de métodos y lo
+  que farmees con su reloj en marcha queda apuntado con su id (también vale `/pg farmeo <id>` al empezar
+  y `/pg farmeo fin` al acabar). Desde ahí manda tu medida.
 
 Los diez mejores salen en el informe y todos en `datos/metodos.md`:
 
@@ -219,7 +266,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 
 1. Haz doble clic en **`vigilar.cmd`** y deja esa ventana abierta mientras juegas.
 2. En el juego verás un panel pequeño, **PitiGolds**, con lo que llevas ganado en la sesión y los botones
-   **Mejor farmeo** y **Sesión**. Se pone al día en cuanto looteas. Puedes moverlo arrastrándolo.
+   **Mejor farmeo**, **Sesión** y **Farmeos activos**. Se pone al día en cuanto looteas. Puedes moverlo
+   arrastrándolo.
 3. En la casa de subastas aparecen dos botones encima de la ventana:
    - **PG: Materiales**: recorre materiales, consumibles, recetas y gemas. Guarda el precio mínimo y la cantidad total de cada objeto. Se puede repetir cuando quieras.
    - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores. El servidor solo lo permite **cada 15 minutos**.
@@ -424,6 +472,9 @@ Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 | `/pg panel` | Muestra u oculta el panel |
 | `/pg sesion` | Abre la lista de lo farmeado en la sesión (igual que el botón Sesión); `/pg sesion reiniciar` empieza otra |
 | `/pg metodos` | Abre la ventana de métodos (igual que el botón Mejor farmeo) |
+| `/pg activos` | Muestra u oculta la ventana de farmeos activos (igual que el botón Farmeos activos) |
+| `/pg flecha` | Enseña o esconde la flecha hacia tu farmeo activo |
+| `/pg objetivo` | Dice qué bichos busca el macro «PG Objetivo» (y lo crea si lo has borrado) |
 | `/pg farmeo Cobre en Durotar` | Pone nombre a lo que farmeas desde ahora (`/pg farmeo fin` lo quita; `/pg farmeo` a secas dice cuánto llevas en la última hora) |
 
 ## Primer día de WoW Forever: qué comprobar
@@ -438,6 +489,9 @@ El addon está escrito para la API del cliente moderno, pero no se ha podido pro
 4. Si algo falla, el error sale en el chat (los tres primeros de cada sesión) y queda en `/pg log`.
 5. Ejecuta `estado.cmd`. La línea **APIs nuevas encontradas** lista las funciones de Forever relacionadas con
    Legacy, Merchant's Favor, cajas, etc. Con eso se programa la lectura de los Legacy Points.
+6. Activa un farmeo con bichos y comprueba la flecha (que apunte bien al girar), la calavera sobre las
+   placas y el macro «PG Objetivo». Los nombres de los bichos del catálogo son el principio del nombre
+   en español: si alguno no coincide, el addon los aprende al lootear.
 
 ## Pruebas
 

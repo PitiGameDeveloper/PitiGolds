@@ -36,6 +36,13 @@ cuando quiere métodos nuevos o cuando el addon le avisa de que ningún método 
      `oro_hora` (oro de monedas y basura de vendedor por hora). Sácalo de la fuente si lo dice; si no,
      estímalo tú (reaparición, bichos por hora, probabilidad de botín) y dilo en `notas` («estimado:
      unos 3 bichos por minuto»). El motor lo valora con los precios de Piti hasta que lo mida;
+   - **`punto`**: dónde se farmea, `{"mapa": 1413, "x": 56, "y": 8}`: el número de mapa de la zona (1411
+     Durotar, 1413 Los Baldíos... están en la tabla UiMap de wago.tools) y las coordenadas en %. Si no
+     sabes el sitio exacto, solo `{"mapa": 1413}`. La flecha del addon lleva hasta ahí;
+   - **`bichos`**: cómo **empieza** el nombre en el juego, en español, de los bichos a matar
+     (`["Arpía"]`). El macro del addon selecciona el más cercano que empiece así, así que basta lo común
+     a todos («Vástago» para «Vástago carmesí» y los demás). Si no lo sabes seguro, no lo pongas: el
+     addon los aprende al lootear;
    - si ya hay uno parecido, mejóralo (notas, objetos, zona, por hora) en vez de duplicarlo;
    - si algo se ha nerfeado o cambiado, apúntalo en las notas del método que corresponda (y baja su
      `por_hora` si da menos).

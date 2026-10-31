@@ -90,6 +90,10 @@ class FarmRow:
     min_level: int = 0
     pending: str = ""
     details: list[str] = field(default_factory=list)
+    items: list[int] = field(default_factory=list)   # lo que cuenta la ventana de farmeos activos
+    coins: bool = False          # da monedas (y basura de vendedor), que también cuentan
+    point: dict | None = None    # adonde lleva la flecha
+    mobs: list[str] = field(default_factory=list)
 
     @property
     def value(self) -> int | None:
@@ -364,7 +368,12 @@ def _farm_rows(ctx: _Context, reviews: Reviews) -> list[FarmRow]:
         if e.kind not in TIME_KINDS:
             continue
         row = FarmRow(key=e.id, name=e.name, kind=e.kind, zone=e.zone, level=e.level,
-                      min_level=e.min_level, pending=e.pending)
+                      min_level=e.min_level, pending=e.pending, coins=e.coins_per_hour > 0,
+                      point=e.point, mobs=list(e.mobs))
+        for label in e.items:
+            item_id = resolved.get(label)
+            if item_id is not None and item_id not in row.items:
+                row.items.append(item_id)
         parts = [f"{ctx.prof(line)} {skill}" if skill > 1 else ctx.prof(line) for line, skill in e.professions]
         if e.any_profession:
             parts.append(" o ".join(ctx.prof(line) for line in e.any_profession))
@@ -384,8 +393,8 @@ def _farm_rows(ctx: _Context, reviews: Reviews) -> list[FarmRow]:
         else:
             row.per_hour, row.per_hour_week = now, week
             if now is not None:
-                row.details.append(f"Esperado con tus precios: ~{format_money(now)}/h (sin medir: mídelo con "
-                                   f"/pg farmeo {e.id}).")
+                row.details.append(f"Esperado con tus precios: ~{format_money(now)}/h (sin medir: pulsa «Farmear "
+                                   "este» y se mide solo mientras lo farmeas).")
             elif not e.per_hour:
                 row.details.append("Aún no hay estimación de cuánto da por hora: pídesela al asesor.")
         row.details += ["  " + t for t in value_lines]
@@ -779,7 +788,8 @@ def panel_export(panel: Panel) -> dict:
         "gph": r.per_hour, "gphWeek": r.per_hour_week, "measured": r.measured, "who": r.who,
         "req": r.requirement, "closest": r.closest, "lacking": "; ".join(r.lacking),
         "level": r.level or None, "minLevel": r.min_level or None, "pending": bool(r.pending),
-        "details": r.details,
+        "details": r.details, "zone": r.zone or None, "items": r.items, "coins": r.coins, "point": r.point,
+        "mobs": r.mobs,
     } for r in panel.farms]
     crafts = []
     for c in panel.crafts:

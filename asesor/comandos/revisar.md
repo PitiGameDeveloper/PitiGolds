@@ -18,7 +18,7 @@ más de 7 días; con «todo», todo).
      Brujo; el cuero grueso lleva una semana bajando»).
    - **pasos**: exactos y en orden, para que Piti no tenga que pensar.
      - Farmeos: con qué personaje, adónde ir (zona y punto conocido), qué matar o recoger y la ruta,
-       qué guardar y qué vender al vendedor, y que lo mida con «Medir este farmeo».
+       qué guardar y qué vender al vendedor, y que lo mida con «Farmear este».
      - Crafteos: solo lo que el addon no sabe calcular: dónde está la receta si los datos no lo dicen
        (vendedor y zona, reputación, botín) y trucos de la receta. La lista de la compra y el correo
        entre personajes ya los calcula el addon.

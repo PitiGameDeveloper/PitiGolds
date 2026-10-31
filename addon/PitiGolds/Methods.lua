@@ -1,7 +1,9 @@
 -- Ventana de métodos: el mejor farmeo y las pestañas de farmeos y crafteos que calcula el
 -- motor (PitiGoldsGenerated.methods). Al pulsar un método se despliega lo que sabe de él;
 -- en los crafteos, además, los pasos para hacerlo con tus personajes, que se rehacen al
--- momento con «Actualizar» (por ejemplo, en cuanto aprendes la receta).
+-- momento con «Actualizar» (por ejemplo, en cuanto aprendes la receta). «Farmear este» y
+-- «Craftear este» lo pasan a la ventana de farmeos activos (Tracker.lua); los activos
+-- llevan » delante.
 local ADDON, ns = ...
 
 local M = {}
@@ -34,7 +36,7 @@ local COLUMNS = {
   },
 }
 
-local window, verdictText, freshText, detailText, detailScroll, detailChild, updateButton, measureButton
+local window, verdictText, freshText, detailText, detailScroll, detailChild, updateButton, activeButton
 local tabButtons, headerButtons, rowFrames = {}, {}, {}
 local state = { tab = "farms", offset = 0, selected = nil, sort = nil, desc = false }
 
@@ -285,9 +287,15 @@ local function Rows()
   return list
 end
 
+local ACTIVE_MARK = "|cff33dd33»|r "
+
+local function IsActive(row)
+  return ns.Tracker ~= nil and ns.Tracker.IsActive(ns.Tracker.KeyFor(row))
+end
+
 local function FarmCells(row)
   local star = row.measured and "" or "*"
-  local name = row.name .. (row.pending and " |cffaaaaaa(en espera)|r" or "")
+  local name = (IsActive(row) and ACTIVE_MARK or "") .. row.name .. (row.pending and " |cffaaaaaa(en espera)|r" or "")
   local rinde = row.color and Colored(row.color == "verde" and "Mucho" or row.color == "amarillo" and "Algo" or "No",
     row.color) .. star or "?"
   local gph = row.gph and (ns.Money(row.gph) .. star) or "?"
@@ -309,7 +317,8 @@ local function CraftCells(row)
   local label = { verde = "Sí", amarillo = "Casi", naranja = "Falta algo", rojo = "Falta mucho" }
   local who = row._crafter and CharName(row._crafter) or row.whoName
   local text = Colored(label[color] or "?", color) .. (who and (": " .. who) or "")
-  return { row.name .. " |cffaaaaaa(" .. (row.prof or "?") .. ")|r", row.score and tostring(row.score) or "-",
+  return { (IsActive(row) and ACTIVE_MARK or "") .. row.name .. " |cffaaaaaa(" .. (row.prof or "?") .. ")|r",
+    row.score and tostring(row.score) or "-",
     profit, perDay, text }
 end
 
@@ -331,20 +340,24 @@ local function DetailFor(row)
   return table.concat(lines, "\n")
 end
 
-local function ShowDetail()
-  local rows = Rows()
-  local row
-  for _, r in ipairs(rows) do
-    if (r.key or r.recipe) == state.selected then row = r end
+local function SelectedRow()
+  for _, r in ipairs(Rows()) do
+    if (r.key or r.recipe) == state.selected then return r end
   end
+end
+
+local function ShowDetail()
+  local row = SelectedRow()
   if not row then
     detailText:SetText("|cffaaaaaaPulsa un método para ver lo que sé de él.|r")
     updateButton:Hide()
-    measureButton:Hide()
+    activeButton:Hide()
   else
     detailText:SetText(DetailFor(row))
     if state.tab == "crafts" then updateButton:Show() else updateButton:Hide() end
-    if state.tab == "farms" and row.key and not row.key:find("^medido:") then measureButton:Show() else measureButton:Hide() end
+    activeButton:SetText(IsActive(row) and "Quitar de activos"
+      or (state.tab == "crafts" and "Craftear este" or "Farmear este"))
+    activeButton:Show()
   end
   local height = detailText.GetStringHeight and detailText:GetStringHeight() or nil
   if detailChild and height then detailChild:SetHeight(height + 10) end
@@ -590,15 +603,17 @@ local function CreateWindow()
   updateButton:SetText("Actualizar")
   updateButton:SetScript("OnClick", M.Update)
 
-  measureButton = CreateFrame("Button", nil, window, "UIPanelButtonTemplate")
-  measureButton:SetSize(140, 22)
-  measureButton:SetPoint("BOTTOMRIGHT", -12, 10)
-  measureButton:SetText("Medir este farmeo")
-  measureButton:SetScript("OnClick", function()
-    if state.selected then
-      PitiGoldsDB.farmLabel = state.selected
-      ns.Print("farmeando: " .. state.selected .. ". Cuando acabes: /pg farmeo fin")
-      if ns.RefreshUI then ns.RefreshUI() end
+  activeButton = CreateFrame("Button", nil, window, "UIPanelButtonTemplate")
+  activeButton:SetSize(150, 22)
+  activeButton:SetPoint("BOTTOMLEFT", 12, 10)
+  activeButton:SetText("Farmear este")
+  activeButton:SetScript("OnClick", function()
+    local row = SelectedRow()
+    if not row then return end
+    if IsActive(row) then
+      ns.Tracker.Remove(ns.Tracker.KeyFor(row))
+    else
+      ns.Tracker.Activate(row)
     end
   end)
 end

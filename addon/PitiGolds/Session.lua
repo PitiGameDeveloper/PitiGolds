@@ -133,10 +133,11 @@ function S.OnLogin()
   end
 end
 
-local function ItemName(itemID)
+function ns.ItemName(itemID)
   local entry = PitiGoldsDB.items and PitiGoldsDB.items[itemID]
   return (type(entry) == "table" and entry.name) or ns.ItemNameByID(itemID) or ("objeto " .. itemID)
 end
+local ItemName = ns.ItemName
 
 -- Lo ganado en la sesión: tiempo jugado, oro suelto, objetos valorados y oro por hora.
 function S.Summary()

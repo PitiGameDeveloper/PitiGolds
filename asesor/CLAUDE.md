@@ -48,7 +48,7 @@ Piti para que lo pida allí.
 2. **Solo subasta y oro de vendedor.** Nada de comerciar con jugadores, anunciarse en /2 ni vender
    servicios. Nada de bots, automatizar acciones del juego ni nada contra las normas de Blizzard.
 3. **Las cifras salen del motor.** El oro por hora de una guía o un vídeo es de su servidor: dalo solo
-   como orientación y propón medirlo con `/pg farmeo <id>`.
+   como orientación y propón medirlo con «Farmear este» en la ventana de métodos.
 4. **Si falta un dato, di cómo conseguirlo en el juego**: escanear la subasta, abrir la profesión,
    pasar por un vendedor y abrir su ventana, entrar con ese personaje... El addon lo apunta solo y
    WoW lo guarda al cambiar de personaje, al salir o con `/reload`: no hay que exportar nada.

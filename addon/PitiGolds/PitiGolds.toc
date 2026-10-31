@@ -17,5 +17,8 @@ Tooltip.lua
 Farming.lua
 Ledger.lua
 Session.lua
+Tracker.lua
+Hunt.lua
+Arrow.lua
 Methods.lua
 UI.lua
