@@ -11,7 +11,7 @@ from .catalogo import CatalogEntry, CatalogError, GuideMethod, evaluate_catalog,
 from .crafting import CraftResult, evaluate_recipes, recipe_item_ids
 from .farming import FarmSession, FarmSummary, farm_item_ids, load_sessions, summarize, value_sessions
 from .market import Backtest, MarketSignals, backtest, compute_signals, load_series
-from .pricing import AH_CUT, ItemPrice, load_prices
+from .pricing import ItemPrice, load_prices
 from .selling import SellAdvice, advise
 from .vendors import VendorCandidate, VendorFlip, vendor_candidates, vendor_flips
 
@@ -95,8 +95,9 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
     for c in crafts:
         s = c.output_signals = signals.get(c.output_item_id)
         c.capacity = craft_capacity(c, business.seconds_per_unit)
-        if c.complete and s is not None and s.forecast_7d:
-            c.profit_week = round(s.forecast_7d * (1 - AH_CUT) * c.output_qty) - c.cost
+        out = prices.get(c.output_item_id)
+        if c.complete and s is not None and s.forecast_7d and out is not None:
+            c.profit_week = out.net_of(s.forecast_7d) * c.output_qty - c.cost
     sales = advise(conn, prices, crafts, signals)
     last_scan = conn.execute("SELECT MAX(time) FROM scans").fetchone()[0]
     result = Analysis(prices=prices, crafts=crafts, sales=sales, owned=owned, signals=signals,

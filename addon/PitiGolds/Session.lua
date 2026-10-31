@@ -4,10 +4,13 @@
 -- y se actualiza en cuanto entra algo en las bolsas.
 --
 -- Cada objeto se valora con el precio más reciente que haya: un escaneo de la subasta que
--- el motor aún no ha leído, el precio del motor o, si paga más, el vendedor.
+-- el motor aún no ha leído, el precio del motor o, si paga más, el vendedor. A la subasta se
+-- le quitan la comisión y el depósito, como en el motor: 1 plata por pila puesta, que se pierde
+-- si no se vende (se cuenta una perdida por pila vendida).
 local ADDON, ns = ...
 
 local AH_CUT = 0.05
+local AH_DEPOSIT = 100               -- depósito mínimo por puesta (una pila), en cobre
 local MARKET_SHARE = 0.15            -- como el motor: media del 15 % más barato a la venta
 local NEW_SESSION_AFTER = 30 * 60    -- tanto rato sin jugar con el personaje empieza otra sesión
 local MIN_SECONDS = 300              -- el oro por hora no se calcula sobre menos de 5 minutos
@@ -73,6 +76,16 @@ function ns.AddScan(scan)
   scanText, scanCache = nil, nil
 end
 
+-- Cuántos caben en una pila (1 si no se sabe: lo que no se apila paga la plata entera).
+local function StackSize(itemID)
+  local size = C_Item and C_Item.GetItemMaxStackSizeByID and C_Item.GetItemMaxStackSizeByID(itemID)
+  if not size then
+    local getInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
+    size = getInfo and select(8, getInfo(itemID))
+  end
+  return (type(size) == "number" and size > 0) and size or 1
+end
+
 -- Lo que vale una unidad y de dónde sale el precio: "escaneo" (de la subasta, aún sin leer
 -- por el motor), "subasta" (el del motor) o "vendedor". 0 y nil si no hay ninguno.
 function ns.ItemValue(itemID)
@@ -85,7 +98,7 @@ function ns.ItemValue(itemID)
   local entry = PitiGoldsDB.items and PitiGoldsDB.items[itemID]
   local vendor = type(entry) == "table" and entry.sell or nil
   if vendor == nil then vendor = ns.ItemSellPrice(itemID) end
-  local net = market and math.floor(market * (1 - AH_CUT)) or nil
+  local net = market and math.floor(market * (1 - AH_CUT) - AH_DEPOSIT / StackSize(itemID)) or nil
   if net and net > (vendor or 0) then return net, source end
   if vendor and vendor > 0 then return vendor, "vendedor" end
   return 0, nil

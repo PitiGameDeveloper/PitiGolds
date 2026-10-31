@@ -6,10 +6,11 @@
       "nombre": "Desollar todo lo que matas mientras subes",
       "tipo": "farmeo", "nivel": 1, "zona": "Cualquiera",
       "profesiones": [{"id": 393, "nivel": 1}],
-      "objetos": ["Light Leather", "Light Hide", "Medium Leather", "Medium Hide", "Heavy Leather"],
-      "por_hora": [{"objeto": "Light Leather", "cantidad": 20}, {"objeto": "Light Hide", "cantidad": 1}, {"objeto": "Medium Leather", "cantidad": 8}, {"objeto": "Medium Hide", "cantidad": 0.5}], "oro_hora": 1.5,
-      "notas": "Al principio nadie compra cuero: véndelo al vendedor. Da para pagar los hechizos del instructor. No te pares a desollar lo que matan otros. Estimado por hora: unos 40 bichos desollados mientras subes.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "objetos": ["Light Leather", "Light Hide", "Medium Leather", "Medium Hide", "Heavy Leather", "Ruined Leather Scraps"],
+      "por_hora": [{"objeto": "Light Leather", "cantidad": 20}, {"objeto": "Light Hide", "cantidad": 1}, {"objeto": "Medium Leather", "cantidad": 8}, {"objeto": "Medium Hide", "cantidad": 0.5}, {"objeto": "Ruined Leather Scraps", "cantidad": 6}], "oro_hora": 1.5,
+      "notas": "Al principio nadie compra cuero: véndelo al vendedor. Da para pagar los hechizos del instructor. No te pares a desollar lo que matan otros. Kaychak lo da como lo más seguro para empezar en los megaservidores: no hace falta la subasta, porque el vendedor paga 3 plata la pila de 20 de cuero ligero, 10 la de medio y 30 la de pesado. Si en la subasta se paga bastante más, véndelo allí: con las materias primas casi nadie se dedica a quitarte las ventas como con los crafteos. Se puede dejar Desollar más adelante. Restos de cuero estropeado: con Peletería, 3 hacen 1 cuero ligero, y en Forever hay 100 recetas que piden cuero ligero (según un short, 59 son nuevas: https://www.youtube.com/shorts/dC-7XW0fz6U), así que al principio se venderá bien. Pero al vendedor 3 restos pagan 21 cobre y 1 cuero ligero 15: conviértelos solo si en la subasta el cuero ligero se paga a más de unos 25 cobre. Estimado por hora: unos 40 bichos desollados mientras subes y unos 6 restos.",
+      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-10-31); Wow Forever Moments & Guides, YouTube (2026-10-23)", "fecha": "2026-10-31",
+      "enlace": "https://www.youtube.com/watch?v=ryub9vdTKq0"
     },
     {
       "id": "tirisfal-humanoides",
@@ -489,6 +490,38 @@
       "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
     },
     {
+      "id": "pesca-restos-tuercespina",
+      "nombre": "Baúles de los restos flotantes junto a Grom'gol",
+      "tipo": "pesca",
+      "nivel": 25,
+      "nivel_minimo": 20,
+      "zona": "Vega de Tuercespina, costa alrededor de Grom'gol",
+      "profesiones": [{"id": 356, "nivel": 130}],
+      "objetos": [],
+      "oro_hora": 15,
+      "punto": {"mapa": 1434, "x": 32, "y": 28},
+      "notas": "Se pesca en los bancos de restos flotantes de la costa: salen baúles de mitril abollados y recubiertos de hierro con monedas, equipo y pociones. El equipo va al vendedor (oro seguro, sin depender de la subasta) y con ese oro se compran materiales baratos en la subasta. Graysfordays propone subir a 20 en 10-12 horas y pescar baúles durante horas. @sevaxa (comentario en su vídeo) lo hizo en la beta con un brujo trol a nivel 25 y sacó unos 40 oros en 2 horas. Se puede ir con menos nivel: si te ataca algo desde la orilla, usa Sacrificio con el abisario y aléjate nadando. Otros sitios de restos con poca competencia, según comentarios: la costa norte del Marjal Revolcafango (donde los múrlocs). Para subir Pesca de nivel bajo, el río de Molino Tarren. Estimado por hora: 15 oros, por debajo de los 20 de la beta porque en los megaservidores habrá más gente pescando los mismos bancos. La Pesca que pide Tuercespina (130) es la del juego original, sin comprobar en Forever. No da objetos fijos: la ventana de farmeos activos cuenta todo lo que sale. Con el expositor de pesca (ver «Lago Lordamere») de estos bancos salen además peces hinchados con gemas y equipo.",
+      "fuente": "Graysfordays y comentario de @sevaxa, YouTube (2026-10-16)",
+      "fecha": "2026-10-31",
+      "enlace": "https://www.youtube.com/watch?v=sL_apWyzXlk"
+    },
+    {
+      "id": "pesca-lordamere",
+      "nombre": "Lago Lordamere con el expositor de pesca",
+      "tipo": "pesca",
+      "nivel": 30,
+      "nivel_minimo": 25,
+      "zona": "Lago Lordamere, Montañas de Alterac (al norte de Trabalomas, junto a Dalaran)",
+      "profesiones": [{"id": 356, "nivel": 225}],
+      "objetos": [],
+      "oro_hora": 10,
+      "punto": {"mapa": 1416},
+      "notas": "Novedad de Forever: el expositor de pesca, puesto junto a una hoguera, da durante 60 minutos el beneficio «Pesca poco común» y, al hacerle clic derecho, un cebo gratis. Con ese beneficio salen peces hinchados con equipo verde, anillos, collares y gemas. En este lago, rubíes estrella (el vendedor paga 50 plata) y aguamarinas (10 plata; en la beta se vendían a 3 oros en la subasta). Los hinchados solo salen con Pesca alta para la zona: unos 125-150 en zonas de menos de nivel 20 y más de 300 en las de nivel 25-30 como esta. Se llega con 225 de habilidad más caña, cebo y comida: el siluro mostacherizo del propio lago, cocinado, da +8 de Pesca. Donde más se gana es en los bancos: los de peces (sabiola superior, pargo de fuego, bocanegra) y sobre todo los restos flotantes, que dan baúles recubiertos de hierro con verdes (uno se vendió a 2 oros), madejas de seda, cuero grueso y pesado, pociones de maná y recetas. Con el beneficio activo, de los bancos también salen hinchados. Búscalos pasando el ratón por la orilla; los chamanes, con Vista lejana. La trucha cabeza de mitril de este lago tendrá demanda porque se usa para hacer el expositor. Loru dice que sacaba más de 10 oros por hora solo en agua abierta y cientos de oros a nivel 30 en la beta, cuando el oro escaseaba y las gemas se vendían caras: aquí se estiman 10 por hora. Habla también de un talento de Legacy de cebos (Lure Master) que daría más.",
+      "fuente": "Loru Gaming, YouTube (2026-10-22)",
+      "fecha": "2026-10-31",
+      "enlace": "https://www.youtube.com/watch?v=9XphhkeGHeI"
+    },
+    {
       "id": "pesca-desviado",
       "nombre": "Pez desviado",
       "tipo": "pesca", "nivel": 10, "zona": "Los Baldíos",
@@ -630,8 +663,31 @@
       "tipo": "crafteo",
       "profesiones": [{"id": 333, "nivel": 10}],
       "objetos": ["Lesser Magic Wand", "Greater Magic Wand"],
-      "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas. Aviso de Kaychak (31-10-2026, https://www.youtube.com/watch?v=ryub9vdTKq0): lo recomiendan muchos vídeos y en los megaservidores lo hará muchísima gente, así que te quitarán las ventas al momento y el margen será mínimo. Además, al final de la beta la subasta empezó a cobrar 1 plata de depósito por cada puesta, que pierdes si no se vende. Antes de fabricar, mira en la subasta cuántos venden y a cuánto. NERF: desde el 1 de octubre de 2026 las varitas se venden al vendedor por 1 cobre (lo avisa Ceedsy en su vídeo de cómo sacar 10 oros el primer día, que se basaba en eso: https://www.youtube.com/watch?v=NDdiw-q_-qw). Los datos del juego aún dicen 1 plata 10 la menor y 2 plata la mayor porque el cambio es del servidor: el addon apunta el precio real en cuanto ve una varita. Solo queda venderlas en la subasta.",
+      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-31"
+    },
+    {
+      "id": "aceite-zahori-menor",
+      "nombre": "Pantalones de lino marrón para desencantar y aceite de zahorí menor",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 197, "nivel": 30}, {"id": 333, "nivel": 1}],
+      "objetos": ["Minor Wizard Oil", "Strange Dust", "Lesser Magic Essence", "Brown Linen Pants"],
+      "notas": "Costura y Encantamiento, y se vende al vendedor: pantalones de lino marrón (2 madejas de lino y hilo burdo), se desencantan (1-2 polvos extraños o 1-2 esencias mágicas inferiores) y con el polvo se hace aceite de zahorí menor (polvo extraño, semillas de arce y vial vacío), que se vende al vendedor. El beneficio sale de que el vendedor pague por el aceite bastante más que las semillas (2 plata) y el vial (4 cobre). Es el mismo tipo de truco que el de las varitas de Ceedsy, que Blizzard dejó en 1 cobre el 1 de octubre, y lo más probable es que el aceite corra la misma suerte. El precio de verdad lo pone el servidor: los datos del juego dicen 1 plata (con eso se pierde dinero), pero en la beta las varitas pagaban 5 plata cuando los datos decían 1 plata 10. El addon apunta lo que paga el vendedor en cuanto ves un aceite; desde entonces el motor lo cuenta solo. En la subasta tampoco sale: no se apila, así que paga la plata entera de depósito, y habrá mucha competencia.",
+      "pendiente": "¿Cuánto paga el vendedor por el aceite de zahorí menor en el juego? Si son unos pocos cobres, como las varitas, el método no vale: bórralo.",
+      "fuente": "Unoptimized Builds, YouTube (2026-10-07); Ceedsy, YouTube (2026-09-22)",
+      "fecha": "2026-10-31",
+      "enlace": "https://www.youtube.com/shorts/oNltLlcJNsM"
+    },
+    {
+      "id": "expositor-pesca",
+      "nombre": "Expositor de pesca y cuenco con pescado para la subasta",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 356, "nivel": 1}],
+      "objetos": ["Fishing Rack", "Fish Bowl", "Raw Mithril Head Trout", "Raw Brilliant Smallfish"],
+      "notas": "Recetas nuevas de Pesca en Forever. Expositor de pesca: 2 maderas simples, 1 vial de cristal y 2 truchas cabeza de mitril crudas. Se aprende con el «Plano: expositor de pesca», que se compra en la subasta o, según la beta, cae del jefe múrloc de las Cavernas de Brazanegra (puede cambiar al salir). Cuenco con pescado: pececito luminoso crudo y vial vacío. En la beta, los dos se vendían a unas 19-24 plata en la subasta. Todo pescador querrá el expositor, así que las truchas cabeza de mitril y los pececitos luminosos (que antes no valían nada) se venderán: mira si sale más vender el pescado crudo o fabricarlo.",
+      "fuente": "Loru Gaming, YouTube (2026-10-22)",
+      "fecha": "2026-10-31",
+      "enlace": "https://www.youtube.com/watch?v=9XphhkeGHeI"
     },
     {
       "id": "invertir-al-principio",

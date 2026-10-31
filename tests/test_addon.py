@@ -214,14 +214,19 @@ class AddonMasMotor(unittest.TestCase):
             self.assertIn("Favor del mercader", text)
             self.assertIn("Paño de lino", text)
 
+            # Cuántos caben en cada pila (de los datos del juego): el depósito de la subasta es por pila.
+            conn.executemany("INSERT INTO gd_items (item_id, stackable) VALUES (?, ?)",
+                             [(i, 20) for i in (2589, 2592, 2770, 2840, 2880, 818, 5000)] + [(2845, 1)])
             a = analyze(conn)
             crafts = {c.recipe_id: c for c in a.crafts}
             smelt, axe, helm = crafts[1001], crafts[1002], crafts[1003]
-            self.assertEqual((smelt.cost, smelt.value, smelt.profit), (120, 285, 165))
+            # La barra a 300 en la subasta: menos la comisión (285) y 5 c de depósito (pila de 20).
+            self.assertEqual((smelt.cost, smelt.value, smelt.profit), (120, 280, 160))
             self.assertEqual(smelt.craftable_now, 15)
             self.assertEqual(smelt.difficulty_name, "amarilla")
-            # 6 barras a 300 en la subasta + flujo a 100 del vendedor; el paño opcional no cuenta.
-            self.assertEqual((axe.cost, axe.value, axe.profit), (1900, 4750, 2850))
+            # 6 barras a 300 en la subasta + flujo a 100 del vendedor; el paño opcional no cuenta. El hacha
+            # no se apila: pierde la plata entera de depósito.
+            self.assertEqual((axe.cost, axe.value, axe.profit), (1900, 4650, 2750))
             self.assertEqual([r.source for r in axe.reagents], ["subasta", "vendedor"])
             self.assertFalse(helm.known)
             self.assertEqual([m.name for m in helm.missing], ["Barra de bronce"])
@@ -247,7 +252,7 @@ class AddonMasMotor(unittest.TestCase):
             up_to = int(re.search(r"ingestedUpTo = (\d+)", content).group(1))
             self.assertGreater(up_to, 0)
             self.assertIn('[2589] = "40,,",', content)
-            self.assertIn('[2845] = "1900,2850",', content)
+            self.assertIn('[2845] = "1900,2750",', content)
 
             # Al recargar, el addon carga Generated.lua y borra lo que el motor ya tiene.
             lua.execute(f'dofile("{generated.as_posix()}")')
@@ -256,7 +261,7 @@ class AddonMasMotor(unittest.TestCase):
 
             tooltip = mock.Tooltip(2840)
             self.assertIn("PitiGolds subasta = 3p 0c", tooltip)
-            self.assertIn("PitiGolds fabricar = 1p 20c  |cff40ff40+1p 65c|r", tooltip)
+            self.assertIn("PitiGolds fabricar = 1p 20c  |cff40ff40+1p 60c|r", tooltip)
             self.assertEqual(mock.Tooltip(123456), "")
 
             # Ventana de métodos: el hacha ya la sabe hacer, así que salen los pasos con lo que tiene.
@@ -413,8 +418,9 @@ class SesionEnVivo(unittest.TestCase):
     def test_cuenta_lo_farmeado_y_no_el_correo(self):
         self.assertEqual(self.items, {2770: 3})
         self.assertEqual(self.money, 250)
-        # 250 c sueltos + 3 minerales a 190 c (200 en la subasta menos la comisión).
-        self.assertIn("Sesión (0 min): 8p 20c", self.panel)
+        # 250 c sueltos + 3 minerales a 185 c (200 en la subasta menos la comisión y 5 c de depósito,
+        # 1 plata por pila de 20).
+        self.assertIn("Sesión (0 min): 8p 5c", self.panel)
 
     def test_el_panel_cambia_en_cuanto_looteas(self):
         before = self.ns.PanelText()
@@ -426,16 +432,25 @@ class SesionEnVivo(unittest.TestCase):
         self.assertIn("Última hora:", after)
 
     def test_precio_del_escaneo_que_el_motor_no_ha_leido(self):
-        self.assertEqual(self.value(2770), (190, "subasta"))
+        self.assertEqual(self.value(2770), (185, "subasta"))
         self.assertEqual(self.value(818), (150, "vendedor"))
         # Escaneo completo: el mercado es la media del 15 % más barato (2 de 10 a 100 c).
         self.lua.execute('Mock.ns.AddScan({ time = time(), items = { [2770] = "100,10,2,2|100:2;120:8" } })')
-        self.assertEqual(self.value(2770), (95, "escaneo"))
+        self.assertEqual(self.value(2770), (90, "escaneo"))
         self.mock.Advance(5)
         self.lua.execute('Mock.ns.AddScan({ time = time(), items = { [2770] = "300,5" } })')
-        self.assertEqual(self.value(2770), (285, "escaneo"))   # manda el más reciente
+        self.assertEqual(self.value(2770), (280, "escaneo"))   # manda el más reciente
         self.lua.execute('Mock.ns.AddScan({ time = time(), items = { [818] = "100,4" } })')
         self.assertEqual(self.value(818), (150, "vendedor"))   # el vendedor paga más
+
+    def test_el_precio_del_vendedor_se_pone_al_dia(self):
+        # Guardado en otra sesión a 1 p 10 c; desde entonces Blizzard la dejó en 1 c.
+        self.lua.execute('Mock.itemNames[11287] = "Varita mágica inferior"; Mock.sellPrices[11287] = 1;'
+                         'PitiGoldsDB.items[11287] = { name = "Varita mágica inferior", sell = 110 }')
+        self.assertEqual(self.value(11287), (110, "vendedor"))
+        self.ns.NoteItem(11287)
+        self.assertEqual(self.lua.eval("PitiGoldsDB.items[11287].sell"), 1)
+        self.assertEqual(self.value(11287), (1, "vendedor"))
 
     def test_ventana_y_reiniciar(self):
         S = self.ns.Session

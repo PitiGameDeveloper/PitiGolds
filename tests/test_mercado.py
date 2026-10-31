@@ -82,6 +82,7 @@ class ConsejoConTendencia(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             conn = dbmod.connect(Path(tmp) / "p.db")
             conn.execute("INSERT INTO items VALUES (1, 'Mineral', 1)")
+            conn.execute("INSERT INTO gd_items (item_id, name, stackable) VALUES (1, 'Mineral', 20)")
             conn.execute("INSERT INTO inventory VALUES ('A-R', 'bags', 1, 0, 50, 0)")
             for day, price in enumerate([100, 100, 100, 100, 95, 85, 75, 65]):
                 scan = f"s{day}"

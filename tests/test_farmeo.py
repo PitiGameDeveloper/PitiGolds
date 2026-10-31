@@ -18,7 +18,8 @@ class Sesiones(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.conn = c = dbmod.connect(Path(self.tmp.name) / "p.db")
         # Mineral (metal y piedra) y una hierba; el mineral vale 100 en la subasta.
-        c.executemany("INSERT INTO gd_items (item_id, name, class_id, subclass_id, sell_price) VALUES (?, ?, 7, ?, ?)",
+        c.executemany("INSERT INTO gd_items (item_id, name, class_id, subclass_id, sell_price, stackable) "
+                      "VALUES (?, ?, 7, ?, ?, 20)",
                       [(1, "Mineral", 7, 5), (2, "Hierba", 9, 3)])
         c.execute("INSERT INTO scans VALUES ('s', 'browse', ?, 0, 0, 'R', 'Horde', 'A-R', 2, 'X')", (T0,))
         c.executemany("INSERT INTO prices VALUES ('s', ?, ?, 10, NULL, NULL, NULL, ?)", [(1, 100, 100), (2, 40, 40)])
@@ -58,16 +59,17 @@ class Sesiones(unittest.TestCase):
         mining = s[0]
         self.assertEqual(mining.items, {1: 60})
         self.assertEqual(mining.money, 500)
-        self.assertEqual(mining.value_now, 60 * 95 + 500)  # 100 menos el 5 % de comisión
+        # 100 menos el 5 % de comisión y 5 de depósito (1 plata por pila de 20).
+        self.assertEqual(mining.value_now, 60 * 90 + 500)
         self.assertEqual(mining.hours, 24 * MIN / 3600)
-        self.assertEqual(mining.per_hour, round((60 * 95 + 500) / 0.4))
+        self.assertEqual(mining.per_hour, round((60 * 90 + 500) / 0.4))
         self.assertEqual(mining.activity, "Minería")
         self.assertEqual(s[-1].activity, "Hierbas")  # la etiqueta manda
 
     def test_prevision_a_7_dias(self):
         falling = MarketSignals(current=100, median=100, quantity=10, points=8, span_days=7, forecast_7d=60)
         mining = self.sessions({1: falling})[0]
-        self.assertEqual(mining.value_week, 60 * 57 + 500)
+        self.assertEqual(mining.value_week, 60 * 52 + 500)
         self.assertLess(mining.per_hour_week, mining.per_hour)
 
     def test_resumen_por_actividad_y_zona(self):

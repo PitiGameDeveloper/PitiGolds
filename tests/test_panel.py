@@ -52,8 +52,8 @@ class Panel(unittest.TestCase):
         c.execute("INSERT INTO vendor_items (item_id, price, limited, vendor, zone) VALUES "
                   "(2589, 500, 0, 'Tejedor', 'Orgrimmar')")
         c.commit()
-        self.prices = {4304: ItemPrice(4304, "Cuero grueso", market=1 * G, vendor_sell=150),
-                       4611: ItemPrice(4611, "Perla azul", market=2 * G, vendor_sell=500),
+        self.prices = {4304: ItemPrice(4304, "Cuero grueso", market=1 * G, vendor_sell=150, stack_size=20),
+                       4611: ItemPrice(4611, "Perla azul", market=2 * G, vendor_sell=500, stack_size=20),
                        9001: ItemPrice(9001, "Patrón: túnica", market=3 * G)}
         self.signals = {4304: MarketSignals(current=G, median=G, quantity=50, points=6, span_days=3,
                                             sales_per_day=20)}
@@ -80,7 +80,8 @@ class Panel(unittest.TestCase):
         panel = self.build([self.pieles()])
         row = panel.farms[0]
         # 20 ventas al día × 30 % / 2 h de juego = 3 por hora a la subasta; las otras 37, al vendedor.
-        self.assertEqual(row.per_hour, 2 * G + 3 * 9500 + 37 * 150)
+        # A la subasta, 1 o sin comisión y sin 5 c de depósito (1 plata por pila de 20).
+        self.assertEqual(row.per_hour, 2 * G + 3 * 9495 + 37 * 150)
         self.assertFalse(row.measured)
         self.assertTrue(any("el mercado solo se lleva unas 3 por hora" in d for d in row.details))
 

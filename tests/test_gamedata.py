@@ -113,7 +113,7 @@ class Importacion(unittest.TestCase):
         c.execute("INSERT INTO profession_summary VALUES ('A-R', 164, 'primary1', 'Herrería', 50, 150, 0)")
         c.execute("INSERT INTO scans VALUES ('s', 'full', 1000, 0, 0, 'R', 'Horde', 'A-R', 0, 'X')")
         c.executemany("INSERT INTO prices VALUES ('s', ?, ?, 10, 1, 1, NULL, ?)", [
-            (2840, 300, 300), (2845, 5000, 5000), (118, 60, 60), (2447, 20, 20), (765, 30, 30), (9100, 1500, 1500),
+            (2840, 300, 300), (2845, 5000, 5000), (118, 100, 100), (2447, 20, 20), (765, 30, 30), (9100, 1500, 1500),
         ])
         c.execute("INSERT INTO vendor_items (item_id, price, limited, vendor) VALUES (2880, 100, 0, 'Grimtak')")
         c.commit()
@@ -124,7 +124,8 @@ class Importacion(unittest.TestCase):
 
         self.assertTrue(axe.yours)
         self.assertFalse(axe.known)
-        self.assertEqual((axe.cost, axe.value, axe.profit), (1900, 4750, 2850))
+        # El hacha no se apila: cada una pierde la plata entera de depósito.
+        self.assertEqual((axe.cost, axe.value, axe.profit), (1900, 4650, 2750))
         self.assertEqual((axe.yellow, axe.green, axe.grey), (60, 80, 100))
         self.assertEqual(axe.learn_price, 1500)
 
@@ -132,7 +133,7 @@ class Importacion(unittest.TestCase):
         self.assertEqual([m.name for m in plate.missing], ["Vial vacío"])
 
         self.assertFalse(potion.yours)
-        self.assertEqual(potion.profit, 57 - 50)
+        self.assertEqual(potion.profit, 95 - 20 - 50)   # se apila de 5 en 5: 20 c de depósito por unidad
         self.assertEqual(potion.source, "Se aprende al aprender la profesión")
 
         text = build_advice_report(c, a)

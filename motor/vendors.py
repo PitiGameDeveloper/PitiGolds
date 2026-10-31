@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from .business import MARKET_SHARE
 from .crafting import CraftResult
 from .farming import FarmSession, TRADEGOODS
-from .pricing import AH_CUT, ItemPrice
+from .pricing import ItemPrice
 
 DAY = 86400
 MIN_GAP = 1.3                      # la subasta paga al menos un 30 % más de lo que costaría comprarlo al vendedor
@@ -70,7 +70,7 @@ def vendor_flips(conn: sqlite3.Connection, prices: dict[int, ItemPrice], signals
         flips.append(VendorFlip(item_id=r["item_id"], name=p.name, vendor=r["vendor"] or "?", buy=r["price"],
                                 sell=p.net_sale, limited=bool(r["limited"]),
                                 sales_per_day=s.sales_per_day if s is not None else None,
-                                sell_week=round(s.forecast_7d * (1 - AH_CUT)) if s is not None and s.forecast_7d
+                                sell_week=p.net_of(s.forecast_7d) if s is not None and s.forecast_7d
                                 else None))
     return sorted(flips, key=lambda f: f.gold_per_day or f.profit, reverse=True)
 

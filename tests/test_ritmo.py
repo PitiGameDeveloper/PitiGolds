@@ -52,7 +52,7 @@ class ConsejoConRitmo(unittest.TestCase):
             conn.execute("INSERT INTO inventory VALUES ('A-R', 'bags', 1, 0, 100, 0)")
             conn.commit()
             prices = {1: ItemPrice(item_id=1, name="Hierba", market=100, min_price=100, quantity=50,
-                                   vendor_sell=60)}
+                                   vendor_sell=60, stack_size=20)}
             (a,) = advise(conn, prices, [], {1: signals(trend=-0.03, strength=1.0)})
             conn.close()
         self.assertEqual(a.action, "subastar")

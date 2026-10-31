@@ -27,10 +27,11 @@ class Vendedores(unittest.TestCase):
         c.execute("INSERT INTO vendor_items (item_id, price, limited, vendor) VALUES (1, 100, 0, 'Grimtak')")
         c.commit()
         self.prices = {
-            1: ItemPrice(item_id=1, name="Especia", market=200, min_price=200),
-            2: ItemPrice(item_id=2, name="Tinte azul", market=100, min_price=100, catalog_buy=10),
-            3: ItemPrice(item_id=3, name="Paño de lana", market=200, min_price=200, catalog_buy=44),
-            4: ItemPrice(item_id=4, name="Pocion", market=100, min_price=100, catalog_buy=90),  # poca diferencia
+            1: ItemPrice(item_id=1, name="Especia", market=200, min_price=200, stack_size=20),
+            2: ItemPrice(item_id=2, name="Tinte azul", market=100, min_price=100, catalog_buy=10, stack_size=20),
+            3: ItemPrice(item_id=3, name="Paño de lana", market=200, min_price=200, catalog_buy=44, stack_size=20),
+            4: ItemPrice(item_id=4, name="Pocion", market=100, min_price=100, catalog_buy=90,  # poca diferencia
+                         stack_size=20),
         }
         self.crafts = [CraftResult(recipe_id=9, name="Bolsa", profession="Sastrería", output_item_id=5,
                                    cost=100, value=500, yours=True,
@@ -49,8 +50,9 @@ class Vendedores(unittest.TestCase):
     def test_reventa_desde_un_vendedor_visto(self):
         signals = {1: MarketSignals(current=200, median=200, quantity=30, points=10, span_days=3, sales_per_day=10)}
         (flip,) = vendor_flips(self.conn, self.prices, signals)
-        self.assertEqual((flip.buy, flip.sell, flip.profit), (100, 190, 90))
-        self.assertEqual(flip.gold_per_day, round(90 * 10 * 0.3))
+        # 200 sin comisión (190) ni 5 c de depósito (1 plata por pila de 20).
+        self.assertEqual((flip.buy, flip.sell, flip.profit), (100, 185, 85))
+        self.assertEqual(flip.gold_per_day, round(85 * 10 * 0.3))
 
     def test_solo_objetos_de_crafteos_y_farmeos_con_diferencia(self):
         c = self.candidates(T0)

@@ -338,8 +338,8 @@ tu oro: lo que llevas en la sesión, a cuánto sale por hora y lo de la última 
 más a menos valioso. **Reiniciar** empieza a contar desde cero (`/pg sesion reiniciar`).
 - La sesión es de cada personaje. Sigue tras un `/reload` o un cambio rápido de personaje, sin contar el
   rato fuera; si pasas más de 30 minutos sin jugar con él, empieza otra.
-- Cada objeto vale lo que da en la subasta quitando la comisión, o lo que paga el vendedor si paga más
-  (sale con «(v)»). El precio de la subasta es el del último escaneo si el motor aún no lo ha leído, así
+- Cada objeto vale lo que da en la subasta quitando la comisión y el depósito (ver «Cómo decide el
+  informe»), o lo que paga el vendedor si paga más (sale con «(v)»). El precio de la subasta es el del último escaneo si el motor aún no lo ha leído, así
   que si escaneas a media sesión, la cuenta cambia en ese momento; si no, el del motor.
 
 ## Tu negocio en la subasta
@@ -437,8 +437,13 @@ Con estos datos el informe añade:
 - **Coste de un crafteo**: cada material al precio más barato entre la subasta y un vendedor (si no tiene
   límite de existencias). Los materiales opcionales no cuentan. Lo que se paga con divisas (Merchant's
   Favor...) se muestra aparte.
-- **Lo que sacas**: precio de mercado de lo fabricado menos el 5 % de comisión, o lo que paga el vendedor
-  si es más.
+- **Lo que sacas**: precio de mercado de lo fabricado menos el 5 % de comisión y el depósito, o lo que
+  paga el vendedor si es más.
+- **Depósito**: en Forever cada puesta en la subasta (una pila) cuesta como mínimo 1 plata, que se devuelve
+  si se vende y se pierde si no. Con la competencia de los megaservidores se cuenta una puesta perdida por
+  cada pila vendida, repartida entre sus unidades: 5 cobre por unidad en lo que se apila de 20, 20 en lo
+  que va de 5 en 5 y la plata entera en lo que no se apila (equipo, varitas). Por eso lo barato que no se
+  apila suele ir mejor al vendedor. Vale para todo: farmeos, crafteos, qué vender y el addon.
 - **Qué hacer con cada objeto** (solo los no ligados):
   - **guardar** si es material de una receta tuya que da beneficio;
   - **vendedor** si el vendedor paga más que la subasta;

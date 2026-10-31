@@ -4,6 +4,11 @@ El precio mínimo engaña: basta una sola unidad barata para hundirlo. Por eso s
 el «precio de mercado»: lo que costaría de media comprar el 15 % más barato de las
 unidades a la venta. Con varios escaneos se calcula además la mediana de 7 días, que
 sirve para no valorar las cosas por un pico puntual y para saber si ahora está barato.
+
+Lo que te queda de una venta descuenta la comisión y el depósito: en Forever cada puesta (una
+pila) cuesta como mínimo 1 plata, que se devuelve si se vende y se pierde si no. Con tanta
+competencia en los megaservidores se cuenta una puesta perdida por cada pila vendida, repartida
+entre sus unidades: 5 cobre por unidad en una pila de 20, 1 plata entera en lo que no se apila.
 """
 
 from __future__ import annotations
@@ -20,6 +25,8 @@ HISTORY_DAYS = 7
 MIN_HISTORY_SCANS = 3    # escaneos necesarios para fiarse de la mediana
 SPIKE_CAP = 1.25         # nunca se valora por encima de la mediana + 25 %
 AH_CUT = 0.05            # comisión de la casa de subastas
+AH_DEPOSIT = 100         # depósito mínimo por puesta (por pila), en cobre
+LOST_POSTS_PER_SALE = 1  # puestas que no se venden por cada pila vendida
 
 
 def parse_book(book: str | None) -> list[tuple[int, int]]:
@@ -63,6 +70,7 @@ class ItemPrice:
     vendor_buy: int | None = None    # lo que cuesta comprárselo a un vendedor (visto en el juego)
     vendor_limited: bool = False
     vendor_sell: int | None = None   # lo que paga un vendedor
+    stack_size: int = 1              # unidades por pila (lo que va en cada puesta)
     # Precio de vendedor según los datos del juego. No dice si algún vendedor lo vende, así
     # que no se usa para costes: solo como pista cuando falta un precio.
     catalog_buy: int | None = None
@@ -88,9 +96,18 @@ class ItemPrice:
         return self.market
 
     @property
+    def deposit_per_unit(self) -> float:
+        """Depósito perdido por unidad vendida en la subasta."""
+        return AH_DEPOSIT * LOST_POSTS_PER_SALE / max(self.stack_size or 1, 1)
+
+    def net_of(self, price: float) -> int:
+        """Lo que te queda por unidad vendiéndola a `price`: sin comisión ni depósito perdido."""
+        return max(0, round(price * (1 - AH_CUT) - self.deposit_per_unit))
+
+    @property
     def net_sale(self) -> int | None:
         sale = self.sale_price
-        return None if sale is None else round(sale * (1 - AH_CUT))
+        return None if sale is None else self.net_of(sale)
 
     @property
     def buy_price(self) -> int | None:
@@ -127,12 +144,13 @@ def load_prices(conn: sqlite3.Connection, item_ids: Iterable[int] | None = None)
         return result[item_id]
 
     # Primero los datos del juego y después lo visto en partida, que manda si existe.
-    for row in conn.execute("SELECT item_id, name, buy_price, vendor_stack, sell_price FROM gd_items"):
+    for row in conn.execute("SELECT item_id, name, buy_price, vendor_stack, sell_price, stackable FROM gd_items"):
         if keep(row["item_id"]):
             p = get(row["item_id"])
             if row["name"]:
                 p.name = row["name"]
             p.vendor_sell = row["sell_price"] or None
+            p.stack_size = row["stackable"] or 1
             if row["buy_price"]:
                 p.catalog_buy = round(row["buy_price"] / max(row["vendor_stack"] or 1, 1))
 

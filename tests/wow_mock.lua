@@ -213,6 +213,7 @@ end
 
 Mock.itemNames = {}
 Mock.sellPrices = {}
+Mock.stackSizes = {}
 local function CountItem(itemID, bags)
   local n = 0
   for _, bag in ipairs(bags) do
@@ -230,6 +231,7 @@ C_Item = {
     return n
   end,
   GetItemNameByID = function(id) return Mock.itemNames[id] end,
+  GetItemMaxStackSizeByID = function(id) return Mock.stackSizes[id] end,
   GetItemID = function(location) return location.itemID end,
   -- Solo importan el nombre (1.º valor) y el precio de venta al vendedor (11.º).
   GetItemInfo = function(id)

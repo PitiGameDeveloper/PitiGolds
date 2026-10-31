@@ -142,7 +142,10 @@ function ns.ItemSellPrice(itemID)
   if name then return sellPrice or 0 end
 end
 
--- Guarda el nombre y el precio de venta al vendedor de un objeto para el motor.
+-- Guarda el nombre y el precio de venta al vendedor de un objeto para el motor. El precio se
+-- vuelve a mirar una vez por sesión: Blizzard lo cambia desde el servidor (las varitas pasaron
+-- a pagar 1 cobre) y lo guardado en otra sesión puede haberse quedado viejo.
+local sellChecked = {}
 function ns.NoteItem(itemID, name)
   if not itemID then return end
   local items = PitiGoldsDB.items
@@ -152,7 +155,10 @@ function ns.NoteItem(itemID, name)
     items[itemID] = entry
   end
   if name and name ~= "" then entry.name = name end
-  if entry.sell == nil then entry.sell = ns.ItemSellPrice(itemID) end
+  if not sellChecked[itemID] then
+    local sell = ns.ItemSellPrice(itemID)
+    if sell then entry.sell, sellChecked[itemID] = sell, true end
+  end
 end
 
 function ns.AddScan(scan)

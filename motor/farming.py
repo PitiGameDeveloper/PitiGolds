@@ -12,7 +12,7 @@ import sqlite3
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from .pricing import AH_CUT, ItemPrice
+from .pricing import ItemPrice
 
 DAY = 86400
 SEGMENT_GAP = 15 * 60
@@ -115,7 +115,7 @@ def value_sessions(conn: sqlite3.Connection, sessions: list[FarmSession], prices
             unit_week = unit
             sig = signals.get(item_id)
             if p and p.net_sale and sig is not None and sig.forecast_7d:
-                unit_week = round(sig.forecast_7d * (1 - AH_CUT))
+                unit_week = p.net_of(sig.forecast_7d)
             if not unit:
                 s.unpriced.append(name)
             s.value_now += unit * n

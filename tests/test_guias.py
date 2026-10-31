@@ -64,11 +64,11 @@ class Catalogo(unittest.TestCase):
 
     def evaluate(self, farm_summary=()):
         resolved, _ = resolve_items(self.conn, self.entries)
-        prices = {4611: ItemPrice(4611, "Perla azul", market=2 * G, vendor_sell=500),
-                  2452: ItemPrice(2452, "Cardo veloz", market=3000),
-                  5000: ItemPrice(5000, "Pluma vibrante", vendor_sell=825),
-                  7078: ItemPrice(7078, "Esencia de Fuego", market=4 * G),
-                  7080: ItemPrice(7080, "Esencia de agua", market=2 * G)}
+        prices = {4611: ItemPrice(4611, "Perla azul", market=2 * G, vendor_sell=500, stack_size=20),
+                  2452: ItemPrice(2452, "Cardo veloz", market=3000, stack_size=20),
+                  5000: ItemPrice(5000, "Pluma vibrante", vendor_sell=825, stack_size=20),
+                  7078: ItemPrice(7078, "Esencia de Fuego", market=4 * G, stack_size=10),
+                  7080: ItemPrice(7080, "Esencia de agua", market=2 * G, stack_size=10)}
         signals = {4611: MarketSignals(current=2 * G, median=2 * G, quantity=40, points=8, span_days=3,
                                        sales_per_day=20)}
         methods = evaluate_catalog(self.conn, self.entries, resolved, prices, signals, [], list(farm_summary))
@@ -79,8 +79,8 @@ class Catalogo(unittest.TestCase):
         self.assertEqual(by_id["perla-azul"].lacking, [])
         self.assertEqual(by_id["cardo"].lacking, ["Botánica 70 (tienes 60)"])
         self.assertEqual(by_id["lejos"].lacking, ["nivel 55 (tu máximo: 32)"])
-        # La perla mueve 20 al día: el 30 % a 1,9 o sin comisión.
-        self.assertEqual(by_id["perla-azul"].market_day, round(20 * 0.3 * 19000))
+        # La perla mueve 20 al día: el 30 % a 1,9 o sin comisión, menos 5 c de depósito (pila de 20).
+        self.assertEqual(by_id["perla-azul"].market_day, round(20 * 0.3 * 18995))
         self.assertTrue(by_id["arpias"].items[0].to_vendor)
         timed = [m.entry.id for m in ordered if m.entry.kind == "farmeo"]
         self.assertEqual(timed[:2], ["perla-azul", "arpias"])   # primero lo que puedes hacer, por mercado
@@ -93,8 +93,9 @@ class Catalogo(unittest.TestCase):
 
     def test_diario(self):
         by_id, _ = self.evaluate()
-        # 3 esencias al azar entre fuego (3,8 o sin comisión) y agua (1,9 o).
-        self.assertEqual(by_id["estudio"].daily_value, round(3 * (38000 + 19000) / 2))
+        # 3 esencias al azar entre fuego (3,8 o sin comisión) y agua (1,9 o), menos 10 c de depósito
+        # (pila de 10).
+        self.assertEqual(by_id["estudio"].daily_value, round(3 * (37990 + 18990) / 2))
 
     def test_en_el_informe(self):
         a = analyze(self.conn, self.entries)

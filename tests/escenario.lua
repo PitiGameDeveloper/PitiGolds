@@ -5,6 +5,10 @@ Mock.itemNames = {
   [2840] = "Barra de cobre", [2845] = "Hacha de cobre", [2770] = "Mineral de cobre", [2841] = "Barra de bronce",
   [2880] = "Flujo débil", [2320] = "Hilo grueso", [19019] = "Furia del Viento",
 }
+-- Cuántos caben en una pila (lo que no sale aquí no se apila).
+Mock.stackSizes = {
+  [2589] = 20, [2592] = 20, [818] = 20, [2840] = 20, [2770] = 20, [2841] = 20, [2880] = 20, [2320] = 20,
+}
 -- Lo que paga el vendedor por unidad.
 Mock.sellPrices = {
   [2589] = 13, [2592] = 33, [818] = 150, [5000] = 500, [2840] = 10, [2845] = 18, [2770] = 5,

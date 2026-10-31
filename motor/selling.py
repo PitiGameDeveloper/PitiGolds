@@ -17,7 +17,7 @@ from .business import MARKET_SHARE
 from .crafting import CraftResult
 from .market import forecast_price
 from .money import format_money, format_pct
-from .pricing import AH_CUT, ItemPrice
+from .pricing import ItemPrice
 
 DROP_TO_WAIT = -0.20   # si está un 20 % por debajo de su mediana, mejor esperar
 SLOW_DAYS = 1.5        # a partir de aquí se avisa del ritmo de venta
@@ -158,12 +158,12 @@ def advise(conn: sqlite3.Connection, prices: dict[int, ItemPrice],
             # Barato respecto a su mediana y sin tendencia de bajada: lo normal es que se recupere.
             a.action = "esperar"
             a.unit_price = p.median
-            a.total = round(p.median * (1 - AH_CUT)) * count
+            a.total = p.net_of(p.median) * count
             a.reason = f"está un {format_pct(abs(p.deviation))} por debajo de su mediana de 7 días"
         elif rising and sig.forecast_7d and sig.forecast_7d > p.market:
             a.action = "esperar"
             a.unit_price = sig.forecast_7d
-            a.total = round(sig.forecast_7d * (1 - AH_CUT)) * count
+            a.total = p.net_of(sig.forecast_7d) * count
             a.reason = "está subiendo: " + _why(sig)
         else:
             a.action = "subastar"
@@ -171,7 +171,7 @@ def advise(conn: sqlite3.Connection, prices: dict[int, ItemPrice],
             a.unit_price = max((p.min_price or p.market) - 1, floor)
             a.plan = plan = sell_plan(count, p, sig)
             expected = min(a.unit_price, plan.avg_price) if plan.avg_price else a.unit_price
-            a.total = round(expected * (1 - AH_CUT)) * count
+            a.total = p.net_of(expected) * count
             notes = []
             if falling:
                 slow = plan.days is not None and plan.days > SLOW_DAYS

@@ -32,6 +32,8 @@ class HistorialYConsejos(unittest.TestCase):
         self.conn = dbmod.connect(Path(self.tmp.name) / "p.db")
         c = self.conn
         c.executemany("INSERT INTO items VALUES (?, ?, ?)", [(1, "Hundido", 5), (2, "Disparado", 5)])
+        c.executemany("INSERT INTO gd_items (item_id, name, stackable) VALUES (?, ?, 20)",
+                      [(1, "Hundido"), (2, "Disparado")])
         # Cuatro días a 100 y hoy: el 1 cae a 70 y el 2 sube a 200.
         history = [(100, 100)] * 4 + [(70, 200)]
         for day, (p1, p2) in enumerate(history):

@@ -39,7 +39,6 @@ from .crafting import CraftResult
 from .leveling import plan_leveling
 from .money import format_money
 from .planner import Settings, load_settings
-from .pricing import AH_CUT
 from .recoleccion import GATHERING, Stretch, gathering_hours, load_routes, route_lines
 from .revision import Review, Reviews, load_reviews
 
@@ -344,7 +343,7 @@ def _expected(ctx: _Context, e: CatalogEntry, resolved: dict[str, int]) -> tuple
         cap = s.sales_per_day * MARKET_SHARE / hours_day if s is not None and s.sales_per_day else None
         to_ah = qty if cap is None else min(qty, cap)
         rest = qty - to_ah
-        ah_week = round(s.forecast_7d * (1 - AH_CUT)) if s is not None and s.forecast_7d else ah
+        ah_week = p.net_of(s.forecast_7d) if s is not None and s.forecast_7d else ah
         now += to_ah * ah + rest * vendor
         week += to_ah * max(ah_week, vendor) + rest * vendor
         text = f"{qty:g} {name}/h a {format_money(ah)} en la subasta"
