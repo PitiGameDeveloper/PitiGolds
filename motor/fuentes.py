@@ -114,16 +114,33 @@ def parse_feed(data: bytes, source: str) -> list[Novelty]:
     return items
 
 
+def first_link(path: Path) -> str | None:
+    """El primer enlace de un archivo de texto o Word: el vídeo de una transcripción, por ejemplo."""
+    try:
+        if path.suffix.lower() == ".docx":
+            text = word_text(path)
+        elif path.suffix.lower() == ".pdf":
+            return None
+        else:
+            text = path.read_text(encoding="utf-8", errors="ignore")[:20000]
+    except (OSError, zipfile.BadZipFile, ET.ParseError, KeyError):
+        return None
+    found = re.search(r"https?://[^\s<>\"')\]]+", text)
+    return found.group(0).rstrip(".,;:") if found else None
+
+
 def local_files(folder: Path = LOCAL_DIR) -> list[Novelty]:
-    """Archivos de fuentes/. Si cambias uno, vuelve a salir como novedad."""
+    """Archivos de fuentes/. Si cambias uno, vuelve a salir como novedad. Si dentro hay un enlace
+    (el vídeo de una transcripción), sale en el resumen."""
     if not folder.is_dir():
         return []
     items = []
     for path in sorted(folder.iterdir()):
         if path.is_file() and path.suffix.lower() in LOCAL_SUFFIXES:
             mtime = int(path.stat().st_mtime)
+            link = first_link(path)
             items.append(Novelty(key=f"archivo|{path.name}|{mtime}", source="fuentes/", title=path.name,
-                                 url=str(path), published=mtime))
+                                 url=str(path), published=mtime, summary=f"Enlace: {link}" if link else ""))
     return items
 
 

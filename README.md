@@ -13,6 +13,59 @@ Addon personal para WoW Forever que ayuda a decidir en qué gastar el tiempo par
   tus precios y tus personajes, las esperas de las recetas y el talento de Legacy de subir profesión.
 - **Fase 4 (hecha):** el asesor de Claude Code (`asesor/`), que te dice qué hacer cada sesión y busca
   métodos nuevos en lo publicado los últimos 7 días.
+- **Fase 5 (hecha):** la ventana de métodos del addon: el mejor farmeo para ti, la pestaña de farmeos y
+  la de crafteos, con lo que te falta para cada uno y los pasos exactos.
+
+## La ventana de métodos (Fase 5)
+
+En el panel pequeño del juego, **Mejor farmeo** (o `/pg metodos`) abre la ventana de métodos. Arriba te
+dice qué hacer, y debajo hay dos pestañas. Se calcula sin IA cada vez que el motor lee tus datos, así que
+cada método guardado se vuelve a comprobar con tus últimos precios. Lo nuevo se ve tras un `/reload`.
+
+**Arriba, el mejor farmeo para ti ahora mismo:**
+- **Mejor farmeo: X**: el que ya puedes hacer con algún personaje, llega al mínimo de oro por hora y da al
+  menos el 60 % del mejor de todos. Si hay crafteos en verde, te dice que los hagas antes (son pocos
+  minutos al día porque el mercado no absorbe más).
+- **Lo que ya puedes hacer rinde poco**: los que rinden más piden prepararse. Salen los tres mejores, con
+  lo que le falta al personaje más cercano y lo que cuesta (horas y oro).
+- **Ningún método guardado da dinero ahora**: se han saturado o ya no funcionan. Toca una sesión de
+  investigación con el asesor (dile «investiga»).
+
+**Pestaña Farmeos** (farmeos, pesca y mazmorras, más los que has medido tú):
+
+| Columna | Qué es |
+|---|---|
+| Farmeo | El método. «En espera» si el asesor tiene una pregunta pendiente para ti: no se recomienda hasta que la contestes. |
+| Nota | Del 1 al 10, la que le pone el asesor según tus personajes (`/revisar`). |
+| Rinde | Verde: da al menos el 60 % del mejor. Amarillo: llega al mínimo (5 oro/h; `ajustes --minimo-hora`). Rojo: no da dinero. |
+| Oro/h | Medido si lo has medido; si no, el esperado (con *): lo que da en una hora según la investigación, valorado con tus precios. De cada objeto solo va a la subasta lo que el mercado absorbe en tus horas de juego; el resto, al vendedor. Si sus objetos van a bajar, cuenta lo que valdrán dentro de 7 días. |
+| ¿Puedo? | Sí, con qué personaje, o no; entre paréntesis lo que pide (nivel, profesión). |
+| Nivel | El recomendado y, entre paréntesis, desde cuál ya se puede aunque rinda menos. |
+
+**Pestaña Crafteos:**
+
+| Columna | Qué es |
+|---|---|
+| Crafteo | Lo que se fabrica y su profesión. |
+| Nota | La del asesor. |
+| Beneficio/u | Por unidad, ya sin materiales ni comisión (* si los precios son de pocos escaneos). |
+| Al día | Las que absorbe el mercado al día sin hundir el precio (o las que deja la espera de la receta). |
+| ¿Puedo? | Verde: ya la sabe hacer un personaje. Amarillo: casi (le faltan 25 puntos o menos y la receta se compra en un momento). Naranja: le falta algo (hasta 75 puntos, un poco de reputación o de divisas, o no se sabe de dónde sale la receta). Rojo: falta mucho (más puntos, receta de botín, mucha reputación o ninguna profesión libre). |
+
+**Al pulsar un método** se despliega lo que se sabe de él: la opinión del asesor y sus pasos, de dónde
+sale el oro, quién puede hacerlo y, si nadie, qué le falta al más cercano y cómo prepararlo. Para subir
+Botánica, Minería, Desollar o Pesca, la ruta por zonas según tu facción (`conocimiento/recoleccion.json`).
+En los farmeos, **Medir este farmeo** empieza a medirlo con su id.
+
+En los crafteos salen los pasos exactos con tus personajes:
+- **Si nadie sabe la receta**: «Conéctate con tu Mago (Sastrería 235), viaja a X y cómprale la receta
+  a Y». Cuando la aprendas, pulsa **Actualizar**.
+- **Si ya la sabes**, la lista de la compra con lo que tienes, contando bolsas, banco, buzón y banco de
+  banda de todos tus personajes: qué le tiene que enviar cada personaje por correo al que fabrica, qué
+  comprar a qué vendedor (y en qué zona) y en la subasta, cuántas fabricar y a qué precio ponerlas.
+
+La zona de cada vendedor se apunta al abrir su ventana. `datos/panel.md` tiene lo mismo que la ventana,
+para leerlo en el PC.
 
 ## El asesor (Fase 4)
 
@@ -22,12 +75,17 @@ extra. Ábrela como carpeta de una sesión en Claude Code (la app de escritorio,
 | Pídele | Qué hace |
 |---|---|
 | «¿Qué hago hoy? Tengo 2 horas» (`que-hago`) | Lee tus datos y te da un plan: qué vender y a qué ritmo, qué craftear, qué farmear y qué medir. |
-| «Busca métodos nuevos» (`buscar-metodos`) | Revisa lo publicado en los últimos 7 días y añade al catálogo los métodos concretos que encuentre. |
+| «Investiga» o «Busca métodos nuevos» (`buscar-metodos`) | Sesión de investigación: lee lo que has dejado en `fuentes/` y lo publicado en los últimos 7 días, y añade al catálogo los métodos concretos con lo que dan por hora. Lo que no se entienda sin ver un vídeo te lo pregunta, con el enlace. |
+| «Revisa los métodos» (`revisar`) | Pone nota del 1 al 10 a cada farmeo y crafteo según tus personajes, con el porqué y los pasos. Sale en el addon. |
 | «Mira los chollos» (`chollos`) | Comprueba en Wowhead si algún vendedor vende los posibles chollos y lo apunta. |
 | «¿Me compensa subir Sastrería?» (`subir-profesion`) | Guía de subida, coste, y si se recupera según el comparador. |
 
-El asesor no hace cuentas: las hace el motor y él las lee y te las explica. Solo edita el catálogo de
-métodos y la lista de fuentes; el código no lo toca.
+El asesor no hace cuentas: las hace el motor y él las lee y te las explica. Solo edita los archivos de
+`conocimiento/` (métodos, sus notas, rutas de recolección y fuentes); el código no lo toca.
+
+**Transcripciones de vídeos**: guárdalas como `.txt` (o `.docx`) en `fuentes/` con el enlace del vídeo
+dentro, por ejemplo en la primera línea. El asesor no puede ver vídeos: si la transcripción no basta («farmea
+aquí» señalando el mapa), te pregunta lo concreto con el enlace y el minuto, y el método queda en espera.
 
 **Para gastar pocos tokens**, `buscar-metodos` no lee internet a lo loco:
 
@@ -47,7 +105,7 @@ y los archivos nuevos que dejes en `fuentes/`. El asesor criba por el título y 
 **Activar los comandos con barra (`/que-hago`...).** Sin esto el asesor funciona igual, pidiéndoselo con
 tus palabras. Claude no puede escribir su propia configuración, así que este paso lo haces tú:
 
-1. Crea la carpeta `asesor\.claude\commands\` y copia en ella los cuatro archivos de `asesor\comandos\`.
+1. Crea la carpeta `asesor\.claude\commands\` y copia en ella los archivos de `asesor\comandos\`.
 2. Si quieres que no te pida permiso cada vez que lanza el motor o mira Wowhead, crea
    `asesor\.claude\settings.json` con esto:
 
@@ -127,8 +185,11 @@ con lo tuyo:
 - lo que valen hoy sus objetos en la subasta, o lo que paga el vendedor si es más;
 - **mercado al día**: lo que podrías sacar al día vendiendo sus objetos sin hundir el precio;
 - si alguno de tus personajes puede hacerlo ya, o qué te falta (nivel o profesión);
+- **lo que da por hora** (`por_hora`: cuántos objetos y cuánto oro suelto), que apunta el asesor al
+  investigar y el motor valora con tus precios;
 - y tu oro por hora de verdad cuando lo mides: `/pg farmeo <id>` al empezar (por ejemplo
-  `/pg farmeo tuercespina-basiliscos`) y `/pg farmeo fin` al acabar. Desde ahí pasa al comparador.
+  `/pg farmeo tuercespina-basiliscos`), o **Medir este farmeo** en la ventana de métodos, y
+  `/pg farmeo fin` al acabar. Desde ahí manda tu medida.
 
 Los diez mejores salen en el informe y todos en `datos/metodos.md`:
 
@@ -151,13 +212,13 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 | `motor/` | Programa en Python, sin IA, que lee lo que guarda el addon y lo pasa a `datos/pitigolds.db` (SQLite). |
 | `tests/` | Un WoW simulado para probar el addon fuera del juego. |
 | `asesor/` | El asesor de Claude Code: sus instrucciones (`CLAUDE.md`), sus guiones (`comandos/`) y `pg.py`, que lanza el motor desde ahí. |
-| `conocimiento/` | Métodos de tus guías (`metodos.json`), escritos con otras palabras, y las fuentes que revisa el asesor (`fuentes.json`). |
+| `conocimiento/` | Métodos de tus guías (`metodos.json`), escritos con otras palabras; las notas del asesor (`revision.json`); rutas de recolección (`recoleccion.json`), y las fuentes que revisa el asesor (`fuentes.json`). |
 | `fuentes/` | Las guías tal cual (PDF, Word...). Solo en tu PC: no se suben a GitHub. |
 
 ## Uso diario
 
 1. Haz doble clic en **`vigilar.cmd`** y deja esa ventana abierta mientras juegas.
-2. En el juego verás un panel pequeño, **PitiGolds**, con el botón **Exportar**. Puedes moverlo arrastrándolo.
+2. En el juego verás un panel pequeño, **PitiGolds**, con los botones **Mejor farmeo** y **Exportar**. Puedes moverlo arrastrándolo.
 3. En la casa de subastas aparecen dos botones encima de la ventana:
    - **PG: Materiales**: recorre materiales, consumibles, recetas y gemas. Guarda el precio mínimo y la cantidad total de cada objeto. Se puede repetir cuando quieras.
    - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores. El servidor solo lo permite **cada 15 minutos**.
@@ -348,6 +409,7 @@ Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 | `/pg estado` | Qué hay guardado y cuánto hace que lo leyó el motor |
 | `/pg log` | Últimas líneas del registro, con los errores si los hay |
 | `/pg panel` | Muestra u oculta el panel |
+| `/pg metodos` | Abre la ventana de métodos (igual que el botón Mejor farmeo) |
 | `/pg farmeo Cobre en Durotar` | Pone nombre a lo que farmeas desde ahora (`/pg farmeo fin` lo quita; `/pg farmeo` a secas dice cuánto llevas en la última hora) |
 
 ## Primer día de WoW Forever: qué comprobar

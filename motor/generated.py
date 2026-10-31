@@ -6,6 +6,9 @@ Lleva:
   prices        "mercado,mediana,tendencia" de tus objetos y de los materiales de tus
                 recetas, para el tooltip. Tendencia: b (baja), s (sube) o vacía.
   craft         coste y beneficio por unidad de lo que sabes fabricar.
+  lastScan      hora del último escaneo de la subasta.
+  methods       la ventana de métodos: el mejor farmeo y las pestañas de farmeos y crafteos
+                (panel.py).
 """
 
 from __future__ import annotations
@@ -15,14 +18,43 @@ import time
 from pathlib import Path
 
 from .analysis import Analysis, analyze
+from .panel import Panel, build_panel, panel_export
 
 HEADER = "-- Este archivo lo escribe el motor de PitiGolds (python -m motor). No lo edites a mano."
 TREND_CODES = {"baja": "b", "sube": "s"}
 FARM_KEEP_SECONDS = 600
 
 
+def lua_value(value, indent: str = "  ") -> str:
+    """Un valor de Python escrito como Lua: dict -> tabla con claves, list -> lista."""
+    if value is None:
+        return "nil"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        return f"{value:.4g}" if value == value and abs(value) != float("inf") else "nil"
+    if isinstance(value, str):
+        text = value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "")
+        return f'"{text}"'
+    inner = indent + "  "
+    if isinstance(value, dict):
+        items = [(k, v) for k, v in value.items() if v is not None]
+        if not items:
+            return "{}"
+        parts = [(f"{k} = " if isinstance(k, str) and k.isidentifier() else f"[{lua_value(k)}] = ")
+                 + lua_value(v, inner) for k, v in items]
+    else:
+        if not value:
+            return "{}"
+        parts = [lua_value(v, inner) for v in value]
+    return "{\n" + "".join(f"{inner}{part},\n" for part in parts) + indent + "}"
+
+
 def render_generated(ingested_up_to: int, analysis: Analysis, now: int | None = None,
-                     farm_ingested_up_to: int = 0, ledger_ingested_up_to: int = 0) -> str:
+                     farm_ingested_up_to: int = 0, ledger_ingested_up_to: int = 0,
+                     panel: Panel | None = None) -> str:
     lines = [
         HEADER,
         "PitiGoldsGenerated = {",
@@ -43,11 +75,16 @@ def render_generated(ingested_up_to: int, analysis: Analysis, now: int | None = 
     for item_id, c in sorted(analysis.best_known_craft().items()):
         lines.append(f'    [{item_id}] = "{round(c.cost / c.output_qty)},{round(c.profit / c.output_qty)}",')
     lines.append("  },")
+    if analysis.last_scan:
+        lines.append(f"  lastScan = {int(analysis.last_scan)},")
+    if panel is not None:
+        lines.append(f"  methods = {lua_value(panel_export(panel))},")
     lines.append("}")
     return "\n".join(lines) + "\n"
 
 
-def write_generated(conn: sqlite3.Connection, addon_dir: Path, analysis: Analysis | None = None) -> Path | None:
+def write_generated(conn: sqlite3.Connection, addon_dir: Path, analysis: Analysis | None = None,
+                    panel: Panel | None = None) -> Path | None:
     if not addon_dir.is_dir():
         return None
     ingested_up_to = conn.execute("SELECT COALESCE(MAX(time), 0) FROM scans").fetchone()[0]
@@ -56,8 +93,10 @@ def write_generated(conn: sqlite3.Connection, addon_dir: Path, analysis: Analysi
     newest_farm = conn.execute("SELECT MAX(t) FROM farm_buckets").fetchone()[0]
     farm_up_to = newest_farm - FARM_KEEP_SECONDS if newest_farm else 0
     ledger_up_to = conn.execute("SELECT COALESCE(MAX(t), 0) FROM ledger").fetchone()[0]
-    content = render_generated(ingested_up_to, analysis if analysis is not None else analyze(conn),
-                               farm_ingested_up_to=farm_up_to, ledger_ingested_up_to=ledger_up_to)
+    analysis = analysis if analysis is not None else analyze(conn)
+    panel = panel if panel is not None else build_panel(conn, analysis)
+    content = render_generated(ingested_up_to, analysis, farm_ingested_up_to=farm_up_to,
+                               ledger_ingested_up_to=ledger_up_to, panel=panel)
     target = addon_dir / "Generated.lua"
     tmp = target.with_suffix(".tmp")
     tmp.write_text(content, encoding="utf-8")

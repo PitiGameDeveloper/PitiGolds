@@ -7,7 +7,8 @@ cada servidor es distinto, así que cada método se valora con tus precios:
   - qué valen hoy sus objetos en la subasta (o lo que paga el vendedor por ellos),
   - cuánto se vende de ellos al día (lo máximo que el mercado te deja sacar),
   - si alguno de tus personajes puede hacerlo ya (nivel y profesiones),
-  - y, cuando lo mides con /pg farmeo <id>, tu oro por hora de verdad.
+  - cuántos objetos da por hora (`por_hora`, estimado al investigar) y, cuando lo mides con
+    /pg farmeo <id>, tu oro por hora de verdad.
 
 Los objetos se buscan por su nombre en inglés o en español en los datos del juego, así que
 el catálogo se puede rellenar copiando los nombres de una guía en inglés.
@@ -55,6 +56,11 @@ class CatalogEntry:
     notes: str = ""
     source: str = ""
     added: str = ""
+    min_level: int = 0                   # con este nivel ya se puede, aunque rinda menos
+    per_hour: list[tuple[str, float]] = field(default_factory=list)   # (objeto, unidades por hora)
+    coins_per_hour: int = 0              # cobre por hora de monedas y basura de vendedor
+    link: str = ""
+    pending: str = ""                    # pregunta sin resolver: no se recomienda hasta resolverla
 
 
 class CatalogError(ValueError):
@@ -121,6 +127,22 @@ def catalog_problems(path: Path = CATALOG_PATH, known_lines: set[int] | None = N
                 check_line(where, p["id"])
         for line in m.get("profesiones_alguna", []) + m.get("mejor_con", []):
             check_line(where, line)
+        if "nivel_minimo" in m and not (isinstance(m["nivel_minimo"], int) and 0 <= m["nivel_minimo"] <= 80):
+            problems.append(f"{where}: «nivel_minimo» debe ser un número de 0 a 80")
+        per_hour = m.get("por_hora", [])
+        if not isinstance(per_hour, list):
+            problems.append(f"{where}: «por_hora» debe ser una lista")
+            per_hour = []
+        for o in per_hour:
+            if (not isinstance(o, dict) or not isinstance(o.get("objeto"), str) or not o["objeto"].strip()
+                    or not isinstance(o.get("cantidad"), (int, float)) or o["cantidad"] <= 0
+                    or not isinstance(o.get("id", 0), int)):
+                problems.append(f"{where}: cada «por_hora» es {{\"objeto\": \"Thick Leather\", \"cantidad\": 40}}"
+                                " (y si hace falta \"id\": 1234)")
+        if "oro_hora" in m and not (isinstance(m["oro_hora"], (int, float)) and m["oro_hora"] >= 0):
+            problems.append(f"{where}: «oro_hora» es el oro por hora de monedas y basura, un número")
+        if m.get("enlace") and not str(m["enlace"]).startswith("http"):
+            problems.append(f"{where}: «enlace» debe empezar por http")
         if m.get("tipo") == "vendedor" and not m.get("vendedor"):
             problems.append(f"{where}: a un método de vendedor le falta «vendedor»")
         if "fecha" in m and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(m["fecha"])):
@@ -148,6 +170,14 @@ def load_catalog(path: Path = CATALOG_PATH) -> list[CatalogEntry]:
                     ids[o["nombre"]] = int(o["id"])
             else:
                 names.append(o)
+        per_hour = []
+        for o in m.get("por_hora", []):
+            if isinstance(o, dict) and o.get("objeto") and o.get("cantidad"):
+                per_hour.append((o["objeto"], float(o["cantidad"])))
+                if o["objeto"] not in names:
+                    names.append(o["objeto"])
+                if o.get("id"):
+                    ids[o["objeto"]] = int(o["id"])
         entries.append(CatalogEntry(
             id=m["id"], name=m.get("nombre", m["id"]), kind=m.get("tipo", "farmeo"), level=m.get("nivel", 0),
             zone=m.get("zona", ""),
@@ -155,7 +185,9 @@ def load_catalog(path: Path = CATALOG_PATH) -> list[CatalogEntry]:
             any_profession=list(m.get("profesiones_alguna", [])), better_with=list(m.get("mejor_con", [])),
             items=names, item_ids=ids, vendor=m.get("vendedor", ""), quantity=m.get("cantidad", 1),
             requirement=m.get("requisito", ""), notes=m.get("notas", ""), source=m.get("fuente", ""),
-            added=m.get("fecha", "")))
+            added=m.get("fecha", ""), min_level=m.get("nivel_minimo", 0), per_hour=per_hour,
+            coins_per_hour=round(float(m.get("oro_hora", 0)) * 10000), link=m.get("enlace", ""),
+            pending=m.get("pendiente", "")))
     return entries
 
 

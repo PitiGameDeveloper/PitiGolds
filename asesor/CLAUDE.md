@@ -19,22 +19,26 @@ Ejecútalo desde esta carpeta (si no existe `../.venv`, usa `python` a secas):
 |---|---|
 | `leer` | Pasa a la base de datos lo último que guardó el addon y rehace el informe |
 | `informe` | Rehace `../datos/informe.md` |
-| `metodos` | Comprueba el catálogo de métodos y rehace `../datos/metodos.md` |
+| `metodos` | Comprueba el conocimiento y rehace la ventana de métodos del addon y `../datos/panel.md` |
 | `guia <profesión> [--desde N] [--hasta N]` | Guía de subida con su coste |
 | `chollos [--todos]` / `chollo <id> nadie\|vende "detalle"` | Posibles chollos de vendedor |
 | `fuentes [--dias N]` / `fuentes --hecho [N ...]` | Novedades de las fuentes sin revisar |
-| `ajustes [--horas-semana N] [--semanas N] [--legado-subida N]` | Ajustes del comparador |
+| `ajustes [--horas-semana N] [--semanas N] [--legado-subida N] [--minimo-hora N]` | Ajustes (horas de juego, talento de Legacy, oro/h mínimo) |
 | `estado` | Resumen de personajes, oro y profesiones |
 
 Archivos (en la carpeta de arriba):
+- `../datos/panel.md`: lo mismo que la ventana de métodos del addon: el mejor farmeo, la tabla de farmeos,
+  la de crafteos, lo que está sin revisar y el detalle de cada uno. Empieza por aquí.
 - `../datos/informe.md`: el informe. Léelo por secciones (`## ...`), no entero si no hace falta.
 - `../datos/metodos.md`: todos los métodos de las guías, con los precios de Piti.
 - `../datos/guias/*.md`: guías de subida.
 - `../conocimiento/metodos.json`: el catálogo de métodos. Su primer campo (`_formato`) explica cada campo.
+- `../conocimiento/revision.json`: tus notas de cada método (nota, por qué, pasos). Las enseña el addon.
+- `../conocimiento/recoleccion.json`: rutas para subir Botánica, Minería, Desollar y Pesca.
 - `../conocimiento/fuentes.json`: las fuentes que revisa `/buscar-metodos`.
 - `../fuentes/`: guías compradas por Piti. Son privadas: no copies su texto a ningún sitio.
 
-Solo editas `../conocimiento/metodos.json` y `../conocimiento/fuentes.json`. No toques `addon/`,
+Solo editas los archivos de `../conocimiento/` (metodos, revision, recoleccion y fuentes). No toques `addon/`,
 `motor/` ni `tests/`: eso se cambia en el proyecto principal. Si ves un fallo del motor, explícaselo a
 Piti para que lo pida allí.
 
@@ -50,6 +54,8 @@ Piti para que lo pida allí.
 5. **Ahorra tokens.** `fuentes` enseña solo lo nuevo; abre a fondo como mucho 5 cosas por búsqueda y no
    leas archivos enteros si basta una sección.
 6. **No copies las fuentes.** Escribe con tus palabras; como mucho, una frase corta citada.
+7. **No puedes ver vídeos.** Si una transcripción no basta, pregúntale a Piti lo concreto, con el enlace
+   y el minuto, y deja la duda en `pendiente` del método hasta que conteste.
 
 ## Comandos de Piti
 
@@ -57,8 +63,10 @@ Cada uno tiene su guion en `comandos/`. Cuando Piti lo pida, con la barra o con 
 hoy?», «busca métodos nuevos»...), lee el guion y síguelo. `$ARGUMENTS` es lo que Piti añada.
 
 - `que-hago [horas]` (`comandos/que-hago.md`): plan para la sesión de hoy.
-- `buscar-metodos [días]` (`comandos/buscar-metodos.md`): lo publicado estos días, convertido en métodos
-  del catálogo.
+- `buscar-metodos [días]` (`comandos/buscar-metodos.md`): sesión de investigación. Lo que Piti ha dejado
+  en `../fuentes/` y lo publicado estos días, convertido en métodos del catálogo con lo que dan por hora.
+  También cuando Piti diga «investiga» (el addon se lo pide si ningún método guardado da dinero).
+- `revisar [qué]` (`comandos/revisar.md`): nota del 1 al 10, por qué y pasos de cada método para Piti.
 - `chollos` (`comandos/chollos.md`): comprueba fuera del juego si algún vendedor vende los posibles chollos.
 - `subir-profesion <profesión> [nivel]` (`comandos/subir-profesion.md`): si compensa subirla, cuánto
   cuesta y cómo.

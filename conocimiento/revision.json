@@ -1,0 +1,6 @@
+{
+  "_formato": "Lo que opina el asesor de cada método para la situación de Piti (sus personajes, profesiones, nivel y precios). La rellena el asesor al revisar (/revisar). farmeos: por id de metodos.json. crafteos: por número de receta (sale en datos/panel.md). nota: del 1 al 10. por_que: por qué es bueno o malo para Piti, en una o dos frases. pasos: los pasos exactos (dónde ir, qué matar o recoger, qué vender y dónde). receta (crafteos, si los datos del juego no lo dicen): {\"como\": instructor, vendedor, subasta, botin, reputacion o mision, \"donde\": quién la vende o dónde cae, \"precio\": ..., \"requisito\": reputación o divisas}. fecha: cuándo se revisó.",
+  "fecha": "",
+  "farmeos": {},
+  "crafteos": {}
+}

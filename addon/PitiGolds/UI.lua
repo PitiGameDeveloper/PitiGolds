@@ -1,5 +1,5 @@
--- Interfaz mínima: un panel movible con el botón Exportar y dos botones de
--- escaneo encima de la ventana de la subasta.
+-- Interfaz mínima: un panel movible con los botones Mejor farmeo (abre la ventana de
+-- métodos) y Exportar, y dos botones de escaneo encima de la ventana de la subasta.
 local ADDON, ns = ...
 
 local panel, statusText
@@ -31,7 +31,7 @@ end
 
 local function CreatePanel()
   panel = CreateFrame("Frame", "PitiGoldsPanel", UIParent, "BackdropTemplate")
-  panel:SetSize(170, 88)
+  panel:SetSize(170, 112)
   local p = PitiGoldsDB.ui.point
   if p then
     panel:SetPoint(p[1], UIParent, p[2], p[3], p[4])
@@ -67,6 +67,12 @@ local function CreatePanel()
   export:SetPoint("BOTTOM", 0, 6)
   export:SetText("Exportar")
   export:SetScript("OnClick", ns.Export)
+
+  local best = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+  best:SetSize(154, 20)
+  best:SetPoint("BOTTOM", 0, 28)
+  best:SetText("Mejor farmeo")
+  best:SetScript("OnClick", function() ns.Methods.Toggle() end)
 
   if PitiGoldsDB.ui.hidden then panel:Hide() end
 end

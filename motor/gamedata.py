@@ -26,9 +26,9 @@ PRODUCT = "wowf"
 LOCALE = "esES"
 USER_AGENT = "PitiGolds (addon personal; https://github.com/PitiGameDeveloper)"
 TABLES = ["SkillLine", "SkillLineAbility", "SpellName", "SpellEffect", "SpellReagents",
-          "ItemSparse", "Item", "ItemEffect", "ItemXItemEffect", "SpellCooldowns", "SpellCategories"]
+          "ItemSparse", "Item", "ItemEffect", "ItemXItemEffect", "SpellCooldowns", "SpellCategories", "Faction"]
 ENGLISH_TABLES = ["ItemSparse"]  # se bajan también en inglés: <tabla>.enUS.csv
-FORMAT = 2  # sube cuando se importan datos nuevos: obliga a reimportar aunque la versión no cambie
+FORMAT = 3  # sube cuando se importan datos nuevos: obliga a reimportar aunque la versión no cambie
 
 PROFESSION_CATEGORIES = {9, 11}  # SkillLine.CategoryID: secundarias (cocina, pesca...) y principales
 EFFECT_CREATE_ITEM = 24
@@ -193,10 +193,12 @@ def import_tables(conn: sqlite3.Connection, folder: Path, build: str) -> ImportR
         items.append((item, r["Display_lang"], _int(r["OverallQualityID"]), cls[0], cls[1],
                       _int(r["BuyPrice"]), _int(r["SellPrice"]), max(1, _int(r["VendorStackCount"])),
                       _int(r["Stackable"]), _int(r["Bonding"]), _int(r["RequiredSkill"]),
-                      _int(r["RequiredSkillRank"]), english.get(item)))
+                      _int(r["RequiredSkillRank"]), english.get(item),
+                      _int(r.get("MinFactionID")) or None, _int(r.get("MinReputation")) or None))
+    factions = [(_int(r["ID"]), r["Name_lang"]) for r in _rows(folder, "Faction") if r.get("Name_lang")]
 
     with conn:
-        for table in ("gd_skill_lines", "gd_recipes", "gd_reagents", "gd_items"):
+        for table in ("gd_skill_lines", "gd_recipes", "gd_reagents", "gd_items", "gd_factions"):
             conn.execute(f"DELETE FROM {table}")
         conn.executemany("INSERT INTO gd_skill_lines VALUES (?, ?, ?, ?)",
                          [(k, *v) for k, v in skill_lines.items()])
@@ -207,8 +209,9 @@ def import_tables(conn: sqlite3.Connection, folder: Path, build: str) -> ImportR
         conn.executemany("INSERT INTO gd_reagents VALUES (?, ?, ?)", reagents)
         conn.executemany(
             "INSERT INTO gd_items (item_id, name, quality, class_id, subclass_id, buy_price, sell_price, "
-            "vendor_stack, stackable, bonding, required_skill, required_skill_rank, name_en) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", items)
+            "vendor_stack, stackable, bonding, required_skill, required_skill_rank, name_en, min_faction, "
+            "min_reputation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", items)
+        conn.executemany("INSERT INTO gd_factions VALUES (?, ?)", factions)
         set_meta(conn, "game_data_build", build)
         set_meta(conn, "game_data_updated", str(int(time.time())))
         set_meta(conn, "game_data_format", str(FORMAT))

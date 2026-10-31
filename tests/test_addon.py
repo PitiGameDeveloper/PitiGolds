@@ -17,6 +17,8 @@ from motor import db as dbmod
 from motor.analysis import analyze
 from motor.generated import write_generated
 from motor.ingest import ingest_file
+from motor.panel import build_panel
+from motor.revision import Reviews
 from motor.report import build_advice_report, build_report
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -237,7 +239,8 @@ class AddonMasMotor(unittest.TestCase):
             self.assertIn("Hacha de cobre", advice)
             self.assertIn("Profesiones sin abrir todavía", advice)  # minería y cocina
 
-            generated = write_generated(conn, addon_dir, a)
+            panel = build_panel(conn, a, reviews=Reviews(), routes={})
+            generated = write_generated(conn, addon_dir, a, panel)
             conn.close()
             content = generated.read_text(encoding="utf-8")
             up_to = int(re.search(r"ingestedUpTo = (\d+)", content).group(1))
@@ -254,6 +257,44 @@ class AddonMasMotor(unittest.TestCase):
             self.assertIn("PitiGolds subasta = 3p 0c", tooltip)
             self.assertIn("PitiGolds fabricar = 1p 20c  |cff40ff40+1p 65c|r", tooltip)
             self.assertEqual(mock.Tooltip(123456), "")
+
+            # Ventana de métodos: el hacha ya la sabe hacer, así que salen los pasos con lo que tiene.
+            self.assertIn("vendor = \"Grimtak\"", content)
+            mock.ClickButton("Mejor farmeo")
+            methods = mock.ns.Methods
+            methods.Open("crafts")
+            names = [c.name for c in panel.crafts]
+            methods.Select(names.index("Hacha de cobre") + 1)
+            detail = methods.DetailText()
+            self.assertIn("Hoy: 1 × Hacha de cobre con Brujo", detail)
+            self.assertIn("Viaja a Durotar, habla con Grimtak y compra x1 Flujo débil", detail)
+            self.assertNotIn("Barra de cobre (", detail)   # las 6 barras ya están en su banco
+            self.assertIn("Fabrica x1 Hacha de cobre con Brujo.", detail)
+            self.assertIn("Ponlo en la subasta: x1 a", detail)
+
+            # Una receta sin aprender: primero cómo conseguirla; al aprenderla, los pasos para hacerla.
+            lua.execute('''
+              TestRow = { recipe = 7777, name = "Yelmo de cobre", prof = "Herrería", line = 164, who = "Alt-Dio",
+                skill = 40, craftsDay = 2, outputQty = 1, sellPrice = 5000,
+                prep = { "Alt: le faltan 10 puntos de Herrería (40/50)." },
+                learn = { way = "vendedor", vendor = "Grimtak", zone = "Orgrimmar", itemName = "Diseño: yelmo",
+                          price = 500 },
+                reagents = { { id = 2840, name = "Barra de cobre", qty = 4, price = 300, src = "subasta" } } }
+            ''')
+            steps, known = methods.CraftSteps(lua.globals().TestRow)
+            text = "\n".join(steps.values())
+            self.assertFalse(known)
+            self.assertIn("Conéctate con Alt (Herrería 40), viaja a Orgrimmar y cómprale «Diseño: yelmo» a Grimtak",
+                          text)
+            self.assertIn("pulsa Actualizar", text)
+            lua.execute('PitiGoldsDB.characters["Alt-Dio"].professions = { [164] = { skill = 50, known = { 7777 } } }')
+            steps, known = methods.CraftSteps(lua.globals().TestRow)
+            text = "\n".join(steps.values())
+            self.assertTrue(known)
+            # 8 barras: 5 le llegan por correo; 3 se las manda Brujo, que tiene 10 en el banco.
+            self.assertIn("Envía por correo a Alt: x3 Barra de cobre", text)
+            self.assertIn("Conéctate con Alt.", text)
+            self.assertIn("Fabrica x2 Yelmo de cobre con Alt.", text)
 
             mock.ClickButton("Exportar")
             self.assertTrue(mock.reloaded)

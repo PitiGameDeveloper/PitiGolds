@@ -243,11 +243,11 @@ def _ingest_vendors(conn: sqlite3.Connection, account: str, vendors: dict) -> No
     conn.execute("DELETE FROM vendor_items WHERE account = ? OR account IS NULL", (account,))
     conn.executemany(
         """INSERT OR REPLACE INTO vendor_items
-           (item_id, price, limited, vendor, costs_json, updated, account, char_key)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+           (item_id, price, limited, vendor, costs_json, updated, account, char_key, zone)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         [(iid, v.get("price"), 1 if v.get("limited") else 0, v.get("vendor"),
           json.dumps(as_list(v.get("costs")), ensure_ascii=False) if v.get("costs") else None, v.get("time"),
-          account, v.get("char"))
+          account, v.get("char"), v.get("zone"))
          for iid, v in vendors.items()],
     )
 

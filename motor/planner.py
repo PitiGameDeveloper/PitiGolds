@@ -27,6 +27,7 @@ from .leveling import LevelingPlan, plan_leveling
 
 DEFAULT_HOURS_PER_WEEK = 10.0
 DEFAULT_HORIZON_WEEKS = 4.0
+DEFAULT_MIN_GOLD_HOUR = 5.0   # por debajo de este oro por hora, un farmeo «no da dinero»
 MIN_BASELINE_HOURS = 0.5      # un farmeo de menos de media hora no sirve de referencia
 FLIP_SECONDS = 15             # comprar al vendedor y poner a la venta, por unidad
 MAX_LEARN_OPTIONS = 5
@@ -38,6 +39,7 @@ class Settings:
     hours_per_week: float = DEFAULT_HOURS_PER_WEEK
     horizon_weeks: float = DEFAULT_HORIZON_WEEKS
     legacy_skillup: float = 0.0   # % que suma el talento de Legacy a la probabilidad de subir habilidad
+    min_gold_hour: float = DEFAULT_MIN_GOLD_HOUR
 
     @property
     def skillup_bonus(self) -> float:
@@ -55,13 +57,15 @@ class Settings:
 def load_settings(conn: sqlite3.Connection) -> Settings:
     return Settings(hours_per_week=float(get_meta(conn, "play_hours_week") or DEFAULT_HOURS_PER_WEEK),
                     horizon_weeks=float(get_meta(conn, "horizon_weeks") or DEFAULT_HORIZON_WEEKS),
-                    legacy_skillup=float(get_meta(conn, "legacy_skillup_pct") or 0))
+                    legacy_skillup=float(get_meta(conn, "legacy_skillup_pct") or 0),
+                    min_gold_hour=float(get_meta(conn, "min_gold_hour") or DEFAULT_MIN_GOLD_HOUR))
 
 
 def save_settings(conn: sqlite3.Connection, settings: Settings) -> None:
     set_meta(conn, "play_hours_week", str(settings.hours_per_week))
     set_meta(conn, "horizon_weeks", str(settings.horizon_weeks))
     set_meta(conn, "legacy_skillup_pct", str(settings.legacy_skillup))
+    set_meta(conn, "min_gold_hour", str(settings.min_gold_hour))
     conn.commit()
 
 

@@ -69,6 +69,7 @@ function Frame:GetText() return self.text end
 function Frame:SetPoint(...) self.point = { ... } end
 function Frame:GetPoint() return unpack(self.point or { "CENTER", nil, "CENTER", 0, 0 }) end
 function Frame:CreateFontString() return Mock.NewFrame() end
+function Frame:CreateTexture() return Mock.NewFrame() end
 
 function Mock.NewFrame(name)
   local f = setmetatable({ events = {}, scripts = {}, shown = true, name = name }, FrameMeta)

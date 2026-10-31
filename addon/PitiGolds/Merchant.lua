@@ -34,6 +34,9 @@ end
 local function ScanMerchant()
   if not ns.merchantOpen or not GetMerchantNumItems then return end
   local vendor = UnitName("npc")
+  local zone = GetZoneText and GetZoneText() or nil
+  local sub = GetSubZoneText and GetSubZoneText() or ""
+  if zone and sub ~= "" and sub ~= zone then zone = sub .. ", " .. zone end
   local known = PitiGoldsDB.vendorItems
   local total = GetMerchantNumItems()
   local sells = {}
@@ -49,6 +52,7 @@ local function ScanMerchant()
         limited = ((numAvailable or -1) >= 0) or nil,
         costs = extended and ReadCosts(i) or nil,
         vendor = vendor,
+        zone = zone,
         -- El precio puede llevar descuentos de este personaje (reputación, talentos de Legacy).
         char = ns.charKey,
         time = time(),

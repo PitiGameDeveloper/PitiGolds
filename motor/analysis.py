@@ -31,6 +31,7 @@ class Analysis:
     vendor_candidates: list[VendorCandidate] = field(default_factory=list)
     guide_methods: list[GuideMethod] = field(default_factory=list)
     guide_unknown_items: list[str] = field(default_factory=list)   # objetos de las guías sin reconocer
+    guide_resolved: dict[str, int] = field(default_factory=dict)   # nombre en las guías -> objeto
     catalog_error: str | None = None   # el catálogo de métodos no se ha podido leer
     last_scan: int | None = None
 
@@ -107,6 +108,7 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
     result.vendor_candidates = vendor_candidates(conn, prices, crafts, result.farms)
     result.guide_methods = evaluate_catalog(conn, catalog, resolved, prices, signals, crafts, result.farm_summary)
     result.guide_unknown_items = unknown
+    result.guide_resolved = resolved
     result.catalog_error = catalog_error
     relevant = result.relevant_items()
     result.accuracy = backtest({i: p for i, p in series.items() if i in relevant}, fulls)

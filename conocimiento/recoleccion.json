@@ -1,0 +1,57 @@
+{
+  "_formato": "Rutas para subir las profesiones de recolección, por número de profesión (182 Botánica, 186 Minería, 393 Desollar, 356 Pesca). Cada tramo: desde/hasta (nivel de la profesión), horda/alianza (zonas), que (objetos que se recogen, en inglés como en el juego; el motor los traduce), nota, puntos_hora (puntos que se suben en una hora, aproximado) y nivel_personaje (el que pide el instructor para pasar de tramo). Son estimaciones: el asesor las corrige si ve que van lentas o rápidas.",
+  "182": {
+    "tramos": [
+      {"desde": 1, "hasta": 70, "horda": "Durotar, Mulgore o Claros de Tirisfal", "alianza": "Bosque de Elwynn, Dun Morogh o Teldrassil",
+       "que": ["Peacebloom", "Silverleaf", "Earthroot"], "puntos_hora": 80},
+      {"desde": 70, "hasta": 115, "horda": "Los Baldíos o Bosque de Argénteos", "alianza": "Páramos de Poniente, Loch Modan o Costa Oscura",
+       "que": ["Mageroyal", "Briarthorn"], "puntos_hora": 60, "nivel_personaje": 10},
+      {"desde": 115, "hasta": 170, "horda": "Sierra Espolón, Laderas de Trabalomas o el sur de Los Baldíos", "alianza": "Los Humedales, Montañas Crestagrana o Bosque del Ocaso",
+       "que": ["Bruiseweed", "Wild Steelbloom", "Kingsblood", "Liferoot"], "puntos_hora": 50, "nivel_personaje": 10},
+      {"desde": 170, "hasta": 230, "horda": "Tierras Altas de Arathi, Pantano de las Penas o Vega de Tuercespina", "alianza": "Tierras Altas de Arathi, Pantano de las Penas o Vega de Tuercespina",
+       "que": ["Fadeleaf", "Goldthorn", "Khadgar's Whisker", "Purple Lotus"], "puntos_hora": 45, "nivel_personaje": 20},
+      {"desde": 230, "hasta": 270, "horda": "Feralas, Tierras Inhóspitas, Las Tierras del Interior o Desolace", "alianza": "Feralas, Tierras Inhóspitas, Las Tierras del Interior o Desolace",
+       "que": ["Sungrass", "Firebloom", "Blindweed", "Ghost Mushroom", "Gromsblood"], "puntos_hora": 40, "nivel_personaje": 35},
+      {"desde": 270, "hasta": 300, "horda": "Cráter de Un'Goro, Bosque Vil, Azshara o Tierras de la Peste del Oeste", "alianza": "Cráter de Un'Goro, Bosque Vil, Azshara o Tierras de la Peste del Oeste",
+       "que": ["Dreamfoil", "Golden Sansam", "Mountain Silversage", "Plaguebloom"], "puntos_hora": 35, "nivel_personaje": 35}
+    ]
+  },
+  "186": {
+    "tramos": [
+      {"desde": 1, "hasta": 65, "horda": "Durotar, Mulgore, Claros de Tirisfal o Los Baldíos", "alianza": "Dun Morogh, Bosque de Elwynn, Loch Modan o Páramos de Poniente",
+       "que": ["Copper Ore"], "nota": "Funde las barras de cobre: también dan puntos.", "puntos_hora": 60},
+      {"desde": 65, "hasta": 125, "horda": "Sierra Espolón, Laderas de Trabalomas o Bosque de Argénteos", "alianza": "Montañas Crestagrana, Los Humedales o Bosque del Ocaso",
+       "que": ["Tin Ore", "Silver Ore"], "puntos_hora": 45, "nivel_personaje": 10},
+      {"desde": 125, "hasta": 175, "horda": "Tierras Altas de Arathi, Desolace o Las Mil Agujas", "alianza": "Tierras Altas de Arathi, Desolace o Vega de Tuercespina",
+       "que": ["Iron Ore", "Gold Ore"], "puntos_hora": 40, "nivel_personaje": 20},
+      {"desde": 175, "hasta": 245, "horda": "Tierras Inhóspitas, La Garganta de Fuego, Tanaris o Las Tierras del Interior", "alianza": "Tierras Inhóspitas, La Garganta de Fuego, Tanaris o Las Tierras del Interior",
+       "que": ["Mithril Ore", "Truesilver Ore"], "puntos_hora": 35, "nivel_personaje": 20},
+      {"desde": 245, "hasta": 300, "horda": "Cráter de Un'Goro, Las Estepas Ardientes, Bosque Vil o Cuna del Invierno", "alianza": "Cráter de Un'Goro, Las Estepas Ardientes, Bosque Vil o Cuna del Invierno",
+       "que": ["Thorium Ore"], "puntos_hora": 30, "nivel_personaje": 35}
+    ]
+  },
+  "393": {
+    "tramos": [
+      {"desde": 1, "hasta": 75, "horda": "Durotar y el norte de Los Baldíos", "alianza": "Bosque de Elwynn, Páramos de Poniente o Loch Modan",
+       "que": ["Light Leather", "Light Hide"], "nota": "Desuella bichos de nivel 1 a 15.", "puntos_hora": 90},
+      {"desde": 75, "hasta": 150, "horda": "El sur de Los Baldíos, Sierra Espolón o Laderas de Trabalomas", "alianza": "Los Humedales, Montañas Crestagrana o Laderas de Trabalomas",
+       "que": ["Medium Leather", "Medium Hide"], "nota": "Bichos de nivel 15 a 30.", "puntos_hora": 70, "nivel_personaje": 10},
+      {"desde": 150, "hasta": 225, "horda": "Tierras Altas de Arathi, Vega de Tuercespina, Desolace o Marjal Revolcafango", "alianza": "Tierras Altas de Arathi, Vega de Tuercespina, Desolace o Marjal Revolcafango",
+       "que": ["Heavy Leather", "Heavy Hide"], "nota": "Bichos de nivel 30 a 45.", "puntos_hora": 60, "nivel_personaje": 20},
+      {"desde": 225, "hasta": 300, "horda": "Feralas, Tanaris, Cráter de Un'Goro o Cuna del Invierno", "alianza": "Feralas, Tanaris, Cráter de Un'Goro o Cuna del Invierno",
+       "que": ["Thick Leather", "Rugged Leather"], "nota": "Bichos de nivel 45 a 60.", "puntos_hora": 55, "nivel_personaje": 35}
+    ]
+  },
+  "356": {
+    "tramos": [
+      {"desde": 1, "hasta": 75, "horda": "Cualquier agua de Durotar, Mulgore o Claros de Tirisfal", "alianza": "Cualquier agua de Bosque de Elwynn, Dun Morogh o Teldrassil",
+       "que": [], "puntos_hora": 70},
+      {"desde": 75, "hasta": 150, "horda": "Los Baldíos o Bosque de Argénteos", "alianza": "Páramos de Poniente, Loch Modan o Costa Oscura",
+       "que": [], "puntos_hora": 45, "nivel_personaje": 10},
+      {"desde": 150, "hasta": 225, "horda": "Laderas de Trabalomas, Tierras Altas de Arathi o Desolace", "alianza": "Laderas de Trabalomas, Tierras Altas de Arathi o Desolace",
+       "que": [], "nota": "Antes compra el libro de pesca experta al Viejo Heming, en Bahía del Botín.", "puntos_hora": 30, "nivel_personaje": 10},
+      {"desde": 225, "hasta": 300, "horda": "Tanaris, Feralas, Azshara o Las Tierras del Interior", "alianza": "Tanaris, Feralas, Azshara o Las Tierras del Interior",
+       "que": [], "nota": "Antes haz la misión de Nat Pagle, en Marjal Revolcafango.", "puntos_hora": 20, "nivel_personaje": 35}
+    ]
+  }
+}

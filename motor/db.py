@@ -58,9 +58,10 @@ CREATE TABLE IF NOT EXISTS items (item_id INTEGER PRIMARY KEY, name TEXT, sell_p
 
 -- Lo que venden los vendedores que has visto. price: por unidad, NULL si solo se paga con
 -- divisas (costs_json). char_key: quién lo vio (el precio puede llevar sus descuentos).
+-- zone: dónde estaba el vendedor.
 CREATE TABLE IF NOT EXISTS vendor_items (
   item_id INTEGER PRIMARY KEY, price INTEGER, limited INTEGER, vendor TEXT, costs_json TEXT, updated INTEGER,
-  account TEXT, char_key TEXT
+  account TEXT, char_key TEXT, zone TEXT
 );
 
 -- Comprobaciones fuera del juego (Wowhead...) de si algún vendedor vende un objeto (vendors.py).
@@ -156,11 +157,13 @@ CREATE INDEX IF NOT EXISTS idx_gd_reagents_spell ON gd_reagents(spell_id);
 
 -- buy_price: lo que cobra un vendedor por vendor_stack unidades; sell_price: lo que paga por una.
 -- name_en: el nombre en inglés, para reconocer los objetos que citan guías y vídeos.
+-- min_faction / min_reputation: reputación que pide (4 neutral, 5 amistoso, 6 honorable, 7 reverenciado...).
 CREATE TABLE IF NOT EXISTS gd_items (
   item_id INTEGER PRIMARY KEY, name TEXT, quality INTEGER, class_id INTEGER, subclass_id INTEGER,
   buy_price INTEGER, sell_price INTEGER, vendor_stack INTEGER, stackable INTEGER, bonding INTEGER,
-  required_skill INTEGER, required_skill_rank INTEGER, name_en TEXT
+  required_skill INTEGER, required_skill_rank INTEGER, name_en TEXT, min_faction INTEGER, min_reputation INTEGER
 );
+CREATE TABLE IF NOT EXISTS gd_factions (faction_id INTEGER PRIMARY KEY, name TEXT);
 """
 
 # La vista se rehace siempre para que coja las columnas nuevas.
@@ -179,8 +182,8 @@ CREATE VIEW latest_prices AS
 ADDED_COLUMNS = {
     "prices": {"market_price": "INTEGER"},
     "items": {"sell_price": "INTEGER"},
-    "vendor_items": {"account": "TEXT", "char_key": "TEXT"},
-    "gd_items": {"name_en": "TEXT"},
+    "vendor_items": {"account": "TEXT", "char_key": "TEXT", "zone": "TEXT"},
+    "gd_items": {"name_en": "TEXT", "min_faction": "INTEGER", "min_reputation": "INTEGER"},
     "gd_recipes": {"cooldown_hours": "REAL", "cooldown_category": "INTEGER"},
 }
 

@@ -31,16 +31,20 @@ from .generated import write_generated
 from .ingest import ingest_file
 from .leveling import plan_leveling
 from .money import format_money
+from .panel import build_panel, render_panel
 from .planner import build_methods, load_settings, save_settings
 from .report import build_advice_report, build_guides_section, build_report, guide_filename, render_guide
+from .recoleccion import route_problems
+from .revision import review_problems
 from .vendors import record_check
 
 
-def write_report(conn: sqlite3.Connection, config: Config, analysis=None) -> str:
-    """Escribe datos/informe.md, datos/metodos.md (todos los métodos de tus guías) y las guías
-    de subida en datos/guias/. Devuelve el informe."""
+def write_report(conn: sqlite3.Connection, config: Config, analysis=None, panel=None) -> str:
+    """Escribe datos/informe.md, datos/metodos.md (todos los métodos de tus guías), datos/panel.md
+    (la ventana de métodos del addon) y las guías de subida en datos/guias/. Devuelve el informe."""
     analysis = analysis if analysis is not None else analyze(conn)
     settings = load_settings(conn)
+    panel = panel if panel is not None else build_panel(conn, analysis, settings)
     methods, baseline = build_methods(conn, analysis, settings)
     text = build_advice_report(conn, analysis, plan=(methods, baseline, settings))
     folder = config.db_path.parent
@@ -48,6 +52,7 @@ def write_report(conn: sqlite3.Connection, config: Config, analysis=None) -> str
     guides_text = "\n".join(build_guides_section(analysis, limit=None, heading="#")).strip()
     if guides_text:
         (folder / "metodos.md").write_text(guides_text + "\n", encoding="utf-8")
+    (folder / "panel.md").write_text(render_panel(panel), encoding="utf-8")
     guides = folder / "guias"
     for m in methods:
         if m.guide is not None and m.guide.steps:
@@ -59,10 +64,11 @@ def write_report(conn: sqlite3.Connection, config: Config, analysis=None) -> str
 def refresh_outputs(conn: sqlite3.Connection, config: Config) -> str:
     """Rehace Generated.lua (para el juego), el informe y las guías. Devuelve un resumen de una línea."""
     analysis = analyze(conn)
-    target = write_generated(conn, config.addon_dir, analysis)
+    panel = build_panel(conn, analysis)
+    target = write_generated(conn, config.addon_dir, analysis, panel)
     if target is None:
         print(f"Aviso: no encuentro la carpeta del addon ({config.addon_dir}); no he escrito Generated.lua.")
-    write_report(conn, config, analysis)
+    write_report(conn, config, analysis, panel)
     crafts = sum(1 for c in analysis.crafts if c.known and c.complete and c.profit > 0)
     to_sell = sum(1 for s in analysis.sales if s.action in ("subastar", "vendedor"))
     return f"{crafts} crafteos rentables, {to_sell} cosas para vender. Detalle: python -m motor informe"
@@ -117,7 +123,8 @@ def cmd_informe(config: Config) -> int:
     return 0
 
 
-def cmd_ajustes(config: Config, hours: float | None, weeks: float | None, skillup: float | None) -> int:
+def cmd_ajustes(config: Config, hours: float | None, weeks: float | None, skillup: float | None,
+                min_hour: float | None = None) -> int:
     conn = dbmod.connect(config.db_path)
     try:
         settings = load_settings(conn)
@@ -127,7 +134,9 @@ def cmd_ajustes(config: Config, hours: float | None, weeks: float | None, skillu
             settings.horizon_weeks = weeks
         if skillup is not None:
             settings.legacy_skillup = skillup
-        if hours is not None or weeks is not None or skillup is not None:
+        if min_hour is not None:
+            settings.min_gold_hour = min_hour
+        if any(v is not None for v in (hours, weeks, skillup, min_hour)):
             save_settings(conn, settings)
     finally:
         conn.close()
@@ -135,6 +144,7 @@ def cmd_ajustes(config: Config, hours: float | None, weeks: float | None, skillu
           f"{settings.horizon_weeks:g} semanas.")
     print(f"Talento de Legacy para subir profesiones: +{settings.legacy_skillup:g} % de probabilidad"
           + (" (sin él)" if not settings.legacy_skillup else "") + ".")
+    print(f"Un farmeo que no llegue a {settings.min_gold_hour:g} oro/h cuenta como que no da dinero.")
     return 0
 
 
@@ -143,8 +153,11 @@ def cmd_metodos(config: Config) -> int:
     try:
         lines = {r[0] for r in conn.execute("SELECT skill_line FROM gd_skill_lines")}
         problems = catalog_problems(known_lines=lines or None)
+        if not problems:
+            ids = {e.id for e in load_catalog()}
+            problems = review_problems(method_ids=ids) + route_problems()
         if problems:
-            print(f"Hay que arreglar {CATALOG_PATH.name}:")
+            print("Hay que arreglar el conocimiento (conocimiento/):")
             for p in problems:
                 print(f"  - {p}")
             return 1
@@ -153,7 +166,9 @@ def cmd_metodos(config: Config) -> int:
             print(f"No hay métodos en {CATALOG_PATH}.")
             return 1
         analysis = analyze(conn, entries)
-        write_report(conn, config, analysis)
+        panel = build_panel(conn, analysis)
+        write_generated(conn, config.addon_dir, analysis, panel)
+        write_report(conn, config, analysis, panel)
     finally:
         conn.close()
     kinds: dict[str, int] = {}
@@ -164,6 +179,8 @@ def cmd_metodos(config: Config) -> int:
     if unknown:
         print(f"{len(unknown)} objetos que no salen en los datos del juego: {', '.join(unknown)}.")
     print(f"Todos, con tus precios: {config.db_path.parent / 'metodos.md'}")
+    print(f"La ventana de métodos del addon (tras un /reload): {config.db_path.parent / 'panel.md'}")
+    print(f"Mejor farmeo: {panel.verdict.title}.")
     return 0
 
 
@@ -348,11 +365,13 @@ def main(argv: list[str] | None = None) -> int:
     settings.add_argument("--semanas", type=float)
     settings.add_argument("--legado-subida", type=float,
                           help="%% que suma tu talento de Legacy a la probabilidad de subir profesión")
+    settings.add_argument("--minimo-hora", type=float,
+                          help="oro por hora por debajo del cual un farmeo no da dinero (5 por defecto)")
     guide = sub.add_parser("guia", help="guía de subida de una profesión con su coste")
     guide.add_argument("profesion")
     guide.add_argument("--desde", type=int)
     guide.add_argument("--hasta", type=int)
-    sub.add_parser("metodos", help="los métodos de tus guías con tus precios (datos/metodos.md)")
+    sub.add_parser("metodos", help="comprueba el conocimiento y rehace la ventana de métodos (datos/panel.md)")
     sources = sub.add_parser("fuentes", help="novedades de tus fuentes que aún no has revisado")
     sources.add_argument("--dias", type=float, default=DEFAULT_DAYS)
     sources.add_argument("--hecho", nargs="*", type=int, metavar="N",
@@ -364,7 +383,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "leer":
         return cmd_leer(config)
     if args.cmd == "ajustes":
-        return cmd_ajustes(config, args.horas_semana, args.semanas, args.legado_subida)
+        return cmd_ajustes(config, args.horas_semana, args.semanas, args.legado_subida, args.minimo_hora)
     if args.cmd == "metodos":
         return cmd_metodos(config)
     if args.cmd == "fuentes":
