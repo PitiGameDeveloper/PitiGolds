@@ -131,6 +131,18 @@ class Panel(unittest.TestCase):
         self.assertEqual(panel.verdict.state, "sin_datos")   # en espera: no se recomienda
         self.assertIn("En espera, falta un dato: ¿En qué zona?", panel.farms[0].details[0])
 
+    def test_sin_personajes_enseña_los_que_mas_rinden(self):
+        self.conn.execute("DELETE FROM characters")
+        self.conn.commit()
+        panel = self.build([self.pieles()])
+        self.assertEqual(panel.verdict.state, "sin_datos")
+        self.assertEqual(panel.verdict.title, "Aún no conozco tus personajes")
+        text = "\n".join(panel.verdict.lines)
+        self.assertIn("pulsa Exportar", text)
+        self.assertIn("- Pieles: ~", text)
+        self.assertIn("(Desollar 175, nivel 45).", text)
+        self.assertNotIn("None", text)
+
     def test_nota_del_asesor(self):
         reviews = Reviews(farms={"pieles": Review(score=8, why="Da mucho y Grom está cerca.",
                                                   steps=["Ve a Feralas.", "Desuella yetis."])})

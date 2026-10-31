@@ -688,7 +688,7 @@ def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None
 # El mejor farmeo ------------------------------------------------------------------------
 
 def _verdict(farms: list[FarmRow], crafts: list[CraftRow], best_value: int | None, floor: int,
-             a: Analysis) -> Verdict:
+             a: Analysis, has_chars: bool = True) -> Verdict:
     usable = [r for r in farms if r.value is not None and not r.pending]
     if not usable:
         lines = []
@@ -697,6 +697,14 @@ def _verdict(farms: list[FarmRow], crafts: list[CraftRow], best_value: int | Non
         if not any(r.per_hour is not None for r in farms):
             lines.append("Los métodos guardados aún no tienen estimación por hora: pídele al asesor que los revise.")
         return Verdict("sin_datos", "Aún no puedo decirte el mejor farmeo", lines)
+    if not has_chars:
+        lines = ["Entra con cada personaje y pulsa Exportar: así sabré quién puede hacer cada farmeo."]
+        if not a.last_scan:
+            lines.append("Escanea también la subasta (botón «PG: Completo»): sin ella solo cuento lo que paga el vendedor.")
+        lines.append("Mientras, los que más rinden sobre el papel:")
+        for r in sorted(usable, key=lambda r: -r.value)[:3]:
+            lines.append(f"- {r.name}: ~{format_money(r.per_hour)}/h" + (f" ({r.requirement})." if r.requirement else "."))
+        return Verdict("sin_datos", "Aún no conozco tus personajes", lines)
     if best_value is None or best_value < floor:
         return Verdict("investigar", "Ningún método guardado da dinero ahora",
                        [f"Ninguno llega a {format_money(floor)}/h con tus precios: o se han saturado o ya no funcionan.",
@@ -720,7 +728,10 @@ def _verdict(farms: list[FarmRow], crafts: list[CraftRow], best_value: int | Non
                     key=lambda r: -r.value)[:3]
     for r in better:
         cost = f"~{_hours(r.prep_hours)}" + (f" y ~{format_money(r.prep_gold)}" if r.prep_gold else "")
-        lines.append(f"- {r.name}: ~{format_money(r.per_hour)}/h. {r.closest}: le falta {'; '.join(r.lacking)} ({cost}).")
+        if r.closest:
+            lines.append(f"- {r.name}: ~{format_money(r.per_hour)}/h. {r.closest}: le falta {'; '.join(r.lacking)} ({cost}).")
+        else:
+            lines.append(f"- {r.name}: ~{format_money(r.per_hour)}/h. Pide {r.requirement or 'algo que no tiene nadie'}.")
     return Verdict("preparar", "Lo que ya puedes hacer rinde poco", lines + quick_lines,
                    best=top.key if top is not None else None)
 
@@ -747,7 +758,7 @@ def build_panel(conn: sqlite3.Connection, a: Analysis, settings: Settings | None
     best = _color_farms(panel.farms, floor)
     panel.farms.sort(key=lambda r: (r.pending != "", r.value is None, -(r.value or 0)))
     panel.crafts = _craft_rows(ctx, reviews)
-    panel.verdict = _verdict(panel.farms, panel.crafts, best, floor, a)
+    panel.verdict = _verdict(panel.farms, panel.crafts, best, floor, a, has_chars=bool(ctx.chars))
     panel.unreviewed = ([r.key for r in panel.farms if r.score is None and not r.key.startswith("medido:")]
                         + [str(c.recipe_id) for c in panel.crafts if c.score is None])
     return panel
