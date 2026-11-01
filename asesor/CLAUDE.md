@@ -79,5 +79,8 @@ hoy?», «busca métodos nuevos»...), lee el guion y síguelo. `$ARGUMENTS` es 
 - Hay otro que abarata un X % lo que se compra a vendedores. Los precios que el addon ve en el vendedor
   ya llevan el descuento del personaje que lo abre.
 - Cambiar los talentos de Legacy cuesta oro: si propones cambiar alguno, cuéntalo como inversión.
+- Otro, del árbol de profesiones, da un 15 % más de Merchant's Favor al entregar cajones saqueados.
+  Ceedsy calcula que el respeceo solo compensa si te faltan miles de puntos de favor.
+- Según un vídeo (sin confirmar), subir las dos profesiones de un alt a 150 da 2 puntos de Legacy.
 - **Bountiful Harvest** ayuda a recolectar. **Estudio dedicado** da esencias cada día cuando un
   personaje tiene todas sus profesiones a 300.

@@ -11,7 +11,7 @@ cuando quiere métodos nuevos o cuando el addon le avisa de que ningún método 
 2. **Criba por título y resumen**, sin abrir nada. Interesa:
    - métodos de oro en Forever (farmeos, recetas, subasta, vendedores, pesca, mazmorras);
    - cambios que afecten a un método (hotfix, nerf, parche, botín, recetas nuevas, precios de vendedor);
-   - Legacy, Merchant's Favor, cajas extraviadas.
+   - Legacy, Merchant's Favor, cajones saqueados.
    Lo demás (historia, cinemáticas, sorteos, retail), fuera. Los archivos de `../fuentes/` siempre
    interesan: Piti los ha dejado ahí para esto.
 3. **Abre a fondo como mucho 5**, empezando por los archivos de Piti:

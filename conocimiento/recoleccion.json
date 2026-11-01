@@ -44,14 +44,14 @@
   },
   "356": {
     "tramos": [
-      {"desde": 1, "hasta": 75, "horda": "Cualquier agua de Durotar, Mulgore o Claros de Tirisfal", "alianza": "Cualquier agua de Bosque de Elwynn, Dun Morogh o Teldrassil",
-       "que": [], "puntos_hora": 70},
-      {"desde": 75, "hasta": 150, "horda": "Los Baldíos o Bosque de Argénteos", "alianza": "Páramos de Poniente, Loch Modan o Costa Oscura",
-       "que": [], "puntos_hora": 45, "nivel_personaje": 10},
-      {"desde": 150, "hasta": 225, "horda": "Laderas de Trabalomas, Tierras Altas de Arathi o Desolace", "alianza": "Laderas de Trabalomas, Tierras Altas de Arathi o Desolace",
-       "que": [], "nota": "Antes compra el libro de pesca experta al Viejo Heming, en Bahía del Botín.", "puntos_hora": 30, "nivel_personaje": 10},
-      {"desde": 225, "hasta": 300, "horda": "Tanaris, Feralas, Azshara o Las Tierras del Interior", "alianza": "Tanaris, Feralas, Azshara o Las Tierras del Interior",
-       "que": [], "nota": "Antes haz la misión de Nat Pagle, en Marjal Revolcafango.", "puntos_hora": 20, "nivel_personaje": 35}
+      {"desde": 1, "hasta": 75, "horda": "La charca del Poblado Sen'jin (Durotar), el lago grande de Mulgore; los no-muertos, mejor en Durotar", "alianza": "La charca de Villadorada (Bosque de Elwynn), el lago helado de Dun Morogh o el lago Al'Ameth (Teldrassil)",
+       "que": ["Raw Brilliant Smallfish", "Raw Longjaw Mud Snapper"], "nota": "Con la caña y un abalorio brillante puesto. Sigue pescando después de 75 hasta tener unos 80 pececitos luminosos: con ellos subes Cocina a 65 y el resto sirve para los cuencos con pescado. Guarda el pargo de loco boquilargo para Cocina de oficial (hasta 110).", "puntos_hora": 70},
+      {"desde": 75, "hasta": 150, "horda": "El río de Laderas de Trabalomas", "alianza": "El río de Laderas de Trabalomas",
+       "que": ["Raw Bristle Whisker Catfish", "Raw Longjaw Mud Snapper"], "nota": "Con lombrices como cebo. Salen más de 100 siluros mostacherizos: guárdalos todos para Cocina (de 110 a 175). La receta del siluro pide nivel 15; en la Horda la vende el cocinero de Molino Tarren.", "puntos_hora": 45, "nivel_personaje": 10},
+      {"desde": 150, "hasta": 225, "horda": "Los lagos gemelos junto a Stromgarde (Tierras Altas de Arathi)", "alianza": "Los lagos gemelos junto a Stromgarde (Tierras Altas de Arathi)",
+       "que": ["Raw Mithril Head Trout", "Raw Bristle Whisker Catfish"], "nota": "Antes compra el libro de pesca experta al Viejo Heming, en Bahía del Botín, y unos 12 abalorios relucientes: ahí se escapan peces hasta que tu Pesca, contando el cebo, llega a 225. Comer siluro mostacherizo cocinado da +8 de Pesca. Es el sitio con más trucha cabeza de mitril y sin bichos que molesten.", "puntos_hora": 30, "nivel_personaje": 20},
+      {"desde": 225, "hasta": 300, "horda": "Los ríos de Feralas junto al Campamento Mojache, o el Claro de la Luna", "alianza": "Los lagos de Las Tierras del Interior, los ríos de Feralas o el Claro de la Luna",
+       "que": ["Raw Redgill", "Raw Nightfin Snapper", "Raw Sunscale Salmon"], "nota": "Antes haz la misión de Nat Pagle, en Marjal Revolcafango (4 peces de Desolace, Feralas, Pantano de las Penas y Vega de Tuercespina), y compra unos 24 abalorios relucientes. Son 4-5 horas. El branquirrojo sube Cocina de 225 a 300; el pargo nocturno y el salmón se venden bien cocinados.", "puntos_hora": 17, "nivel_personaje": 35}
     ]
   }
 }

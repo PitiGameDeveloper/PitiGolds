@@ -49,7 +49,7 @@
       "objetos": ["Linen Cloth", "Wool Cloth"],
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 35}, {"objeto": "Wool Cloth", "cantidad": 15}], "oro_hora": 1.7,
       "punto": {"mapa": 1413, "x": 56, "y": 8},
-      "notas": "Reaparecen sin parar y mueren rápido. Tela, verdes y cajas extraviadas (Waylaid Crates). Estimado por hora: unos 150 bichos.",
+      "notas": "Reaparecen sin parar y mueren rápido. Tela, verdes y cajones saqueados (Waylaid Crates). Estimado por hora: unos 150 bichos.",
       "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
     },
     {
@@ -59,7 +59,7 @@
       "objetos": ["Linen Cloth", "Wool Cloth"],
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 30}, {"objeto": "Wool Cloth", "cantidad": 12}], "oro_hora": 1.5,
       "punto": {"mapa": 1413}, "bichos": ["Arpía"],
-      "notas": "Tela, verdes y cajas extraviadas; unos 18 000 de experiencia por hora. Estimado por hora: unos 140 bichos.",
+      "notas": "Tela, verdes y cajones saqueados; unos 18 000 de experiencia por hora. Estimado por hora: unos 140 bichos.",
       "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
     },
     {
@@ -219,10 +219,10 @@
       "id": "tanaris-tortugas",
       "nombre": "Tortugas de la playa",
       "tipo": "farmeo", "nivel": 42, "zona": "Tanaris",
-      "objetos": ["Speckled Shell Fragment"],
+      "objetos": ["Speckled Shell Fragment", "Big-mouth Clam"],
       "por_hora": [{"objeto": "Speckled Shell Fragment", "cantidad": 55}], "oro_hora": 1,
       "punto": {"mapa": 1446}, "bichos": ["Tortuga"],
-      "notas": "Oro de vendedor; el autor lo combina con la pesca de cajas de la misma costa. Estimado por hora: unas 110 tortugas.",
+      "notas": "Oro de vendedor; el autor lo combina con la pesca de cajas de la misma costa. Sueltan además almejas de boca grande, cuya carne piden los cocineros para pasar a artesano (ver «Huevos gigantes y carne de almeja»). Estimado por hora: unas 110 tortugas.",
       "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
     },
     {
@@ -663,7 +663,7 @@
       "tipo": "crafteo",
       "profesiones": [{"id": 333, "nivel": 10}],
       "objetos": ["Lesser Magic Wand", "Greater Magic Wand"],
-      "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas. Aviso de Kaychak (31-10-2026, https://www.youtube.com/watch?v=ryub9vdTKq0): lo recomiendan muchos vídeos y en los megaservidores lo hará muchísima gente, así que te quitarán las ventas al momento y el margen será mínimo. Además, al final de la beta la subasta empezó a cobrar 1 plata de depósito por cada puesta, que pierdes si no se vende. Antes de fabricar, mira en la subasta cuántos venden y a cuánto. NERF: desde el 1 de octubre de 2026 las varitas se venden al vendedor por 1 cobre (lo avisa Ceedsy en su vídeo de cómo sacar 10 oros el primer día, que se basaba en eso: https://www.youtube.com/watch?v=NDdiw-q_-qw). Los datos del juego aún dicen 1 plata 10 la menor y 2 plata la mayor porque el cambio es del servidor: el addon apunta el precio real en cuanto ve una varita. Solo queda venderlas en la subasta.",
+      "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas. Aviso de Kaychak (31-10-2026, https://www.youtube.com/watch?v=ryub9vdTKq0): lo recomiendan muchos vídeos y en los megaservidores lo hará muchísima gente, así que te quitarán las ventas al momento y el margen será mínimo. Además, al final de la beta la subasta empezó a cobrar 1 plata de depósito por cada puesta, que pierdes si no se vende. Antes de fabricar, mira en la subasta cuántos venden y a cuánto. NERF: desde el 1 de octubre de 2026 las varitas se venden al vendedor por 1 cobre (lo avisa Ceedsy en su vídeo de cómo sacar 10 oros el primer día, que se basaba en eso: https://www.youtube.com/watch?v=NDdiw-q_-qw). Los datos del juego aún dicen 1 plata 10 la menor y 2 plata la mayor porque el cambio es del servidor: el addon apunta el precio real en cuanto ve una varita. Solo queda venderlas en la subasta. Desde el nerf, el polvo extraño y las esencias mágicas tienen otra salida: con ellos se llenan los cajones saqueados de curiosidades (ver «Cajones saqueados»), así que se venden en la subasta.",
       "fuente": "Guía de Studen v1.0", "fecha": "2026-10-31"
     },
     {
@@ -672,7 +672,7 @@
       "tipo": "crafteo",
       "profesiones": [{"id": 197, "nivel": 30}, {"id": 333, "nivel": 1}],
       "objetos": ["Minor Wizard Oil", "Strange Dust", "Lesser Magic Essence", "Brown Linen Pants"],
-      "notas": "Costura y Encantamiento, y se vende al vendedor: pantalones de lino marrón (2 madejas de lino y hilo burdo), se desencantan (1-2 polvos extraños o 1-2 esencias mágicas inferiores) y con el polvo se hace aceite de zahorí menor (polvo extraño, semillas de arce y vial vacío), que se vende al vendedor. El beneficio sale de que el vendedor pague por el aceite bastante más que las semillas (2 plata) y el vial (4 cobre). Es el mismo tipo de truco que el de las varitas de Ceedsy, que Blizzard dejó en 1 cobre el 1 de octubre, y lo más probable es que el aceite corra la misma suerte. El precio de verdad lo pone el servidor: los datos del juego dicen 1 plata (con eso se pierde dinero), pero en la beta las varitas pagaban 5 plata cuando los datos decían 1 plata 10. El addon apunta lo que paga el vendedor en cuanto ves un aceite; desde entonces el motor lo cuenta solo. En la subasta tampoco sale: no se apila, así que paga la plata entera de depósito, y habrá mucha competencia.",
+      "notas": "Costura y Encantamiento, y se vende al vendedor: pantalones de lino marrón (2 madejas de lino y hilo burdo), se desencantan (1-2 polvos extraños o 1-2 esencias mágicas inferiores) y con el polvo se hace aceite de zahorí menor (polvo extraño, semillas de arce y vial vacío), que se vende al vendedor. El beneficio sale de que el vendedor pague por el aceite bastante más que las semillas (2 plata) y el vial (4 cobre). Es el mismo tipo de truco que el de las varitas de Ceedsy, que Blizzard dejó en 1 cobre el 1 de octubre, y lo más probable es que el aceite corra la misma suerte. El precio de verdad lo pone el servidor: los datos del juego dicen 1 plata (con eso se pierde dinero), pero en la beta las varitas pagaban 5 plata cuando los datos decían 1 plata 10. El addon apunta lo que paga el vendedor en cuanto ves un aceite; desde entonces el motor lo cuenta solo. En la subasta tampoco sale: no se apila, así que paga la plata entera de depósito, y habrá mucha competencia. Desde el nerf, el polvo extraño y las esencias mágicas tienen otra salida: con ellos se llenan los cajones saqueados de curiosidades (ver «Cajones saqueados»), así que se venden en la subasta.",
       "pendiente": "¿Cuánto paga el vendedor por el aceite de zahorí menor en el juego? Si son unos pocos cobres, como las varitas, el método no vale: bórralo.",
       "fuente": "Unoptimized Builds, YouTube (2026-10-07); Ceedsy, YouTube (2026-09-22)",
       "fecha": "2026-10-31",
@@ -688,6 +688,95 @@
       "fuente": "Loru Gaming, YouTube (2026-10-22)",
       "fecha": "2026-10-31",
       "enlace": "https://www.youtube.com/watch?v=9XphhkeGHeI"
+    },
+    {
+      "id": "piezas-ingenieria-cajones",
+      "nombre": "Marcos de bronce y otras piezas de ingeniería para llenar cajones",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 202, "nivel": 145}],
+      "objetos": ["Bronze Framework", "Copper Modulator", "Handful of Copper Bolts", "Copper Tube", "Mithril Tube"],
+      "notas": "Los cajones saqueados de piezas se llenan con piezas de ingeniería: el de oficial con 4 marcos de bronce, el de aprendiz con tornillos, tubos o moduladores de cobre y el de experto con tubos de mitril. Según Ceedsy, el verde de piezas de oficial lleno de marcos es la forma más barata de sacar favor, así que mucha gente compra los marcos hechos. En la beta se vendían a 29 platas y salían por unas 12 de materiales: 2 lingotes de bronce, 1 cuero medio y 1 paño de lana, con Ingeniería 145. Las piezas de cobre se hacen antes (tornillos desde 30, tubos desde 50 y moduladores desde 65, más o menos). En los comentarios, un minero cuenta que le compraban los lingotes de bronce a montones y que eso hizo subir el estaño. Compara vender los lingotes con fabricar el marco.",
+      "fuente": "Ceedsy, YouTube (2026-10-07), y sus comentarios",
+      "fecha": "2026-11-01",
+      "enlace": "https://www.youtube.com/watch?v=LikGsgzETOY"
+    },
+    {
+      "id": "cajones-saqueados",
+      "nombre": "Cajones saqueados: guardarlos y venderlos en la subasta",
+      "tipo": "inversion",
+      "objetos": ["Waylaid Crate", "Waylaid Crate: Apprentice Fabrics", "Waylaid Crate: Apprentice Ingots", "Waylaid Crate: Apprentice Parts", "Waylaid Crate: Journeyman Fabrics", "Waylaid Crate: Journeyman Ingots", "Waylaid Crate: Journeyman Parts", "Waylaid Crate: Apprentice Curiosities", "Waylaid Crate: Journeyman Ore"],
+      "notas": "Los cajones saqueados caen de bichos de todo el mundo. El «Cajón saqueado» genérico se abre con «Leer etiqueta» y se convierte en uno de un tipo (hierbas, menas, telas, curiosidades, tejidos, lingotes o piezas) y de un rango (aprendiz, oficial, experto o artesano). Se llena con los materiales que pide y se entrega a cambio de Favor de Mercader, la divisa de las recetas nuevas de Forever (Ceedsy los entrega en El Cruce). Lo que midió en la beta: aprendiz 5 de favor el blanco y 10 el verde; oficial 10 y 20; experto unos 15 y 30; artesano sin comprobar. Los verdes son los de tejidos, lingotes y piezas. Al entregarlo te devuelven además unos 50 cobre por punto de favor. Lleno queda ligado, así que lo que se vende son los vacíos; el vendedor no paga nada por ellos. En la beta costaban 10-20 platas, pero según los comentarios subieron a 55-80 platas después del vídeo, y los verdes de oficial a unos oros. Al salir, todo el mundo querrá favor para sus recetas. Consejo de Ceedsy: guarda en el banco los verdes que te caigan, sobre todo los de tejidos de aprendiz (se llenan con madejas de lino, que cuestan casi nada), y no los vendas los primeros días. Los precios de la beta no valen: el motor sigue los de tu servidor con tus escaneos y te dice cuándo están caros.",
+      "fuente": "Ceedsy, YouTube (2026-10-07), y sus comentarios",
+      "fecha": "2026-11-01",
+      "enlace": "https://www.youtube.com/watch?v=LikGsgzETOY"
+    },
+    {
+      "id": "bolsa-lino-rojo",
+      "nombre": "Bolsas de lino rojo",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 197, "nivel": 50}],
+      "objetos": ["Red Linen Bag", "Bolt of Linen Cloth", "Linen Cloth"],
+      "notas": "Costura 50. Cada bolsa lleva 4 madejas de lino (8 paños de lino), 1 hilo refinado y 1 tinte rojo; el hilo y el tinte son de vendedor. El patrón cuesta 2 platas en un vendedor: en la Alianza, en Páramos de Poniente. Según el vídeo es de 8 casillas, y hasta la seda no hay bolsas de tela más grandes: compite con quien tenga el mismo patrón y con las de lana, que cuestan más de hacer. A Costura 50 se llega haciendo madejas de lino. El plan del autor es un alt banco en la capital: compra el lino si está tirado de precio, fabrica las bolsas y las deja en la subasta mientras juega con su personaje principal. En los comentarios avisan de que el primer día casi nadie tiene oro para comprar, así que ve poniéndolas poco a poco.",
+      "fuente": "Warcraft Forever Gold, YouTube (2026-10-26) y sus comentarios",
+      "fecha": "2026-11-01",
+      "enlace": "https://www.youtube.com/watch?v=bSdYj5HyqfQ"
+    },
+    {
+      "id": "tinte-ceruleo",
+      "nombre": "Tinte cerúleo",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 171, "nivel": 50}],
+      "objetos": ["Cerulean Dye", "Frilled Lichen"],
+      "notas": "Receta nueva de Forever. Alquimia 50: 2 líquenes con volantes y 1 vial vacío. Lo piden las piezas «prístinas» nuevas de Costura (de 2 a 8 tintes cada una) y un encantamiento de arma. En la beta se vendía a unos 1,4 oros, según un comentario en un vídeo de Ceedsy. El liquen es un material escaso (ver «Materiales escasos de Forever»): mira si sale más vender el liquen o el tinte.",
+      "fuente": "Datos del juego; comentario en un vídeo de Ceedsy (2026-10-07)",
+      "fecha": "2026-11-01",
+      "enlace": "https://www.youtube.com/watch?v=bSdYj5HyqfQ"
+    },
+    {
+      "id": "sopa-pargo-nocturno",
+      "nombre": "Sopa de pargo nocturno y salmón escama de sol pochado",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 185, "nivel": 250}],
+      "mejor_con": [356],
+      "objetos": ["Nightfin Soup", "Poached Sunscale Salmon", "Raw Nightfin Snapper", "Raw Sunscale Salmon"],
+      "notas": "Cocina 250. Las recetas (2 oros cada una) las vende Gikkix, el pescador de Puerto Bonvapor, en Tanaris. La sopa lleva pargo nocturno crudo y agua de manantial refrescante (de vendedor); el salmón, solo el pescado. Los dos se pescan en las aguas de 225 a 300 (Claro de la Luna, Feralas, Las Tierras del Interior): el pargo de noche y el salmón de día. Icosiol dice que en el juego original sacaba más de 200 oros solo con la sopa, que los lanzadores usan para el maná, y cree que en Forever el salmón también se venderá bien. Compara vender el pescado crudo con cocinarlo.",
+      "fuente": "Icosiol, YouTube (transcripción que pasó Piti)",
+      "fecha": "2026-11-01",
+      "enlace": "https://www.youtube.com/watch?v=SxQ0akozRL4"
+    },
+    {
+      "id": "ingredientes-cocina-artesana",
+      "nombre": "Huevos gigantes y carne de almeja para la misión de Cocina artesana",
+      "tipo": "farmeo",
+      "nivel": 35,
+      "nivel_minimo": 30,
+      "zona": "Montañas de Alterac, junto al lago al norte de Dalaran (huevos); Tanaris o Riverglades (almejas)",
+      "objetos": ["Giant Egg", "Zesty Clam Meat", "Big-mouth Clam"],
+      "punto": {"mapa": 1416},
+      "notas": "Para pasar a Cocina artesana hay que llevar al cocinero de la posada de Gadgetzan 12 huevos gigantes, 10 carnes de almeja sabrosa y 20 quesos suizos de Alterac (de vendedor). Muchos compran los huevos y la carne en la subasta, así que se venden. Los huevos caen de las lechubestias de Las Tierras del Interior, de los rocs de fuego de Tanaris y, en la beta, de unas aves rapaces nuevas junto al lago al norte de Dalaran, a nivel 35. La carne sale de las almejas de boca grande: las sueltan las tortugas de la costa este de Tanaris (ver «Tortugas de la playa») y, en la beta, los reptadores de arena de Riverglades, una zona nueva. El botín de la beta puede cambiar: mídelo con «Farmear este».",
+      "fuente": "Icosiol, YouTube (transcripción que pasó Piti)",
+      "fecha": "2026-11-01",
+      "enlace": "https://www.youtube.com/watch?v=SxQ0akozRL4"
+    },
+    {
+      "id": "materiales-escasos",
+      "nombre": "Materiales escasos de Forever: guardarlos para cuando suban de precio",
+      "tipo": "inversion",
+      "objetos": ["Pristine Leather", "Pristine Hide", "Pristine Scale", "Frilled Lichen"],
+      "notas": "Materiales nuevos que salen de vez en cuando al recolectar: cuero, pellejo y escama prístinos al desollar, y liquen con volantes con Botánica. Según el vídeo, en la beta el cuero prístino y el liquen no salían si tu personaje pasaba de nivel 25. Al principio, con todo el mundo en zonas bajas, habrá mucho y barato; después escaseará. Tienen demanda: el cuero prístino lo piden decenas de recetas nuevas de Herrería, Peletería y Costura, sobre todo de 85 a 155 (de 2 a 8 cada una); el pellejo y la escama, recetas de Peletería de 195 a 320, de Ingeniería y la bolsa sin fondo; el liquen, el tinte cerúleo. El plan del autor: guardar los que le salgan y comprar más si están baratos. En los comentarios esperan que el prístino se dispare la segunda semana.",
+      "fuente": "Warcraft Forever Gold, YouTube (2026-10-26) y sus comentarios; datos del juego",
+      "fecha": "2026-11-01",
+      "enlace": "https://www.youtube.com/watch?v=bSdYj5HyqfQ"
+    },
+    {
+      "id": "desencantar-verdes",
+      "nombre": "Verdes de nivel 26-30 baratos para desencantar",
+      "tipo": "inversion",
+      "objetos": ["Hillman's Shoulders", "Soul Dust", "Greater Astral Essence", "Large Glimmering Shard"],
+      "notas": "Encantamiento (unos 50 para desencantar objetos de nivel 26-30, sin comprobar en Forever). Plan del autor: desde el segundo día, los peleteros que suben la profesión llenarán la subasta de hombreras de montañero (Peletería 130), y como el vendedor paga menos de 7 platas, se venderán baratas. Se desencantan en polvo de alma, esencia astral superior o fragmento con luz trémula grande; en el juego original, 3 de cada 4 veces salían 1-2 polvos, 1 de cada 5 1-2 esencias y alguna vez un fragmento. Vale lo mismo para cualquier verde de nivel 26 o más que esté barato. El motor todavía no calcula lo que da desencantar: compara el precio de las hombreras con el de esos materiales.",
+      "fuente": "Warcraft Forever Gold, YouTube (2026-10-26)",
+      "fecha": "2026-11-01",
+      "enlace": "https://www.youtube.com/watch?v=bSdYj5HyqfQ"
     },
     {
       "id": "invertir-al-principio",
