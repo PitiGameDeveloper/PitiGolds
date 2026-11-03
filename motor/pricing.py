@@ -20,6 +20,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Iterable
 
+from .merchantmap import KnownVendor, has_data, known_vendors
+
 MARKET_SHARE = 0.15      # parte más barata de las unidades que forma el precio de mercado
 HISTORY_DAYS = 7
 MIN_HISTORY_SCANS = 3    # escaneos necesarios para fiarse de la mediana
@@ -74,6 +76,10 @@ class ItemPrice:
     # Precio de vendedor según los datos del juego. No dice si algún vendedor lo vende, así
     # que no se usa para costes: solo como pista cuando falta un precio.
     catalog_buy: int | None = None
+    # Quién lo vende según Merchant Map (merchantmap.py). Con vendors_known, si no hay
+    # known_vendor es que no lo vende nadie; sin datos de Merchant Map no se sabe.
+    known_vendor: KnownVendor | None = None
+    vendors_known: bool = False
 
     @property
     def has_history(self) -> bool:
@@ -110,13 +116,23 @@ class ItemPrice:
         return None if sale is None else self.net_of(sale)
 
     @property
+    def shop_price(self) -> int | None:
+        """Lo que cuesta a un vendedor sin límite: el que has visto o, si no, uno de Merchant Map."""
+        if self.vendor_buy:
+            return None if self.vendor_limited else self.vendor_buy
+        k = self.known_vendor
+        if k is not None and k.price and not k.limited and not k.currency:
+            return k.price
+        return None
+
+    @property
     def buy_price(self) -> int | None:
         """Lo que cuesta conseguir una unidad: en la subasta o a un vendedor sin límite."""
         options = []
         if self.market is not None:
             options.append(self.market)
-        if self.vendor_buy and not self.vendor_limited:
-            options.append(self.vendor_buy)
+        if self.shop_price:
+            options.append(self.shop_price)
         return min(options) if options else None
 
     @property
@@ -124,7 +140,7 @@ class ItemPrice:
         price = self.buy_price
         if price is None:
             return None
-        if self.vendor_buy == price and not self.vendor_limited:
+        if self.shop_price == price:
             return "vendedor"
         return "subasta"
 
@@ -200,4 +216,10 @@ def load_prices(conn: sqlite3.Connection, item_ids: Iterable[int] | None = None)
     if wanted is not None:
         for item_id in wanted:
             get(item_id)
+
+    if has_data(conn):
+        known = known_vendors(conn)
+        for item_id, p in result.items():
+            p.vendors_known = True
+            p.known_vendor = known.get(item_id)
     return result

@@ -11,6 +11,7 @@ from .catalogo import CatalogEntry, CatalogError, GuideMethod, evaluate_catalog,
 from .crafting import CraftResult, evaluate_recipes, recipe_item_ids
 from .farming import FarmSession, FarmSummary, farm_item_ids, load_sessions, summarize, value_sessions
 from .market import Backtest, MarketSignals, backtest, compute_signals, load_series
+from .merchantmap import sold_item_ids
 from .pricing import ItemPrice, load_prices
 from .selling import SellAdvice, advise
 from .vendors import VendorCandidate, VendorFlip, vendor_candidates, vendor_flips
@@ -80,7 +81,8 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
     owned = owned_items(conn)
     ledger_ids = {r[0] for r in conn.execute("SELECT DISTINCT item_id FROM ledger WHERE item_id IS NOT NULL")}
     vendor_ids = {r[0] for r in conn.execute("SELECT item_id FROM vendor_items")}
-    ids = set(owned) | recipe_item_ids(conn) | farm_item_ids(conn) | ledger_ids | vendor_ids | set(resolved.values())
+    ids = (set(owned) | recipe_item_ids(conn) | farm_item_ids(conn) | ledger_ids | vendor_ids
+           | sold_item_ids(conn) | set(resolved.values()))
     prices = load_prices(conn, ids)
 
     series, fulls = load_series(conn, ids)

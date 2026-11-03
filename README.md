@@ -124,7 +124,7 @@ extra. Ábrela como carpeta de una sesión en Claude Code (la app de escritorio,
 | «¿Qué hago hoy? Tengo 2 horas» (`que-hago`) | Lee tus datos y te da un plan: qué vender y a qué ritmo, qué craftear, qué farmear y qué medir. |
 | «Investiga» o «Busca métodos nuevos» (`buscar-metodos`) | Sesión de investigación: lee lo que has dejado en `fuentes/` y lo publicado en los últimos 7 días, y añade al catálogo los métodos concretos con lo que dan por hora. Lo que no se entienda sin ver un vídeo te lo pregunta, con el enlace. |
 | «Revisa los métodos» (`revisar`) | Pone nota del 1 al 10 a cada farmeo y crafteo según tus personajes, con el porqué y los pasos. Sale en el addon. |
-| «Mira los chollos» (`chollos`) | Comprueba en Wowhead si algún vendedor vende los posibles chollos y lo apunta. |
+| «Mira los chollos» (`chollos`) | Comprueba en Wowhead si algún vendedor vende los posibles chollos y lo apunta (solo hace falta si no se han podido bajar los datos de Merchant Map). |
 | «¿Me compensa subir Sastrería?» (`subir-profesion`) | Guía de subida, coste, y si se recupera según el comparador. |
 
 El asesor no hace cuentas: las hace el motor y él las lee y te las explica. Solo edita los archivos de
@@ -373,17 +373,36 @@ Dos datos distintos que conviene no mezclar:
 | Dato | ¿Se sabe sin hablar con el vendedor? |
 |---|---|
 | Cuánto cobraría un vendedor por un objeto | Sí: viene en los datos del juego, para todos los objetos |
-| Si algún vendedor lo vende, cuál, dónde y con qué condiciones | No: solo al abrir su ventana, o mirándolo fuera del juego |
+| Si algún vendedor lo vende, cuál, dónde y con qué condiciones | Sí, con los datos de Merchant Map; y del todo al abrir su ventana |
 
-Como los datos del juego dan precio de vendedor también a objetos que no vende nadie (el paño de lino,
-por ejemplo), los costes solo usan precios de vendedores que has visto. Al abrir un vendedor se
-apunta lo que vende (con quién lo viste, porque el precio puede llevar descuentos de reputación o de
-Legacy) y se borra lo que ya no vende.
+Los datos del juego dan precio de vendedor también a objetos que no vende nadie (el paño de lino,
+por ejemplo): de 12.500 objetos con precio, solo unos 1.900 los vende algún PNJ. Para saber cuáles,
+`datos-juego` baja también los datos del addon [Merchant Map](https://github.com/knofle/MerchantMap)
+(GPLv3), una vez por semana. No hace falta instalarlo. Trae dos listas:
+
+- **Comprobados en Forever** (unos 220 vendedores): precio de verdad, existencias limitadas, si se
+  paga con divisa y lo del Classic que ya no venden.
+- **Lista del Classic** (sacada de Questie, unos 1.000 vendedores): qué vende cada uno, sin precio.
+  Se cuenta al precio de los datos del juego y sale como «sin comprobar».
+
+Para el coste de un material manda, por este orden: el vendedor que has visto tú, el comprobado
+de Merchant Map y el de la lista del Classic. Solo cuentan los vendedores de la facción de tus
+personajes, sin límite de existencias, que cobran en oro y que no son de fiestas. El precio
+comprobado lleva los descuentos de reputación de quien lo vio, así que si se parece (±15 %) se usa
+el de los datos del juego. Lo que no sale en Merchant Map se da por no vendido: ya no aparece la
+pista «si lo vende un vendedor». Si ves en el juego que alguien sí lo vende, al abrir su ventana
+queda apuntado y manda.
+
+Al abrir un vendedor se apunta lo que vende (con quién lo viste, porque el precio puede llevar
+descuentos de reputación o de Legacy) y se borra lo que ya no vende. El panel dice quién vende cada
+material y cada receta, y en qué zona.
 
 El informe añade:
-- **Comprar a vendedores y revender**: lo que un vendedor que has visto vende por debajo de lo que
-  pagan en la subasta, con lo que da como mucho al día.
-- **Posibles chollos de vendedor**: objetos de tus crafteos o farmeos que en la subasta (ya sin
+- **Comprar a vendedores y revender**: lo que un vendedor (visto por ti o de Merchant Map) vende por
+  debajo de lo que pagan en la subasta, con lo que da como mucho al día. La columna «Dato» dice de
+  dónde sale el precio; los «sin comprobar» conviene confirmarlos abriendo su ventana.
+- **Posibles chollos de vendedor**: solo si no se han podido bajar los datos de Merchant Map. Son
+  objetos de tus crafteos o farmeos que en la subasta (ya sin
   comisión) se pagan al menos un 30 % más de lo que costaría comprárselos a un vendedor, si alguno los vende. Hay que mirar fuera del juego si alguien los vende:
   - `python -m motor chollos` lista los que toca comprobar;
   - `python -m motor chollo <id> nadie` o `python -m motor chollo <id> vende "Grimtak (Ratchet), Honorable"`
@@ -423,7 +442,8 @@ estas tablas y, si un dato está en los dos sitios, manda el del juego.
 
 Lo que **no** traen: qué PNJ vende cada receta, porque eso está en el servidor. Para tus profesiones
 lo dice el propio juego al abrir la ventana; para las demás, el informe dice si se aprende con un
-objeto (y cuánto cuesta en la subasta), con el instructor o al aprender la profesión.
+objeto (y cuánto cuesta en la subasta), con el instructor o al aprender la profesión. Si el objeto
+lo vende un PNJ, el panel lo saca de Merchant Map (ver «Vendedores»).
 
 Con estos datos el informe añade:
 - **Recetas de tus profesiones que te convendría aprender**, con el nivel que piden y cómo se aprenden.

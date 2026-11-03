@@ -4,8 +4,8 @@ Traen todas las recetas de todas las profesiones (también de las que no tienes)
 el nivel al que se aprenden y al que pasan a amarilla, verde y gris, sus materiales, lo
 que fabrican, el objeto con el que se aprenden, la espera de las que tienen (tela lunar,
 transmutaciones...) y lo que cobra y paga un vendedor por cada objeto. Los nombres de los
-objetos se bajan también en inglés, para reconocer lo que citan guías y vídeos. No traen qué
-PNJ vende cada cosa: eso vive en el servidor.
+objetos se bajan también en inglés, para reconocer lo que citan guías y vídeos, y los nombres de
+las zonas. No traen qué PNJ vende cada cosa: eso vive en el servidor (ver merchantmap.py).
 """
 
 from __future__ import annotations
@@ -26,9 +26,10 @@ PRODUCT = "wowf"
 LOCALE = "esES"
 USER_AGENT = "PitiGolds (addon personal; https://github.com/PitiGameDeveloper)"
 TABLES = ["SkillLine", "SkillLineAbility", "SpellName", "SpellEffect", "SpellReagents",
-          "ItemSparse", "Item", "ItemEffect", "ItemXItemEffect", "SpellCooldowns", "SpellCategories", "Faction"]
+          "ItemSparse", "Item", "ItemEffect", "ItemXItemEffect", "SpellCooldowns", "SpellCategories", "Faction",
+          "AreaTable", "UiMap"]
 ENGLISH_TABLES = ["ItemSparse"]  # se bajan también en inglés: <tabla>.enUS.csv
-FORMAT = 3  # sube cuando se importan datos nuevos: obliga a reimportar aunque la versión no cambie
+FORMAT = 4  # sube cuando se importan datos nuevos: obliga a reimportar aunque la versión no cambie
 
 PROFESSION_CATEGORIES = {9, 11}  # SkillLine.CategoryID: secundarias (cocina, pesca...) y principales
 EFFECT_CREATE_ITEM = 24
@@ -196,9 +197,12 @@ def import_tables(conn: sqlite3.Connection, folder: Path, build: str) -> ImportR
                       _int(r["RequiredSkillRank"]), english.get(item),
                       _int(r.get("MinFactionID")) or None, _int(r.get("MinReputation")) or None))
     factions = [(_int(r["ID"]), r["Name_lang"]) for r in _rows(folder, "Faction") if r.get("Name_lang")]
+    areas = [(_int(r["ID"]), r["AreaName_lang"]) for r in _rows(folder, "AreaTable") if r.get("AreaName_lang")]
+    maps = [(_int(r["ID"]), r["Name_lang"]) for r in _rows(folder, "UiMap") if r.get("Name_lang")]
 
     with conn:
-        for table in ("gd_skill_lines", "gd_recipes", "gd_reagents", "gd_items", "gd_factions"):
+        for table in ("gd_skill_lines", "gd_recipes", "gd_reagents", "gd_items", "gd_factions", "gd_areas",
+                      "gd_maps"):
             conn.execute(f"DELETE FROM {table}")
         conn.executemany("INSERT INTO gd_skill_lines VALUES (?, ?, ?, ?)",
                          [(k, *v) for k, v in skill_lines.items()])
@@ -212,6 +216,8 @@ def import_tables(conn: sqlite3.Connection, folder: Path, build: str) -> ImportR
             "vendor_stack, stackable, bonding, required_skill, required_skill_rank, name_en, min_faction, "
             "min_reputation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", items)
         conn.executemany("INSERT INTO gd_factions VALUES (?, ?)", factions)
+        conn.executemany("INSERT INTO gd_areas VALUES (?, ?)", areas)
+        conn.executemany("INSERT INTO gd_maps VALUES (?, ?)", maps)
         set_meta(conn, "game_data_build", build)
         set_meta(conn, "game_data_updated", str(int(time.time())))
         set_meta(conn, "game_data_format", str(FORMAT))

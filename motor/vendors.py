@@ -1,7 +1,8 @@
 """Vendedores: reventa de lo que venden por debajo de la subasta, y posibles chollos por comprobar.
 
 Las tablas del juego dicen cuánto cobraría un vendedor por cada objeto, pero no si alguno lo
-vende: eso solo se sabe al abrir su ventana o mirando fuera del juego (Wowhead...). Para no
+vende: eso se sabe al abrir su ventana o con los datos de Merchant Map (merchantmap.py). Si no
+se han podido bajar, queda mirarlo fuera del juego (Wowhead...). Para no
 comprobar todo el juego, solo son candidatos los objetos de crafteos y farmeos que dan dinero
 que en la subasta (ya sin comisión) se pagan muy por encima de lo que costaría comprárselos a
 un vendedor (no de lo que paga un vendedor si se lo vendes tú: eso lo usa selling.py).
@@ -41,6 +42,7 @@ class VendorFlip:
     buy: int
     sell: int              # lo que cobras en la subasta, ya sin comisión
     limited: bool
+    source: str = "visto"          # visto, Merchant Map o Merchant Map, sin comprobar
     sales_per_day: float | None = None
     sell_week: int | None = None   # lo que cobrarías con el precio previsto a 7 días
 
@@ -60,15 +62,23 @@ class VendorFlip:
 
 
 def vendor_flips(conn: sqlite3.Connection, prices: dict[int, ItemPrice], signals: dict) -> list[VendorFlip]:
-    """Lo que un vendedor que has visto vende por debajo de lo que pagan en la subasta."""
+    """Lo que un vendedor vende por debajo de lo que pagan en la subasta: los que has visto y,
+    para lo demás, los que conoce Merchant Map."""
+    offers = {r["item_id"]: (r["vendor"] or "?", r["price"], bool(r["limited"]), "visto") for r in conn.execute(
+        "SELECT item_id, price, limited, vendor FROM vendor_items WHERE price > 0")}
+    for item_id, p in prices.items():
+        k = p.known_vendor
+        if item_id not in offers and not p.vendor_buy and k is not None and k.price and not k.currency:
+            offers[item_id] = (k.where, k.price, k.limited,
+                               "Merchant Map" if k.verified else "Merchant Map, sin comprobar")
     flips = []
-    for r in conn.execute("SELECT item_id, price, limited, vendor FROM vendor_items WHERE price > 0"):
-        p = prices.get(r["item_id"])
-        if p is None or not p.net_sale or p.net_sale < r["price"] * 1.1 or p.net_sale - r["price"] < MIN_GAIN:
+    for item_id, (vendor, buy, limited, source) in offers.items():
+        p = prices.get(item_id)
+        if p is None or not p.net_sale or p.net_sale < buy * 1.1 or p.net_sale - buy < MIN_GAIN:
             continue
-        s = signals.get(r["item_id"])
-        flips.append(VendorFlip(item_id=r["item_id"], name=p.name, vendor=r["vendor"] or "?", buy=r["price"],
-                                sell=p.net_sale, limited=bool(r["limited"]),
+        s = signals.get(item_id)
+        flips.append(VendorFlip(item_id=item_id, name=p.name, vendor=vendor, buy=buy,
+                                sell=p.net_sale, limited=limited, source=source,
                                 sales_per_day=s.sales_per_day if s is not None else None,
                                 sell_week=p.net_of(s.forecast_7d) if s is not None and s.forecast_7d
                                 else None))
@@ -132,8 +142,9 @@ def vendor_candidates(conn: sqlite3.Connection, prices: dict[int, ItemPrice], cr
     result = []
     for item_id, why in reasons.items():
         p = prices.get(item_id)
-        # Si ya lo has visto en un vendedor no hace falta mirarlo fuera.
-        if p is None or p.vendor_buy or not p.catalog_buy or not p.net_sale:
+        # Si ya lo has visto en un vendedor no hace falta mirarlo fuera, ni si Merchant Map dice
+        # quién lo vende (entra en la reventa) o que no lo vende nadie.
+        if p is None or p.vendor_buy or p.vendors_known or not p.catalog_buy or not p.net_sale:
             continue
         if p.net_sale < p.catalog_buy * MIN_GAP or p.net_sale - p.catalog_buy < MIN_GAIN:
             continue

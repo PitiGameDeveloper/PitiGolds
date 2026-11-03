@@ -164,6 +164,19 @@ CREATE TABLE IF NOT EXISTS gd_items (
   required_skill INTEGER, required_skill_rank INTEGER, name_en TEXT, min_faction INTEGER, min_reputation INTEGER
 );
 CREATE TABLE IF NOT EXISTS gd_factions (faction_id INTEGER PRIMARY KEY, name TEXT);
+-- Nombres de zona: area_id de AreaTable (datos del Classic) y map_id de UiMap (mapas del juego).
+CREATE TABLE IF NOT EXISTS gd_areas (area_id INTEGER PRIMARY KEY, name TEXT);
+CREATE TABLE IF NOT EXISTS gd_maps (map_id INTEGER PRIMARY KEY, name TEXT);
+
+-- Lo que vende cada vendedor según el addon Merchant Map (merchantmap.py). Se rehace en cada importación.
+-- npc: su clave en Merchant Map; faction: A, H o AH (NULL si no se sabe); price: comprobado en Forever,
+-- por unidad (NULL si no se ha comprobado o se paga con divisa); verified: 0 si solo sale en la lista
+-- del Classic; holiday: vendedor de fiestas.
+CREATE TABLE IF NOT EXISTS mm_vendor_items (
+  item_id INTEGER, npc TEXT, vendor TEXT, faction TEXT, area_id INTEGER, map_id INTEGER, price INTEGER,
+  limited INTEGER, currency INTEGER, verified INTEGER, holiday INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_mm_vendor_items_item ON mm_vendor_items(item_id);
 """
 
 # La vista se rehace siempre para que coja las columnas nuevas.

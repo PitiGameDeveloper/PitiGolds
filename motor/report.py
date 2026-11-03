@@ -140,8 +140,12 @@ def _how_to_learn(c) -> str:
 
 
 def _missing_hint(p) -> str:
-    # El precio de catálogo solo sirve si algún vendedor lo vende: se da como pista.
-    if p.catalog_buy:
+    k = p.known_vendor
+    if k is not None:
+        how = "con divisa" if k.currency else "con existencias limitadas" if k.limited else "sin precio"
+        return f"{p.name} (lo vende {k.where}, {how})"
+    # Sin datos de Merchant Map, el precio de catálogo solo sirve si algún vendedor lo vende: se da como pista.
+    if p.catalog_buy and not p.vendors_known:
         return f"{p.name} (si lo vende un vendedor: {format_money(p.catalog_buy)})"
     return p.name
 
@@ -219,11 +223,13 @@ def _vendor_sections(a: Analysis, limit: int) -> list[str]:
     out = []
     if a.vendor_flips:
         out += ["", "## Comprar a vendedores y revender", "",
-                "Vendedores que has visto que venden por debajo de lo que pagan en la subasta.", ""]
-        out += _table(["Objeto", "Vendedor", "Compras a", "Vendes por", "Ganas por unidad", "En 7 días",
+                "Vendedores que venden por debajo de lo que pagan en la subasta: los que has visto y los de "
+                "Merchant Map. Los «sin comprobar» salen de la lista del Classic, al precio de los datos del juego: "
+                "abre su ventana para confirmarlo.", ""]
+        out += _table(["Objeto", "Vendedor", "Dato", "Compras a", "Vendes por", "Ganas por unidad", "En 7 días",
                        "Como mucho al día",
                        "Existencias"],
-                      [[f.name, f.vendor, format_money(f.buy), format_money(f.sell), format_money(f.profit),
+                      [[f.name, f.vendor, f.source, format_money(f.buy), format_money(f.sell), format_money(f.profit),
                         _week_cell(f.profit, f.profit_week),
                         format_money(f.gold_per_day) if f.gold_per_day is not None else "",
                         "limitadas" if f.limited else "sin límite"] for f in a.vendor_flips[:limit]])
@@ -501,10 +507,14 @@ def _vendor_rows(methods) -> list[list]:
     for m in methods:
         for i in m.items:
             p = i.price
-            buy = p.vendor_buy or p.catalog_buy if p else None
+            k = p.known_vendor if p else None
+            known = k.price if k is not None and not k.currency else None
+            buy = p.vendor_buy or known or p.catalog_buy if p else None
             gain = p.net_sale - buy if p and p.net_sale and buy else None
+            note = ("" if p and p.vendor_buy else " (Merchant Map)" if known and k.verified
+                    else " (datos del juego)")
             rows.append([i.name, m.entry.vendor, m.entry.zone,
-                         format_money(buy) + ("" if p and p.vendor_buy else " (datos del juego)") if buy else "?",
+                         format_money(buy) + note if buy else "?",
                          format_money(p.net_sale) if p and p.net_sale else "sin precio",
                          format_money(gain) if gain is not None else ""])
     return rows

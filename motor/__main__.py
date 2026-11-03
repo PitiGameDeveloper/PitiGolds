@@ -3,7 +3,8 @@
     python -m motor vigilar    los lee cada vez que WoW los guarda (/reload o salir)
     python -m motor estado     resumen de personajes, oro, profesiones y subasta
     python -m motor informe    qué craftear, qué aprender y qué vender
-    python -m motor datos-juego  descarga las recetas y objetos del juego (wago.tools)
+    python -m motor datos-juego  descarga las recetas y objetos del juego (wago.tools) y qué vende
+                               cada vendedor (Merchant Map)
     python -m motor chollos    posibles chollos de vendedor que toca comprobar fuera del juego
     python -m motor chollo <id> nadie | vende "detalle"   apunta lo que encuentres
     python -m motor ajustes --horas-semana 10 --semanas 4 --legado-subida 0   para comparar métodos
@@ -26,6 +27,7 @@ from .analysis import analyze
 from .catalogo import CATALOG_PATH, catalog_problems, load_catalog
 from .config import Config, load_config
 from .gamedata import update_game_data
+from .merchantmap import has_data, update_merchant_map
 from .fuentes import DEFAULT_DAYS, LOCAL_DIR, collect, load_sources, mark_done, word_text
 from .generated import write_generated
 from .ingest import ingest_file
@@ -95,16 +97,24 @@ def cmd_leer(config: Config) -> int:
 def cmd_datos_juego(config: Config, force: bool) -> int:
     conn = dbmod.connect(config.db_path)
     try:
-        report = update_game_data(conn, config.db_path.parent / "juego", config.wow_dir, force=force)
+        try:
+            report = update_game_data(conn, config.db_path.parent / "juego", config.wow_dir, force=force)
+        except (OSError, ValueError) as exc:
+            print(f"No he podido descargar los datos del juego: {exc}")
+            return 1
         if report is None:
             print(f"Los datos del juego ya están al día (versión {dbmod.get_meta(conn, 'game_data_build')}).")
+        else:
+            print(f"Datos del juego {report.build}: {report.recipes} recetas y {report.items} objetos.")
+            for name, n in sorted(report.by_profession.items(), key=lambda kv: -kv[1]):
+                print(f"  {name:<24} {n} recetas")
+        try:
+            sold = update_merchant_map(conn, config.db_path.parent / "juego", force=force)
+        except (OSError, ValueError) as exc:  # sin Merchant Map se sigue con lo que hubiera
+            print(f"No he podido descargar los vendedores de Merchant Map: {exc}")
             return 0
-        print(f"Datos del juego {report.build}: {report.recipes} recetas y {report.items} objetos.")
-        for name, n in sorted(report.by_profession.items(), key=lambda kv: -kv[1]):
-            print(f"  {name:<24} {n} recetas")
-    except (OSError, ValueError) as exc:
-        print(f"No he podido descargar los datos del juego: {exc}")
-        return 1
+        if sold is not None:
+            print(f"Vendedores de Merchant Map: {sold} objetos que vende algún PNJ.")
     finally:
         conn.close()
     return 0
@@ -261,10 +271,18 @@ def check_game_data(config: Config) -> bool:
     conn = dbmod.connect(config.db_path)
     try:
         report = update_game_data(conn, config.db_path.parent / "juego", config.wow_dir)
-        if report is None:
+        try:
+            sold = update_merchant_map(conn, config.db_path.parent / "juego")
+        except (OSError, ValueError) as exc:  # se reintenta en la próxima comprobación
+            print(f"No he podido comprobar los vendedores de Merchant Map ({exc}).")
+            sold = None
+        if report is None and sold is None:
             return False
-        print(f"[{time.strftime('%H:%M:%S')}] Datos del juego actualizados: versión {report.build}, "
-              f"{report.recipes} recetas.")
+        if report is not None:
+            print(f"[{time.strftime('%H:%M:%S')}] Datos del juego actualizados: versión {report.build}, "
+                  f"{report.recipes} recetas.")
+        if sold is not None:
+            print(f"[{time.strftime('%H:%M:%S')}] Vendedores de Merchant Map actualizados: {sold} objetos.")
         print("  " + refresh_outputs(conn, config))
         return True
     finally:
@@ -318,11 +336,17 @@ def cmd_chollos(config: Config, show_all: bool) -> int:
     conn = dbmod.connect(config.db_path)
     try:
         candidates = analyze(conn).vendor_candidates
+        known = has_data(conn)
     finally:
         conn.close()
     shown = candidates if show_all else [c for c in candidates if c.due]
     if not shown:
-        print("No toca comprobar ninguno." if candidates else "No hay posibles chollos de vendedor.")
+        if known and not candidates:
+            print("No hay nada que comprobar: los datos de Merchant Map ya dicen quién vende cada cosa. "
+                  "Lo que vende algún PNJ por debajo de la subasta sale en el informe, en «Comprar a vendedores "
+                  "y revender».")
+        else:
+            print("No toca comprobar ninguno." if candidates else "No hay posibles chollos de vendedor.")
         return 0
     print("Mira si algún vendedor los vende (en Wowhead, la pestaña «Vendido por»)\n"
           "y apúntalo con: python -m motor chollo <id> nadie | vende \"vendedor, zona y condiciones\"\n")

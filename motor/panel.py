@@ -472,8 +472,14 @@ def _color_farms(rows: list[FarmRow], floor: int) -> int | None:
 
 # Crafteos -----------------------------------------------------------------------------
 
-def _vendor_rows(conn: sqlite3.Connection) -> dict[int, sqlite3.Row]:
-    return {r["item_id"]: r for r in conn.execute("SELECT * FROM vendor_items")}
+def _vendor_rows(conn: sqlite3.Connection, prices: dict) -> dict[int, dict]:
+    """Quién vende cada objeto: el vendedor que has visto o, si no, el de Merchant Map."""
+    rows = {r["item_id"]: dict(r, mm=False) for r in conn.execute("SELECT * FROM vendor_items")}
+    for item_id, p in prices.items():
+        k = p.known_vendor
+        if item_id not in rows and k is not None:
+            rows[item_id] = {"vendor": k.vendor, "zone": k.zone, "price": k.price, "costs_json": None, "mm": True}
+    return rows
 
 
 def _recipe_source(ctx: _Context, c: CraftResult, ch: Character | None, vendors: dict, checks: dict,
@@ -494,6 +500,8 @@ def _recipe_source(ctx: _Context, c: CraftResult, ch: Character | None, vendors:
         src.text = f"La vende {v['vendor']}" + (f" en {v['zone']}" if v["zone"] else "")
         if v["price"]:
             src.text += f" por {format_money(v['price'])}"
+        if v["mm"]:
+            src.text += " (según Merchant Map)"
         if v["costs_json"] and ch is not None:
             short = []
             for cost in json.loads(v["costs_json"]):
@@ -606,7 +614,7 @@ def _craft_candidates(ctx: _Context, reviews: Reviews) -> list[CraftResult]:
 
 def _craft_rows(ctx: _Context, reviews: Reviews) -> list[CraftRow]:
     a, conn = ctx.a, ctx.conn
-    vendors = _vendor_rows(conn)
+    vendors = _vendor_rows(conn, a.prices)
     checks = {r["item_id"]: r for r in conn.execute("SELECT item_id, status, detail FROM vendor_checks")}
     item_info = {r["item_id"]: (r["min_faction"], r["min_reputation"]) for r in conn.execute(
         "SELECT item_id, min_faction, min_reputation FROM gd_items WHERE min_faction IS NOT NULL")}
