@@ -107,10 +107,11 @@
       "nombre": "Vástagos de dragón",
       "tipo": "farmeo", "nivel": 24, "zona": "Los Humedales",
       "objetos": ["Small Flame Sac", "Sharp Claw", "Large Fang", "Tiny Crimson Whelpling"],
-      "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 15}, {"objeto": "Sharp Claw", "cantidad": 10}, {"objeto": "Large Fang", "cantidad": 10}, {"objeto": "Tiny Crimson Whelpling", "cantidad": 0.1}], "oro_hora": 1,
+      "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 5}, {"objeto": "Sharp Claw", "cantidad": 10}, {"objeto": "Large Fang", "cantidad": 10}, {"objeto": "Tiny Crimson Whelpling", "cantidad": 0.1}], "oro_hora": 1,
       "punto": {"mapa": 1437}, "bichos": ["Vástago"],
-      "notas": "Depende de vender en la subasta. Hay una pequeña probabilidad de mascota. Estimado por hora: unos 120 vástagos; la mascota, una de cada mil.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "notas": "Depende de vender en la subasta. Hay una pequeña probabilidad de mascota. Estimado por hora: unos 120 vástagos; la mascota, una de cada mil. La glándula de llamas se estima en unas 5 por hora: según MetaBot (datos de Classic), estos vástagos no están entre los 15 bichos que más la sueltan y el último de esa lista da un 5,6 %. Aun así, CJ Mann los propone para ir guardándolas mientras subes.",
+      "fuente": "Guía de Studen v1.0; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
       "id": "trabalomas-gnolls",
@@ -186,6 +187,17 @@
       "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
     },
     {
+      "id": "arathi-exiliados",
+      "nombre": "Exiliados ardientes (talismán y elemental de fuego)",
+      "tipo": "farmeo", "nivel": 38, "zona": "Tierras Altas de Arathi, círculo del oeste (Circle of West Binding), al oeste de Northfold Manor",
+      "objetos": ["Burning Charm", "Elemental Fire"],
+      "por_hora": [{"objeto": "Burning Charm", "cantidad": 32}, {"objeto": "Elemental Fire", "cantidad": 10}], "oro_hora": 3.5,
+      "punto": {"mapa": 1417, "x": 25, "y": 30}, "bichos": ["Exiliado ardiente"],
+      "notas": "Bichos de nivel 38-39 que sueltan talismán ardiente (40 %) y elemental de fuego (12 %, de lo mejor que hay), según MetaBot con datos de Classic. CJ Mann dice que los guerreros compran el talismán para la misión del hacha de Torbellino: es un mercado pequeño, así que pon pocos cada vez; si no salen, el vendedor paga 1 plata 78. Lo que aguanta el farmeo es el elemental: 4 plata al vendedor y más cuando lleguen las bandas (ver «Materiales de pociones de protección»). Las coordenadas son aproximadas. Estimado por hora: unos 80 exiliados, porque el sitio es pequeño y lo comparten otros jugadores.",
+      "fuente": "CJ Mann, YouTube (2026-11-03); MetaBot; Warcraft Wiki; Wowhead", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
+    },
+    {
       "id": "inhospitas-elementales",
       "nombre": "Elementales de roca",
       "tipo": "farmeo", "nivel": 37, "zona": "Tierras Inhóspitas",
@@ -207,13 +219,24 @@
     },
     {
       "id": "inhospitas-vastagos",
-      "nombre": "Vástagos (bolsa de llamas)",
+      "nombre": "Vástagos (glándula de llamas)",
       "tipo": "farmeo", "nivel": 40, "zona": "Tierras Inhóspitas",
       "objetos": ["Small Flame Sac"],
-      "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 25}], "oro_hora": 1.5,
+      "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 14}], "oro_hora": 1.5,
       "punto": {"mapa": 1418}, "bichos": ["Vástago"],
-      "notas": "Solo compensa cuando la gente empiece con el Núcleo de Magma: la bolsa de llamas pequeña es para la poción de protección contra el fuego. Estimado por hora: unos 110 vástagos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "notas": "La glándula de llamas pequeña se usa en la poción de protección contra el Fuego, el chili de aliento de dragón, el batido picante y el deflector de llamas. La guía decía que solo compensa cuando la gente empiece con el Núcleo de Magma, y según la hoja de ruta este no abre el 9 de diciembre (ver «Materiales de pociones de protección»). Estimado por hora: unos 110 vástagos con un 13 % (MetaBot, datos de Classic).",
+      "fuente": "Guía de Studen v1.0; MetaBot; Blizzard Watch (2026-09-13)", "fecha": "2026-11-04"
+    },
+    {
+      "id": "marjal-vastagos",
+      "nombre": "Vástagos del Marjal (glándula de llamas)",
+      "tipo": "farmeo", "nivel": 42, "zona": "Marjal Revolcafango",
+      "objetos": ["Small Flame Sac"],
+      "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 15}], "oro_hora": 1.5,
+      "punto": {"mapa": 1445},
+      "notas": "Searing Whelp en inglés, de nivel 42-43, con un 13 % de glándula de llamas pequeña (MetaBot, datos de Classic). MetaBot los pone en Las Mil Agujas, pero Wowhead y el vídeo dicen el Marjal. Otra opción antes de este nivel: los vástagos de 34-36 del Pantano de las Penas, con un 9-10 %. Estimado por hora: unos 120 vástagos. Para qué sirve la glándula y hasta cuándo guardarla: ver «Materiales de pociones de protección».",
+      "fuente": "CJ Mann, YouTube (2026-11-03); MetaBot; Wowhead", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
       "id": "tanaris-tortugas",
@@ -309,13 +332,14 @@
     },
     {
       "id": "esencia-fuego",
-      "nombre": "Esencia de fuego",
+      "nombre": "Esencia y elemental de fuego",
       "tipo": "farmeo", "nivel": 52, "zona": "Cráter de Un'Goro (bichos 53-56) o Frondavil",
-      "objetos": ["Essence of Fire"],
-      "por_hora": [{"objeto": "Essence of Fire", "cantidad": 6}], "oro_hora": 3,
+      "objetos": ["Essence of Fire", "Elemental Fire"],
+      "por_hora": [{"objeto": "Essence of Fire", "cantidad": 6}, {"objeto": "Elemental Fire", "cantidad": 8}], "oro_hora": 3,
       "punto": {"mapa": 1449},
-      "notas": "En Frondavil cae menos que en Un'Goro. Estimado por hora: unas 6 esencias en Un'Goro.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "notas": "En Frondavil cae menos que en Un'Goro. Los elementales de fuego de Un'Goro sueltan elemental de fuego en un 7-8 % (MetaBot, datos de Classic); CJ Mann propone farmearlos justo antes de llegar a 60 y avisa de que Un'Goro será zona de guerra. Antes de nivel 52, los elementales de 45-49 de La Garganta de Fuego dan un 8-9 %. Estimado por hora: unas 6 esencias y 8 elementales en Un'Goro.",
+      "fuente": "Guía de Studen v1.0; CJ Mann, YouTube (2026-11-03); MetaBot", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
       "id": "esencia-aire-tierra",
@@ -481,13 +505,14 @@
     {
       "id": "pesca-cajas",
       "nombre": "Pesca de cajas en la costa de Tanaris",
-      "tipo": "pesca", "nivel": 20, "zona": "Tanaris, costa este alrededor de Puerto Bonvapor",
-      "profesiones": [{"id": 356, "nivel": 205}],
-      "objetos": ["Bolt of Mageweave", "Iron Bar", "Mithril Bar"],
-      "por_hora": [{"objeto": "Bolt of Mageweave", "cantidad": 5}, {"objeto": "Iron Bar", "cantidad": 10}, {"objeto": "Mithril Bar", "cantidad": 8}], "oro_hora": 5,
+      "tipo": "pesca", "nivel": 20, "nivel_minimo": 5, "zona": "Tanaris, costa este alrededor de Puerto Bonvapor",
+      "profesiones": [{"id": 356, "nivel": 125}],
+      "objetos": ["Bolt of Mageweave", "Iron Bar", "Mithril Bar", "Rugged Leather"],
+      "por_hora": [{"objeto": "Bolt of Mageweave", "cantidad": 5}, {"objeto": "Iron Bar", "cantidad": 10}, {"objeto": "Mithril Bar", "cantidad": 8}, {"objeto": "Rugged Leather", "cantidad": 5}], "oro_hora": 10,
       "punto": {"mapa": 1446, "x": 67, "y": 23},
-      "notas": "Pesca solo en restos flotantes, no en agua abierta. Hace falta 205 efectivo para lanzar y 300 para que no se escape nada: 225 de habilidad (libro de Pesca experta de Bahía del Botín), caña de +20/+25 y cebo de +75/+100. Los bichos de la costa son neutrales. Estimado por hora: unos 30 restos flotantes.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "notas": "Pesca solo en restos flotantes, no en agua abierta. Hace falta 205 efectivo para lanzar y 300 para que no se escape nada: 225 de habilidad (libro de Pesca experta de Bahía del Botín), caña de +20/+25 y cebo de +75/+100. Los bichos de la costa son neutrales. CJ Mann lo da como el método seguro del primer día: la Pesca llega a 150 desde nivel 5 y a 225 desde nivel 20, así que se puede ir casi desde el principio, y va bien para sesiones cortas de unos 40 minutos. Lo mínimo para lanzar son 125 de habilidad con caña fuerte (+5) y adornos brillantes (+75), que piden Pesca 100, pero así se escapan más capturas y rinde menos. El atractor acuadinámico (+100) también pide Pesca 100, y los vendedores lo tienen con existencias limitadas. Además de lo que se cuenta aquí, cita cuero basto y verdes que el vendedor paga hasta a 3 oros, y habla de hasta 25 oros por hora: es su cifra, y avisa de que el primer día habrá mucha gente pescando. Mídelo con «Farmear este». Estimado por hora: unos 30 restos flotantes; 10 oros de monedas y verdes al vendedor.",
+      "fuente": "Guía de Studen v1.0; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
       "id": "pesca-restos-tuercespina",
@@ -529,19 +554,20 @@
       "objetos": ["Deviate Fish", "Savory Deviate Delight"],
       "por_hora": [{"objeto": "Deviate Fish", "cantidad": 40}], "oro_hora": 0.3,
       "punto": {"mapa": 1413},
-      "notas": "Con 150 de Pesca no se escapa ninguno. Con Cocina 85 y la receta (botín del mundo) lo conviertes en delicia de desviado, que siempre se vende. Estimado por hora: unas 120 capturas, un tercio desviados; cocinado vale más.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "notas": "Con 150 de Pesca no se escapa ninguno. Con Cocina 85 y la receta (botín del mundo) lo conviertes en delicia desviada sabrosa, que te transforma en humano pirata o ninja y siempre se vende. Si está barata en la subasta, ver «Delicias desviadas baratas». Estimado por hora: unas 120 capturas, un tercio desviados; cocinado vale más.",
+      "fuente": "Guía de Studen v1.0; Method (2026-10-12)", "fecha": "2026-11-04"
     },
     {
       "id": "pesca-whimsyfin",
       "nombre": "Delicia sabrosa de Whimsyfin (nueva en Forever)",
       "tipo": "pesca", "nivel": 15, "zona": "Montañas Crestagrana",
-      "profesiones": [{"id": 356, "nivel": 1}, {"id": 185, "nivel": 1}],
-      "objetos": ["Savory Whimsyfin Delight"],
+      "profesiones": [{"id": 356, "nivel": 1}, {"id": 185, "nivel": 85}],
+      "objetos": ["Savory Whimsyfin Delight", "Whimsyfin", "Recipe: Savory Whimsyfin Delight"],
       "por_hora": [{"objeto": "Savory Whimsyfin Delight", "cantidad": 25}], "oro_hora": 0.3,
       "punto": {"mapa": 1433},
-      "notas": "La receta cae en Crestagrana y el pez se pesca en bancos de la zona. Te convierte en múrloc u ogro. Estimado por hora: unas 25 delicias pescando y cocinando.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "notas": "La receta pide Cocina 85, cae con poca probabilidad de cualquier bicho de Crestagrana y no se liga, así que también se puede vender. El pez solo sale de bancos de la zona, sobre todo en el lago pequeño del este, junto a la aldea múrloc. Te convierte en orco pirata o ninja durante una hora; los múrlocs y ogros que salen en guías antiguas eran de la beta y se quitaron. CJ Mann cuenta que en la beta valía unas cuatro veces más que la delicia desviada por ser nueva. Estimado por hora: unas 25 delicias pescando y cocinando.",
+      "fuente": "Guía de Studen v1.0; Method (2026-10-12); CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
       "id": "mazmorra-colmillo-oscuro",
@@ -617,20 +643,33 @@
       "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
     },
     {
+      "id": "invernadero-semillas",
+      "nombre": "Invernadero: plantar semillas de hierba",
+      "tipo": "farmeo", "zona": "Cualquiera (equipo de campamento)",
+      "profesiones": [{"id": 182, "nivel": 140}],
+      "objetos": ["Commonplace Herb Seeds", "Uncommon Herb Seeds", "Unusual Herb Seeds", "Scarce Herb Seeds"],
+      "notas": "Sin probar: Kaychak lo presenta como el que más curiosidad le da a largo plazo, pero en la beta las hierbas desaparecían y nadie ha visto lo que da. Se fabrica un Invernadero con Botánica 140, se monta como equipo de campamento, se plantan semillas y a los pocos minutos se recogen las hierbas. Cada uno se gasta al usarlo (según el cliente) y pide 2 de madera simple, 1 de lágrimas de Arthas y 1 de loto morado: lo que salga tiene que pagar eso y las semillas. Espera de 1 hora, en la misma categoría que las hogueras. El plano lo suelta Shadetooth (8 %, Excavación: Los Humedales, según Wowhead) y se puede comerciar. Las semillas salen al recoger hierbas (Wowhead ve las comunes en hojaplata y flor de paz) y se pueden vender; con el Hibridador de semillas (plano a Botánica 300) se combinan. Cultivo, la racial de tauren (15 min de espera), hace crecer una hierba sobre otra para recogerla dos veces: si también vale con estas, renta más. Con Minería existe el Jardín de piedra, pero según Kaychak se controla mucho menos lo que sale.",
+      "pendiente": "Nadie ha medido lo que da: en la beta las hierbas desaparecían. Hay que probar en el juego qué hierbas salen de cada semilla y cuántas, y si Cultivo (tauren) funciona sobre ellas.",
+      "fuente": "Kaychak, YouTube (2026-11-02)", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
+    },
+    {
       "id": "crafteos-costura",
       "nombre": "Costura con lo que farmeas",
       "tipo": "crafteo",
-      "objetos": ["Runecloth Bag", "Dreamweave Gloves", "Dreamweave Vest", "Dreamweave Circlet", "Felcloth Hood", "Felcloth Boots", "Mooncloth"],
-      "notas": "Bolsas de tela rúnica (comprando la tela y haciendo los rollos) y piezas de Tejesueños y tela vil. La tela lunar tiene espera de varios días: cada personaje con Costura hace una.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "objetos": ["Runecloth Bag", "Dreamweave Gloves", "Dreamweave Vest", "Dreamweave Circlet", "Felcloth Hood", "Felcloth Boots", "Mooncloth", "Mooncloth Reagent Bag", "Bottomless Reagent Bag"],
+      "notas": "Bolsas de tela rúnica (comprando la tela y haciendo los rollos) y piezas de Tejesueños y tela vil. Tela lunar: 2 de tela de inferi dan 1, con Costura 230 (personaje de nivel 35 como mínimo) y una espera de 4 días por personaje (95 h en el cliente), así que cada sastre hace una. El patrón lo vende Qia en Cuna del Invierno y se liga al recogerlo: hay que ir con cada sastre. Vi'el, también en Cuna del Invierno, vende tela de inferi a 80 plata en existencias limitadas (2 según Wowhead, lo justo para una tela lunar): pásate antes de comprarla en la subasta. Kaychak espera que en Forever la pidan más que en Classic, por las épicas nuevas de Costura y las bolsas de componentes: la de tela lunar (18 casillas) lleva 1 y la sin fondo (20 casillas) lleva 12, que son 48 días de espera de un sastre, y además 5 de cuero, pellejo y escama prístinos. Según los datos del juego la piden 61 recetas, 10 de ellas épicos que se ligan al equipar. CJ Mann también la pone entre los ingresos pasivos que merece tener en cada alter.",
+      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
     },
     {
       "id": "crafteos-peleteria",
       "nombre": "Peletería",
       "tipo": "crafteo",
-      "objetos": ["Devilsaur Leggings", "Devilsaur Gauntlets", "Wolfshead Helm", "Deviate Scale Belt", "Cured Rugged Hide"],
-      "notas": "En Forever hay kits de armadura nuevos (defensa, poder con hechizos y poder de ataque) y muchas recetas nuevas con buenas características, aún sin destripar del todo.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "objetos": ["Devilsaur Leggings", "Devilsaur Gauntlets", "Wolfshead Helm", "Deviate Scale Belt", "Cured Rugged Hide", "Blue Dragonscale Helm", "Black Dragonscale Helm", "Dawn Armor"],
+      "notas": "En Forever hay kits de armadura nuevos (defensa, poder con hechizos y poder de ataque) y muchas recetas nuevas con buenas características, aún sin destripar del todo. Pellejo basto curado: 1 pellejo basto y 1 sal de roca refinada dan 2 (ver «Salero»). Kaychak espera más demanda que en Classic por piezas épicas nuevas ligadas al equipar que piden varios: 6 el Yelmo de escamas de dragón azul y 4 el negro y la Armadura del Alba. Según los datos del juego lo piden 144 recetas, 27 de ellas épicos que se ligan al equipar. CJ Mann cuenta además con que las piezas de demosaurio tendrán mucha demanda cuando la gente llegue a 60.",
+      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
     },
     {
       "id": "crafteos-herreria",
@@ -644,9 +683,10 @@
       "id": "crafteos-alquimia",
       "nombre": "Transmutaciones de Alquimia",
       "tipo": "crafteo",
-      "objetos": ["Arcanite Bar", "Essence of Fire", "Essence of Earth", "Essence of Water", "Essence of Air", "Living Essence", "Essence of Undeath"],
-      "notas": "Tienen espera y comparten la misma: una transmutación por personaje cada vez. Por eso compensa tener varios personajes con Alquimia.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "objetos": ["Arcanite Bar", "Legionite Bar", "Essence of Fire", "Essence of Earth", "Essence of Water", "Essence of Air", "Living Essence", "Essence of Undeath"],
+      "notas": "Tienen espera y comparten la misma: una transmutación por personaje cada vez. Por eso compensa tener varios personajes con Alquimia. Forever añade Transmutar: legionita (1 barra de torio pesado y 1 cristal vil, Alquimia 275, nivel 35), con 2 días de espera como la arcanita (47 h en el cliente). Kaychak lo deja como duda, pero las tablas del cliente les dan la misma categoría de espera: cada 2 días eliges una de las dos. A Kaychak no le preocupa, porque así llegan menos barras de cada una a la subasta y aguanta el precio. La legionita la piden sobre todo piezas de nivel 60 ligadas al equipar de Herrería e Ingeniería (12 los Quijotes de campeón y el Yelmo incondicional). Sin resolver: ni Merchant Map ni Wowhead dicen aún dónde se consigue la receta ni de dónde sale el cristal vil (cabe en bolsa de minería, así que seguramente se mine). La barra de torio pesado se funde con Minería 300 y, según guías de la beta, su mineral sale en Monte Hyjal: no cuentes con la legionita al principio. La arcanita (lingote de torio y cristal arcano, con la receta de Alchemist Pestlezugg) la piden 88 recetas, 16 de ellas épicos que se ligan al equipar; la legionita, 22 recetas y 12 épicos. CJ Mann pone las dos entre los mejores ingresos pasivos.",
+      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
     },
     {
       "id": "antifaz-bandido",
@@ -663,8 +703,8 @@
       "tipo": "crafteo",
       "profesiones": [{"id": 333, "nivel": 10}],
       "objetos": ["Lesser Magic Wand", "Greater Magic Wand"],
-      "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas. Aviso de Kaychak (31-10-2026, https://www.youtube.com/watch?v=ryub9vdTKq0): lo recomiendan muchos vídeos y en los megaservidores lo hará muchísima gente, así que te quitarán las ventas al momento y el margen será mínimo. Además, al final de la beta la subasta empezó a cobrar 1 plata de depósito por cada puesta, que pierdes si no se vende. Antes de fabricar, mira en la subasta cuántos venden y a cuánto. NERF: desde el 1 de octubre de 2026 las varitas se venden al vendedor por 1 cobre (lo avisa Ceedsy en su vídeo de cómo sacar 10 oros el primer día, que se basaba en eso: https://www.youtube.com/watch?v=NDdiw-q_-qw). Los datos del juego aún dicen 1 plata 10 la menor y 2 plata la mayor porque el cambio es del servidor: el addon apunta el precio real en cuanto ve una varita. Solo queda venderlas en la subasta. Desde el nerf, el polvo extraño y las esencias mágicas tienen otra salida: con ellos se llenan los cajones saqueados de curiosidades (ver «Cajones saqueados»), así que se venden en la subasta.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-31"
+      "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas. Aviso de Kaychak (31-10-2026, https://www.youtube.com/watch?v=ryub9vdTKq0): lo recomiendan muchos vídeos y en los megaservidores lo hará muchísima gente, así que te quitarán las ventas al momento y el margen será mínimo. Además, al final de la beta la subasta empezó a cobrar 1 plata de depósito por cada puesta, que pierdes si no se vende. Antes de fabricar, mira en la subasta cuántos venden y a cuánto. NERF: desde el 1 de octubre de 2026 las varitas se venden al vendedor por 1 cobre (lo avisa Ceedsy en su vídeo de cómo sacar 10 oros el primer día, que se basaba en eso: https://www.youtube.com/watch?v=NDdiw-q_-qw). Los datos del juego aún dicen 1 plata 10 la menor y 2 plata la mayor porque el cambio es del servidor: el addon apunta el precio real en cuanto ve una varita. Solo queda venderlas en la subasta. Desde el nerf, el polvo extraño y las esencias mágicas tienen otra salida: con ellos se llenan los cajones saqueados de curiosidades (ver «Cajones saqueados»), así que se venden en la subasta. CJ Mann (03-11-2026, https://www.youtube.com/watch?v=gzfLo4vBsGo) lo vuelve a proponer para el primer día: comprar lino a poco más de lo que paga el vendedor, hacer verdes, desencantarlos y fabricar varitas con madera simple de vendedor. Los 50 oros que cita son de un amigo suyo en el primer día de Classic, anunciándolas a otros jugadores: aquí solo cuenta la subasta, y él mismo avisa de que a partir del segundo día el precio cae mucho. Él habla de togas y jubones de lino marrón, pero según los datos del juego el jubón es blanco y no se puede desencantar, y la toga gasta 3 madejas donde los pantalones gastan 2: mejor pantalones.",
+      "fuente": "Guía de Studen v1.0; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04"
     },
     {
       "id": "aceite-zahori-menor",
@@ -787,6 +827,24 @@
       "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
     },
     {
+      "id": "invertir-protecciones",
+      "nombre": "Materiales de pociones de protección: guardarlos hasta las bandas del 9 de diciembre",
+      "tipo": "inversion",
+      "objetos": ["Elemental Fire", "Elemental Water", "Elemental Earth", "Elemental Air", "Dream Dust", "Shadow Oil", "Dreamfoil", "Small Flame Sac"],
+      "notas": "La idea de CJ Mann: hasta que empiecen las bandas casi nadie los necesita, así que se compran baratos o se guardan los que caen al subir. Según los datos del juego, cada poción superior lleva hojasueño, vial de cristal y uno de estos: elemental de fuego (Fuego), de agua (Escarcha), de tierra (Naturaleza), de aire (Sagrado), polvo onírico (Arcano) o aceite de las Sombras (Sombras). La glándula de llamas no entra en ellas, pero sí en la poción normal de Fuego y en el chili de aliento de dragón. Ojo con las fechas: según la hoja de ruta, el 9 de diciembre abren Barrow Deeps (10), Hyjal Summit (20) y Onyxia (40), sin Núcleo de Magma, que aún no tiene fecha. Por eso no cuentes con que la protección contra el Fuego suba tanto como en otras versiones del juego. El vendedor paga 4 plata por cada elemental: comprando cerca de ese precio casi no hay riesgo. Para farmearlos de camino a 60: vástagos de Los Humedales (24), elementales y vástagos de las Tierras Inhóspitas (37-40), exiliados de Arathi (38), vástagos del Marjal (42) y Un'Goro (52).",
+      "fuente": "CJ Mann, YouTube (2026-11-03); datos del juego; Blizzard Watch (2026-09-13)", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
+    },
+    {
+      "id": "invertir-delicia-desviada",
+      "nombre": "Delicias desviadas baratas para vender poco a poco durante años",
+      "tipo": "inversion",
+      "objetos": ["Savory Deviate Delight"],
+      "notas": "La idea de CJ Mann: la delicia de aletantojo, por ser nueva, se llevará la atención, y la desviada de siempre se quedará por debajo de lo que vale. A nivel 20 la gente se la pesca; a nivel 60, con oro de sobra, compra pilas. Pone de ejemplo pasar de 5 a 25 plata. Solo si no tienes nada mejor en que invertir: es dinero parado durante mucho tiempo, y el vendedor solo paga 5 cobre, así que si no sube se pierde casi todo. Guárdalas en un personaje de banco y pon pocas cada vez.",
+      "fuente": "CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
+    },
+    {
       "id": "twinks",
       "nombre": "Objetos para twinks (19, 29 y 39)",
       "tipo": "inversion",
@@ -821,8 +879,21 @@
       "cantidad": 3,
       "requisito": "todas las profesiones del personaje (las dos principales y las tres secundarias) a 300",
       "objetos": ["Essence of Fire", "Essence of Water", "Essence of Earth", "Essence of Air"],
-      "notas": "Una vez al día (23 h, 25 s de lanzamiento): sube un punto tu profesión más baja; con todo a 300 da 2-4 esencias elementales al azar. Cada alter con todo a 300 es otra tirada diaria. Antes de gastar Legacy en esto, la guía aconseja los talentos que aceleran subir de nivel.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "notas": "Una vez al día (23 h, 25 s de lanzamiento): sube un punto tu profesión más baja; con todo a 300 da 2-4 esencias elementales al azar. Cada alter con todo a 300 es otra tirada diaria. Antes de gastar Legacy en esto, la guía aconseja los talentos que aceleran subir de nivel. Kaychak lo ve como un extra para personajes cuyas profesiones ya ibas a subir: Cocina y Primeros auxilios suben pronto y lo lento es Pesca.",
+      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-11-02)", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
+    },
+    {
+      "id": "salero-sal-refinada",
+      "nombre": "Salero: una sal de roca refinada cada 3 días",
+      "tipo": "diario", "nivel": 35,
+      "profesiones": [{"id": 165, "nivel": 250}],
+      "cantidad": 0.34,
+      "requisito": "Peletería 250 y un Salero",
+      "objetos": ["Refined Deeprock Salt"],
+      "notas": "El Salero convierte 1 sal de roca en 1 refinada y no se gasta; espera de 3 días por personaje (71 h en el cliente). Lo usa quien tenga Peletería 250, así que hace falta un personaje de nivel 35. Lo fabrica un ingeniero, no un peletero como da a entender CJ Mann (Ingeniería 265: 1 envoltura de mitril, 6 lingotes de torio, 1 núcleo de energía de oro y 4 disparadores inestables) y se puede vender, así que búscalo en la subasta. La sal de roca no la vende nadie: cae de gólems y similares (en Tanaris, Tierras Inhóspitas y La Garganta de Fuego, según Wowhead) y se compra en la subasta. La refinada se vende tal cual o se convierte: con 1 pellejo basto da 2 pellejos bastos curados, y el motor compara esa receta en la tabla de crafteos. Kaychak espera que la pidan más que en Classic por las piezas nuevas de Peletería, y los datos del juego lo apoyan: 144 recetas piden el pellejo curado. CJ Mann lo cuenta entre los ingresos pasivos de subir un alter a 35. El valor de aquí es bruto: réstale lo que cueste la sal de roca.",
+      "fuente": "Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
+      "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
     }
   ]
 }
