@@ -527,17 +527,40 @@ El addon está escrito para la API del cliente moderno, pero no se ha podido pro
 Cargan el addon en un Lua 5.1 (el mismo que usa WoW) con la API simulada, juegan una sesión completa
 y pasan el resultado por el motor.
 
-## Dónde está el addon y cómo reinstalarlo
+## Instalar y actualizar el addon con WowUp
 
-El código vive en esta carpeta (`addon/PitiGolds/`). En WoW solo hay un **enlace** a ella, así que borrar
-o reinstalar el juego no borra el addon. Por precaución, si algún día desinstalas WoW, borra antes
-`_forever_\Interface\AddOns\PitiGolds`: es solo el enlace y no toca nada de aquí.
+El código vive en esta carpeta (`addon/PitiGolds/`). Al juego llega con WowUp, desde las releases de GitHub.
 
-Para volver a ponerlo en el juego (tras reinstalar WoW o al clonar el repositorio en otro PC):
+Para ponerlo en el juego (la primera vez, tras reinstalar WoW o al clonar el repositorio en otro PC):
 
 1. Si no existe `.venv`: `python -m venv .venv` y `.venv\Scripts\python -m pip install -r requirements-dev.txt`
    (solo hace falta para las pruebas; el motor funciona con Python a secas).
-2. Doble clic en **`instalar.cmd`**.
+2. Doble clic en **`instalar.cmd`**. Si queda un enlace de la instalación antigua, lo quita.
+3. En WowUp, con WoW Forever elegido: **Obtener addons → Instalar desde URL** y pega
+   `https://github.com/PitiGameDeveloper/PitiGolds`.
+4. Con el addon ya instalado, ejecuta `estado.cmd` para crear `Generated.lua` y haz `/reload` en el juego.
+
+**Después de cada actualización de WowUp hay que repetir el paso 4.** WowUp reemplaza la carpeta entera y
+`Generated.lua` no viene en el zip, porque es tuyo y lo escribe el motor. Mientras falte, el addon sigue
+apuntando datos, pero no tiene precios ni métodos. Con `vigilar.cmd` abierto basta con dos `/reload`: el
+primero guarda los datos y hace que el motor lo escriba, y el segundo lo carga. Tus datos no se pierden:
+las SavedVariables están en `WTF`, fuera de la carpeta del addon.
+
+### Publicar una versión
+
+1. Cambia la versión en `PitiGolds.toc` y en `ns.VERSION` de `Core.lua`, y haz commit.
+2. Crea la etiqueta y súbela (cambia `0.4.1` por tu versión):
+
+   ```
+   git tag v0.4.1
+   git push origin main v0.4.1
+   ```
+
+GitHub crea la release con `PitiGolds-0.4.1-forever.zip` (`.github/workflows/publicar-addon.yml`), y WowUp
+la ofrece como actualización. Si la etiqueta no coincide con la versión del addon, no se publica nada.
+
+Para probar cambios sin publicar, **`probar-addon.cmd`** copia el addon de este repositorio al juego. Luego
+haz `/reload`. La siguiente actualización de WowUp lo deja como en la release.
 
 `datos/` (tu base de datos con el histórico de precios) y `Generated.lua` no se suben a GitHub.
 Para no perder el histórico, haz copia de `datos/pitigolds.db` de vez en cuando.

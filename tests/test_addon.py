@@ -36,6 +36,15 @@ def lua_path(path: Path) -> str:
     return path.as_posix()
 
 
+class VersionDelAddon(unittest.TestCase):
+    def test_el_toc_y_core_dicen_la_misma(self):
+        # Si no coinciden, GitHub rechaza la publicación de la release.
+        toc = (ADDON_DIR / "PitiGolds.toc").read_text(encoding="utf-8")
+        core = (ADDON_DIR / "Core.lua").read_text(encoding="utf-8")
+        self.assertEqual(re.search(r"^## Version: *(\S+)", toc, re.M).group(1),
+                         re.search(r'^ns\.VERSION = "(.*?)"', core, re.M).group(1))
+
+
 class AddonEnPartidaSimulada(unittest.TestCase):
     """Una sesión completa: entrar, abrir banco, correo, profesión y subasta, y recargar."""
 

@@ -42,5 +42,7 @@ Solo si trabajas desde la raíz del proyecto. Si vienes de `asesor/`, mandan sus
   `ADDED_COLUMNS` para que se creen en bases antiguas. Las tablas `gd_*` y `mm_*` se rehacen en
   cada importación.
 - Si cambia lo que se importa de wago.tools, sube `FORMAT` en `gamedata.py`.
+- El addon llega al juego con WowUp, desde las releases de GitHub: una etiqueta `vX.Y.Z` las crea
+  (versión igual en `PitiGolds.toc` y `Core.lua`). Para probar sin publicar: `probar-addon.cmd`.
 - Cuando cambie lo que ve Piti (informe, panel, comandos), actualiza `README.md`; si afecta al asesor,
   también `asesor/CLAUDE.md` o su guion en `asesor/comandos/`.
