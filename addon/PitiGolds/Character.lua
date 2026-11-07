@@ -206,7 +206,8 @@ ns.On("UPDATE_FACTION", function()
   ns.Debounce("reputations", 3, CollectReputations)
 end)
 
+-- El oro no se lee aquí: en Forever se guardaba 0 al salir, machacando el valor bueno. No hace
+-- falta, porque PLAYER_MONEY ya apunta cada cambio.
 ns.On("PLAYER_LOGOUT", function()
-  CollectMoney()
   ns.Char().lastSeen = time()
 end)

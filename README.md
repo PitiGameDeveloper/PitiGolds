@@ -573,3 +573,6 @@ Por defecto se usa `C:\Program Files (x86)\World of Warcraft\_forever_`. Para ca
 ```json
 { "wow_dir": "D:/Juegos/World of Warcraft/_forever_" }
 ```
+
+El motor, `instalar.cmd` y `probar-addon.cmd` usan esa ruta. Si está mal, el addon sigue apuntando datos en el
+juego, pero el motor no los ve y la ventana de métodos sale vacía; `vigilar.cmd` lo avisa al arrancar.

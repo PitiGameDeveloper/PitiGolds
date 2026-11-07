@@ -2,7 +2,10 @@
 rem Copia el addon de este repositorio al juego para probar cambios sin publicar una version.
 rem Haz /reload despues. La proxima actualizacion de WowUp lo deja como en la release.
 cd /d "%~dp0"
-set "ADDONS=C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns"
+set "PY=.venv\Scripts\python.exe"
+if not exist "%PY%" set "PY=python"
+rem La carpeta del juego es la del motor (config.json si existe).
+for /f "usebackq delims=" %%i in (`call "%PY%" -c "from motor.config import load_config; print(load_config().wow_dir)"`) do set "ADDONS=%%i\Interface\AddOns"
 
 if not exist "%ADDONS%\PitiGolds\PitiGolds.toc" (
   echo Primero instala el addon con WowUp: no lo encuentro en

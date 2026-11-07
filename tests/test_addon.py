@@ -45,6 +45,27 @@ class VersionDelAddon(unittest.TestCase):
                          re.search(r'^ns\.VERSION = "(.*?)"', core, re.M).group(1))
 
 
+class OroAlSalir(unittest.TestCase):
+    def test_salir_no_machaca_el_oro_guardado(self):
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.player.money = 12345
+        mock.Fire("PLAYER_LOGIN")
+        char = lua.globals().PitiGoldsDB.characters["Brujo-Dio"]
+        self.assertEqual(char.money, 12345)
+
+        mock.AddMoney(55)
+        self.assertEqual(char.money, 12400)
+
+        mock.player.money = 0  # lo que da GetMoney() mientras se sale del juego
+        mock.Fire("PLAYER_LOGOUT")
+        self.assertEqual(char.money, 12400)
+
+
 class AddonEnPartidaSimulada(unittest.TestCase):
     """Una sesión completa: entrar, abrir banco, correo, profesión y subasta, y recargar."""
 

@@ -292,6 +292,9 @@ def check_game_data(config: Config) -> bool:
 def cmd_vigilar(config: Config, interval: float) -> int:
     print("Vigilando los datos del addon. Cada /reload o salida del juego se leerá solo. Ctrl+C para parar.")
     print("Una vez al día se comprueba también si hay datos nuevos del juego.")
+    if not config.saved_variables():
+        print(f"Aviso: no encuentro PitiGolds.lua en {config.wow_dir / 'WTF' / 'Account'}.")
+        print('Si el juego está en otra carpeta, ponla en config.json: { "wow_dir": "C:/ruta/_forever_" }')
     seen: dict[str, float] = {}
     next_game_check = 0.0
     while True:

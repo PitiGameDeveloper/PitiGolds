@@ -1,9 +1,10 @@
 @echo off
 rem Prepara el motor para WoW Forever. El addon lo instala WowUp. Vuelve a ejecutarlo si reinstalas el juego.
 cd /d "%~dp0"
-set "ADDONS=C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns"
 set "PY=.venv\Scripts\python.exe"
 if not exist "%PY%" set "PY=python"
+rem La carpeta del juego es la del motor (config.json si existe).
+for /f "usebackq delims=" %%i in (`call "%PY%" -c "from motor.config import load_config; print(load_config().wow_dir)"`) do set "ADDONS=%%i\Interface\AddOns"
 
 if not exist "%ADDONS%" (
   echo No encuentro la carpeta de addons de WoW Forever:
