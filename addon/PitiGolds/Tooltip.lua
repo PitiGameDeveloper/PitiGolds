@@ -5,6 +5,8 @@ local ADDON, ns = ...
 function ns.Money(copper)
   copper = tonumber(copper)
   if not copper then return "?" end
+  -- Las pérdidas llevan el signo aparte: con módulo, -2 c saldría como 99p 98c.
+  if copper < 0 then return "-" .. ns.Money(-copper) end
   if GetCoinTextureString then return GetCoinTextureString(copper) end
   local gold = math.floor(copper / 10000)
   local silver = math.floor((copper % 10000) / 100)

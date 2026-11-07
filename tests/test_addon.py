@@ -45,6 +45,17 @@ class VersionDelAddon(unittest.TestCase):
                          re.search(r'^ns\.VERSION = "(.*?)"', core, re.M).group(1))
 
 
+class FormatoDelDinero(unittest.TestCase):
+    def test_las_perdidas_llevan_signo(self):
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        for copper, text in ((-2, "-2c"), (-32, "-32c"), (-175, "-1p 75c"), (-12345, "-1o 23p 45c"), (175, "1p 75c")):
+            self.assertEqual(mock.ns.Money(copper), text)
+
+
 class OroAlSalir(unittest.TestCase):
     def test_salir_no_machaca_el_oro_guardado(self):
         lua = LuaRuntime(unpack_returned_tuples=True)
