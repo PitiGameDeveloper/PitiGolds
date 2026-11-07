@@ -66,6 +66,15 @@ En los crafteos salen los pasos exactos con tus personajes:
   banda de todos tus personajes: qué le tiene que enviar cada personaje por correo al que fabrica, qué
   comprar a qué vendedor (y en qué zona) y en la subasta, cuántas fabricar y a qué precio ponerlas.
 
+La pestaña tiene **todas las recetas del juego**: primero las que dan dinero, luego las que dan pérdida
+(con el beneficio en negativo y un aviso en sus pasos) y al final las que aún no tienen precio, con `?` y
+el motivo al pulsarlas. Las recetas que sabes se apuntan al abrir la ventana de cada profesión, una vez
+por personaje; hasta entonces no salen como tuyas en lo que calcula el motor.
+
+Arriba hay un **botón por profesión** para enseñarla u ocultarla (las ocultas se ven apagadas), y **Todas**
+y **Ninguna** para no ir de una en una. Cada personaje recuerda lo que dejó oculto; sin registro, se ven
+todas. `datos/panel.md` y el asesor siguen viendo solo la lista corta de lo que merece la pena mirar.
+
 La zona de cada vendedor se apunta al abrir su ventana. `datos/panel.md` tiene lo mismo que la ventana,
 para leerlo en el PC.
 

@@ -56,6 +56,102 @@ class FormatoDelDinero(unittest.TestCase):
             self.assertEqual(mock.ns.Money(copper), text)
 
 
+class PasosDeUnCrafteoConPerdida(unittest.TestCase):
+    def test_avisa_de_la_perdida(self):
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        steps = lua.eval('''(function()
+          local base = { name = "Madeja", recipe = 1, knownBy = { "Brujo-Dio" }, reagents = {} }
+          local loss = setmetatable({ profit = -2 }, { __index = base })
+          local gain = setmetatable({ profit = 2 }, { __index = base })
+          return { (Mock.ns.Methods.CraftSteps(loss))[1], (Mock.ns.Methods.CraftSteps(gain))[1] }
+        end)()''')
+        self.assertEqual(steps[1], "Ahora mismo da pérdida (-2c por unidad): no lo fabriques para vender.")
+        self.assertTrue(steps[2].startswith("Hoy: 1 × Madeja"))
+
+
+class FiltroDeProfesiones(unittest.TestCase):
+    CRAFTS = """PitiGoldsGenerated = { methods = { farms = {}, crafts = {
+      { recipe = 1, name = "Camisa", prof = "Costura", profit = 50, reagents = {}, output = 10, color = "verde" },
+      { recipe = 2, name = "Hacha", prof = "Herrería", profit = -5, reagents = {}, output = 20, color = "rojo" },
+      { recipe = 3, name = "Encantar capa", prof = "Encantamiento", reagents = {}, color = "rojo" },
+      { recipe = 4, name = "Pantalón", prof = "Costura", reagents = {}, output = 40, color = "rojo" },
+    } } }"""
+
+    def setUp(self):
+        self.lua = lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        self.mock = mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        lua.execute(self.CRAFTS)
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        self.methods = mock.ns.Methods
+        self.methods.Open("crafts")
+
+    def char(self):
+        return self.lua.globals().PitiGoldsDB.characters["Brujo-Dio"]
+
+    def test_sin_registro_salen_todas(self):
+        self.assertEqual(self.methods.RowCount(), 4)
+        self.assertIsNone(self.char().craftFilter["Costura"])
+
+    def test_un_boton_por_profesion(self):
+        self.assertEqual(list(self.methods.Professions().values()), ["Costura", "Encantamiento", "Herrería"])
+        self.assertTrue(self.mock.ClickButton("Costura"))
+        self.assertEqual(self.methods.RowCount(), 2)
+        self.assertTrue(self.char().craftFilter["Costura"])
+        self.assertTrue(self.mock.ClickButton("Costura"))
+        self.assertEqual(self.methods.RowCount(), 4)
+        self.assertIsNone(self.char().craftFilter["Costura"])
+
+    def test_todas_y_ninguna(self):
+        self.assertTrue(self.mock.ClickButton("Ninguna"))
+        self.assertEqual(self.methods.RowCount(), 0)
+        self.assertTrue(self.mock.ClickButton("Herrería"))
+        self.assertEqual(self.methods.RowCount(), 1)
+        self.assertTrue(self.mock.ClickButton("Todas"))
+        self.assertEqual(self.methods.RowCount(), 4)
+
+    def test_cada_personaje_recuerda_lo_suyo(self):
+        self.mock.ClickButton("Herrería")
+        self.lua.execute('PitiGoldsDB.characters["Otro-Dio"] = { craftFilter = { Costura = true } }')
+        # Otro personaje: su filtro es el suyo, y al volver sigue el primero.
+        self.lua.execute('Mock.ns.charKey = "Otro-Dio"')
+        self.methods.Open("crafts")
+        self.assertEqual(self.methods.RowCount(), 2)
+        self.lua.execute('Mock.ns.charKey = "Brujo-Dio"')
+        self.methods.Open("crafts")
+        self.assertEqual(self.methods.RowCount(), 3)
+
+    def test_las_recetas_sin_precio_van_al_final_al_ordenar(self):
+        self.lua.execute('''for i, row in ipairs(PitiGoldsGenerated.methods.crafts) do row.details = { "D" .. i } end
+          for _, f in ipairs(Mock.frames) do
+            if f.key == "profit" and f.scripts.OnClick then f.scripts.OnClick(f) end
+          end''')
+        order = []
+        for index in range(1, 5):
+            self.methods.Select(index)
+            order.append(self.methods.DetailText().rsplit("\n", 1)[-1])
+        self.assertEqual(order[:2], ["D1", "D2"])          # 50 c y -5 c
+        self.assertEqual(sorted(order[2:]), ["D3", "D4"])  # sin precio
+
+    def test_lo_que_no_fabrica_un_objeto_no_se_pone_en_la_subasta(self):
+        steps = self.lua.eval('''(function()
+          local row = PitiGoldsGenerated.methods.crafts[3]
+          row.knownBy = { "Brujo-Dio" }
+          local list = Mock.ns.Methods.CraftSteps(row)
+          return list[#list]
+        end)()''')
+        self.assertEqual(steps, "Fabrica x1 Encantar capa con Brujo.")
+
+
 class OroAlSalir(unittest.TestCase):
     def test_salir_no_machaca_el_oro_guardado(self):
         lua = LuaRuntime(unpack_returned_tuples=True)

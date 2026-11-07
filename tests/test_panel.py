@@ -181,6 +181,44 @@ class Panel(unittest.TestCase):
         # El verdict propone hacer antes el crafteo rápido.
         self.assertIn("Antes, fabrica 4 × Prenda 100 con Grom", "\n".join(panel.verdict.lines))
 
+    def test_lo_que_sabes_sale_aunque_de_perdida(self):
+        def loss(c):
+            c.value, c.capacity = 500, None
+            return c
+        crafts = [loss(self.craft(100, 150, known=True)), self.craft(101, 210), loss(self.craft(102, 150))]
+        panel = self.build([], crafts)
+        rows = {r.recipe_id: r for r in panel.crafts}
+        self.assertNotIn(102, rows)                     # no la sabes y da pérdida
+        self.assertEqual(rows[100].profit_item, -500)
+        self.assertIn("Ahora mismo da pérdida: no compensa fabricarlo para vender.", rows[100].details)
+        # Va detrás de lo que da dinero, aunque aquello aún no lo sepas hacer.
+        self.assertEqual([r.recipe_id for r in panel.crafts], [101, 100])
+        # El asesor no tiene que revisar cada receta que sabes y no da dinero.
+        self.assertNotIn("100", panel.unreviewed)
+        self.assertIn("101", panel.unreviewed)
+
+    def test_el_addon_recibe_todas_las_recetas(self):
+        def no_price(c, **attrs):
+            c.value, c.capacity = None, None
+            for name, value in attrs.items():
+                setattr(c, name, value)
+            return c
+        crafts = [no_price(self.craft(100, 150, known=True)),               # sin precio de venta
+                  no_price(self.craft(101, 150), output_item_id=None),      # un encantamiento
+                  self.craft(102, 150)]
+        crafts[1].reagents[0].unit_cost = None
+        panel = self.build([], crafts)
+        self.assertEqual([r.recipe_id for r in panel.crafts], [102])        # la lista corta no cambia
+        rows = panel_export(panel)["crafts"]
+        self.assertEqual({r["recipe"] for r in rows}, {100, 101, 102})
+        self.assertEqual(rows[0]["recipe"], 102)                            # lo que da dinero, primero
+        by_id = {r["recipe"]: r for r in rows}
+        self.assertIsNone(by_id[100]["profit"])
+        self.assertIn("Aún no sé si da beneficio: falta el precio de Prenda 100.", by_id[100]["details"])
+        self.assertIn("No fabrica un objeto, así que no sé calcular su beneficio.", by_id[101]["details"])
+        self.assertEqual(by_id[100]["knownBy"], ["Grom-R"])
+        self.assertNotIn("Prenda 100", render_panel(panel))
+
     def test_para_el_addon_y_para_el_asesor(self):
         panel = self.build([self.pieles()], [self.craft(100, 150, known=True)])
         lua = lua_value(panel_export(panel))

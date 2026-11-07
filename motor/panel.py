@@ -16,7 +16,9 @@ Farmeos (farmeos, pesca y mazmorras del catálogo, más los que has medido tú):
 Crafteos: beneficio por unidad, cuántas absorbe el mercado al día y lo cerca que estás de
 poder hacerlo: verde (ya puedes), amarillo (te faltan 25 puntos o menos y la receta se compra
 en un momento), naranja (te faltan hasta 75 puntos, un poco de reputación o de divisas, o no
-se sabe de dónde sale la receta) y rojo (falta mucho, o la receta es de botín).
+se sabe de dónde sale la receta) y rojo (falta mucho, o la receta es de botín). Lo que ya sabes
+fabricar sale aunque dé pérdida; las pérdidas van al final de la lista. La pestaña del addon lleva
+además todas las recetas del juego (`all_crafts`); panel.md y el asesor solo ven la lista corta.
 
 El mejor farmeo:
   - «mejor»: el que ya puedes hacer, llega al mínimo y rinde al menos el 60 % del mejor de todos;
@@ -175,7 +177,8 @@ class Verdict:
 @dataclass
 class Panel:
     farms: list[FarmRow] = field(default_factory=list)
-    crafts: list[CraftRow] = field(default_factory=list)
+    crafts: list[CraftRow] = field(default_factory=list)       # las que merece la pena mirar (panel.md, asesor)
+    all_crafts: list[CraftRow] = field(default_factory=list)   # todas las del juego (pestaña del addon)
     verdict: Verdict = field(default_factory=lambda: Verdict("sin_datos", "Aún no hay datos"))
     unreviewed: list[str] = field(default_factory=list)
     problems: list[str] = field(default_factory=list)   # archivos de conocimiento rotos
@@ -586,7 +589,8 @@ def _craft_candidates(ctx: _Context, reviews: Reviews) -> list[CraftResult]:
             continue
         s = c.output_signals
         wanted = c.recipe_id in reviews.crafts or c.output_item_id in catalog_outputs
-        if c.profit <= 0 and not wanted:
+        # Lo que ya sabes fabricar sale aunque dé pérdida: los precios cambian y así lo ves.
+        if c.profit <= 0 and not wanted and not c.known:
             continue
         if s is not None and s.sales_per_day == 0 and not (c.known or wanted):
             continue
@@ -612,23 +616,18 @@ def _craft_candidates(ctx: _Context, reviews: Reviews) -> list[CraftResult]:
     return chosen[:max(MAX_CRAFT_ROWS, len(must))]
 
 
-def _craft_rows(ctx: _Context, reviews: Reviews) -> list[CraftRow]:
-    a, conn = ctx.a, ctx.conn
-    vendors = _vendor_rows(conn, a.prices)
-    checks = {r["item_id"]: r for r in conn.execute("SELECT item_id, status, detail FROM vendor_checks")}
-    item_info = {r["item_id"]: (r["min_faction"], r["min_reputation"]) for r in conn.execute(
-        "SELECT item_id, min_faction, min_reputation FROM gd_items WHERE min_faction IS NOT NULL")}
-    by_key = {ch.key: ch for ch in ctx.chars}
-    rows = []
-    for c in _craft_candidates(ctx, reviews):
-        review = reviews.crafts.get(c.recipe_id)
-        row = CraftRow(recipe_id=c.recipe_id, name=c.output_name or c.name, profession=c.profession or "?",
-                       skill_line=c.skill_line, required=c.required_skill or 0, known_by=list(c.known_by),
-                       output_id=c.output_item_id, output_qty=c.output_qty, cooldown_hours=c.cooldown_hours)
-        row.score = review.score if review else None
+def _craft_row(ctx: _Context, c: CraftResult, review: Review | None, vendors: dict, checks: dict, item_info: dict,
+               by_key: dict[str, Character], with_guide: bool = True) -> CraftRow:
+    """Una fila de crafteo. Sin guía no calcula cómo subir la profesión: tarda demasiado para todas las recetas."""
+    a = ctx.a
+    row = CraftRow(recipe_id=c.recipe_id, name=c.output_name or c.name, profession=c.profession or "?",
+                   skill_line=c.skill_line, required=c.required_skill or 0, known_by=list(c.known_by),
+                   output_id=c.output_item_id, output_qty=c.output_qty, cooldown_hours=c.cooldown_hours)
+    row.score = review.score if review else None
+    out = a.prices.get(c.output_item_id)
+    row.sell_price = out.sale_price if out else None
+    if c.complete:
         row.profit_item = round(c.profit / c.output_qty)
-        out = a.prices.get(c.output_item_id)
-        row.sell_price = out.sale_price if out else None
         approx = []
         if out is None or not out.has_history:
             approx.append("el precio de venta es de pocos escaneos")
@@ -638,44 +637,73 @@ def _craft_rows(ctx: _Context, reviews: Reviews) -> list[CraftRow]:
                 approx.append("algún material tiene precio de pocos escaneos")
                 break
         row.approx, row.approx_why = bool(approx), "; ".join(approx)
-        cap = c.capacity
-        if cap is not None:
-            row.per_day, row.gold_day, row.minutes_day = cap.units_per_day, cap.gold_per_day, cap.minutes_per_day
-            row.crafts_day = max(1, math.floor(cap.units_per_day / max(c.output_qty, 1)))
-        for r in c.reagents:
-            v = vendors.get(r.item_id) if r.item_id else None
-            row.reagents.append(ReagentRow(item_id=r.item_id, name=r.name, quantity=r.quantity,
-                                           unit_price=r.unit_cost, source=r.source,
-                                           vendor=v["vendor"] if v is not None and r.source == "vendedor" else None,
-                                           zone=v["zone"] if v is not None and r.source == "vendedor" else None))
+    cap = c.capacity
+    if cap is not None:
+        row.per_day, row.gold_day, row.minutes_day = cap.units_per_day, cap.gold_per_day, cap.minutes_per_day
+        row.crafts_day = max(1, math.floor(cap.units_per_day / max(c.output_qty, 1)))
+    for r in c.reagents:
+        v = vendors.get(r.item_id) if r.item_id else None
+        row.reagents.append(ReagentRow(item_id=r.item_id, name=r.name, quantity=r.quantity,
+                                       unit_price=r.unit_cost, source=r.source,
+                                       vendor=v["vendor"] if v is not None and r.source == "vendedor" else None,
+                                       zone=v["zone"] if v is not None and r.source == "vendedor" else None))
 
-        if c.known:
-            crafter = by_key.get(c.known_by[0])
-            row.color, row.who = "verde", c.known_by[0]
-            row.who_name = crafter.name if crafter else c.known_by[0].split("-")[0]
-            row.who_skill = crafter.skills.get(c.skill_line, 0) if crafter and c.skill_line else 0
-            row.recipe = _recipe_source(ctx, c, crafter, vendors, checks, review, item_info)
-        else:
-            options = []
-            for ch in ctx.chars or [None]:
-                src = _recipe_source(ctx, c, ch, vendors, checks, review, item_info)
-                color, gap, why = _status(ctx, c, ch, src)
-                options.append((COLOR_RANK[color], gap, -(ch.level if ch else 0), color, ch, src, why))
-            options.sort(key=lambda o: o[:3])
-            _, gap, _, color, ch, src, why = options[0]
-            row.color, row.gap, row.recipe = color, gap, src
-            if ch is not None:
-                row.who, row.who_name = ch.key, ch.name
-                row.who_skill = ch.skills.get(c.skill_line, 0) if c.skill_line else 0
-                if gap and c.skill_line is not None:
-                    prep = _Prep(char=ch)
-                    _profession_prep(ctx, prep, c.skill_line, row.required)
-                    row.prep = prep.lines
-            row.prep[:0] = [f"{(row.who_name or 'Tu personaje')}: {w}." for w in why]
-        _craft_details(row, c, review)
-        rows.append(row)
-    rows.sort(key=lambda r: (COLOR_RANK[r.color], -(r.gold_day or 0), -(r.profit_item or 0)))
-    return rows
+    if c.known:
+        crafter = by_key.get(c.known_by[0])
+        row.color, row.who = "verde", c.known_by[0]
+        row.who_name = crafter.name if crafter else c.known_by[0].split("-")[0]
+        row.who_skill = crafter.skills.get(c.skill_line, 0) if crafter and c.skill_line else 0
+        row.recipe = _recipe_source(ctx, c, crafter, vendors, checks, review, item_info)
+    else:
+        options = []
+        for ch in ctx.chars or [None]:
+            src = _recipe_source(ctx, c, ch, vendors, checks, review, item_info)
+            color, gap, why = _status(ctx, c, ch, src)
+            options.append((COLOR_RANK[color], gap, -(ch.level if ch else 0), color, ch, src, why))
+        options.sort(key=lambda o: o[:3])
+        _, gap, _, color, ch, src, why = options[0]
+        row.color, row.gap, row.recipe = color, gap, src
+        if ch is not None:
+            row.who, row.who_name = ch.key, ch.name
+            row.who_skill = ch.skills.get(c.skill_line, 0) if c.skill_line else 0
+            if with_guide and gap and c.skill_line is not None:
+                prep = _Prep(char=ch)
+                _profession_prep(ctx, prep, c.skill_line, row.required)
+                row.prep = prep.lines
+        row.prep[:0] = [f"{(row.who_name or 'Tu personaje')}: {w}." for w in why]
+    _craft_details(row, c, review)
+    return row
+
+
+def _craft_rows(ctx: _Context, reviews: Reviews) -> tuple[list[CraftRow], list[CraftRow]]:
+    """Los crafteos que merece la pena mirar y todos los del juego, para la pestaña del addon."""
+    a, conn = ctx.a, ctx.conn
+    vendors = _vendor_rows(conn, a.prices)
+    checks = {r["item_id"]: r for r in conn.execute("SELECT item_id, status, detail FROM vendor_checks")}
+    item_info = {r["item_id"]: (r["min_faction"], r["min_reputation"]) for r in conn.execute(
+        "SELECT item_id, min_faction, min_reputation FROM gd_items WHERE min_faction IS NOT NULL")}
+    by_key = {ch.key: ch for ch in ctx.chars}
+    rows = [_craft_row(ctx, c, reviews.crafts.get(c.recipe_id), vendors, checks, item_info, by_key)
+            for c in _craft_candidates(ctx, reviews)]
+    rows.sort(key=lambda r: ((r.profit_item or 0) < 0, COLOR_RANK[r.color], -(r.gold_day or 0), -(r.profit_item or 0)))
+    chosen = {r.recipe_id for r in rows}
+    rest = [_craft_row(ctx, c, reviews.crafts.get(c.recipe_id), vendors, checks, item_info, by_key, with_guide=False)
+            for c in a.crafts if c.recipe_id not in chosen]
+    # Primero lo que da dinero, luego las pérdidas y al final lo que aún no tiene precio.
+    every = sorted(rows + rest, key=lambda r: (r.profit_item is None, (r.profit_item or 0) < 0, COLOR_RANK[r.color],
+                                               -(r.gold_day or 0), -(r.profit_item or 0)))
+    return rows, every
+
+
+def _no_profit_reason(c: CraftResult) -> str:
+    if not c.output_item_id:
+        return "No fabrica un objeto, así que no sé calcular su beneficio."
+    missing = [r.name for r in c.reagents if r.unit_cost is None]
+    if c.value is None:
+        missing.insert(0, c.output_name or c.name)
+    if not missing:
+        return "Aún no sé si da beneficio."
+    return "Aún no sé si da beneficio: falta el precio de " + ", ".join(missing) + "."
 
 
 def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None:
@@ -684,6 +712,12 @@ def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None
         if review.why:
             d.append(f"Asesor ({review.score}/10): {review.why}")
         d += [f"{n}. {step}" for n, step in enumerate(review.steps, 1)]
+    if row.profit_item is None:
+        d.append(_no_profit_reason(c))
+        if row.recipe is not None and row.recipe.way != "aprendida":
+            d.append(f"Receta: {row.recipe.text}" + (f"; pide {row.recipe.reputation}" if row.recipe.reputation
+                                                     else "") + ".")
+        return
     d.append(f"Beneficio: {format_money(row.profit_item)} por unidad (se vende a {format_money(row.sell_price)}, "
              f"materiales {format_money(round(c.cost / c.output_qty))})"
              + (f". Aproximado: {row.approx_why}" if row.approx else "") + ".")
@@ -692,6 +726,8 @@ def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None
         limit = "su espera" if cap.by_cooldown else "el mercado"
         d.append(f"Por {limit}: unas {row.per_day:.1f} al día, ~{format_money(row.gold_day)} en "
                  f"~{row.minutes_day:.0f} min.")
+    elif (row.profit_item or 0) < 0:
+        d.append("Ahora mismo da pérdida: no compensa fabricarlo para vender.")
     else:
         d.append("Aún no sé cuántas se venden al día: empieza con pocas.")
     if row.cooldown_hours:
@@ -774,10 +810,11 @@ def build_panel(conn: sqlite3.Connection, a: Analysis, settings: Settings | None
     panel.farms = _farm_rows(ctx, reviews)
     best = _color_farms(panel.farms, floor)
     panel.farms.sort(key=lambda r: (r.pending != "", r.value is None, -(r.value or 0)))
-    panel.crafts = _craft_rows(ctx, reviews)
+    panel.crafts, panel.all_crafts = _craft_rows(ctx, reviews)
     panel.verdict = _verdict(panel.farms, panel.crafts, best, floor, a, has_chars=bool(ctx.chars))
     panel.unreviewed = ([r.key for r in panel.farms if r.score is None and not r.key.startswith("medido:")]
-                        + [str(c.recipe_id) for c in panel.crafts if c.score is None])
+                        + [str(c.recipe_id) for c in panel.crafts
+                           if c.score is None and not (c.known_by and (c.profit_item or 0) <= 0)])
     return panel
 
 
@@ -799,7 +836,7 @@ def panel_export(panel: Panel) -> dict:
         "mobs": r.mobs,
     } for r in panel.farms]
     crafts = []
-    for c in panel.crafts:
+    for c in panel.all_crafts or panel.crafts:
         src = c.recipe
         crafts.append({
             "recipe": c.recipe_id, "name": c.name, "prof": c.profession, "line": c.skill_line,

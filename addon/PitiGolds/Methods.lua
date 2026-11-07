@@ -3,7 +3,8 @@
 -- en los crafteos, además, los pasos para hacerlo con tus personajes, que se rehacen al
 -- momento con «Actualizar» (por ejemplo, en cuanto aprendes la receta). «Farmear este» y
 -- «Craftear este» lo pasan a la ventana de farmeos activos (Tracker.lua); los activos
--- llevan » delante.
+-- llevan » delante. La pestaña de crafteos tiene todas las recetas del juego, con un botón por
+-- profesión para filtrarlas; lo que dejas oculto se guarda en cada personaje.
 local ADDON, ns = ...
 
 local M = {}
@@ -36,8 +37,12 @@ local COLUMNS = {
   },
 }
 
+local FILTER_ROW_HEIGHT = 22
+local CRAFT_SCROLL_STEP = 3
+
 local window, verdictText, freshText, detailText, detailScroll, detailChild, updateButton, activeButton
-local tabButtons, headerButtons, rowFrames = {}, {}, {}
+local filterBar, countText, rowsCache
+local tabButtons, headerButtons, rowFrames, filterButtons = {}, {}, {}, {}
 local state = { tab = "farms", offset = 0, selected = nil, sort = nil, desc = false }
 
 local function Data()
@@ -217,6 +222,9 @@ local function StepsToCraft(row, crafter, steps)
   end
 
   local who = CharName(crafter)
+  if (row.profit or 0) < 0 then
+    steps[#steps + 1] = ("Ahora mismo da pérdida (%s por unidad): no lo fabriques para vender."):format(ns.Money(row.profit))
+  end
   steps[#steps + 1] = ("Hoy: %d × %s con %s%s."):format(n, row.name, who,
     row.goldDay and (", unos " .. ns.Money(row.goldDay) .. " de beneficio") or "")
   if ready then steps[#steps + 1] = who .. " ya tiene todos los materiales." end
@@ -241,6 +249,7 @@ local function StepsToCraft(row, crafter, steps)
   end
   if #currencies > 0 then steps[#steps + 1] = "Necesitas además " .. table.concat(currencies, ", ") .. "." end
   steps[#steps + 1] = ("Fabrica x%d %s con %s."):format(n, row.name, who)
+  if not row.output then return end -- un encantamiento, por ejemplo: no deja nada que vender
   local units = math.floor(n * (row.outputQty or 1) + 0.5)
   local post = ("Ponlo en la subasta: x%d a %s c/u"):format(units, PriceText(row.sellPrice))
   if row.perDay then post = post .. (" (el mercado se lleva unas %s al día: no pongas más)"):format(row.perDay) end
@@ -261,12 +270,22 @@ end
 
 -- Filas y orden -----------------------------------------------------------------------------
 
+-- Profesiones que este personaje ha ocultado. Solo se apuntan las ocultas: sin registro, se ven todas.
+local function HiddenProfessions()
+  local c = ns.Char()
+  c.craftFilter = c.craftFilter or {}
+  return c.craftFilter
+end
+
+-- La lista se guarda hecha: son miles de recetas y se pide a cada giro de la rueda.
 local function Rows()
+  if rowsCache then return rowsCache end
   local data = Data()
   local list = {}
+  local hidden = state.tab == "crafts" and HiddenProfessions() or nil
   for i, row in ipairs(data and data[state.tab] or {}) do
-    list[#list + 1] = row
     row._order = i
+    if not (hidden and hidden[row.prof or "?"]) then list[#list + 1] = row end
   end
   local key = state.sort
   if key then
@@ -274,7 +293,7 @@ local function Rows()
       if key == "color" then return -(COLOR_RANK[row._color or row.color] or 9) end
       if key == "who" then return row.who and 1 or 0 end
       if key == "name" then return row.name or "" end
-      return row[key] or -1
+      return row[key] or -math.huge
     end
     table.sort(list, function(a, b)
       local va, vb = value(a), value(b)
@@ -284,7 +303,41 @@ local function Rows()
       return (va > vb) ~= state.desc
     end)
   end
+  rowsCache = list
   return list
+end
+
+-- Las profesiones que tienen recetas, por orden alfabético.
+function M.Professions()
+  local data = Data()
+  local list, seen = {}, {}
+  for _, row in ipairs(data and data.crafts or {}) do
+    local name = row.prof or "?"
+    if not seen[name] then list[#list + 1], seen[name] = name, true end
+  end
+  table.sort(list)
+  return list
+end
+
+local function FilterChanged()
+  rowsCache, state.offset = nil, 0
+  M.Refresh()
+end
+
+function M.ToggleProfession(name)
+  local hidden = HiddenProfessions()
+  hidden[name] = (not hidden[name]) or nil
+  FilterChanged()
+end
+
+function M.ShowAllProfessions(show)
+  local hidden = HiddenProfessions()
+  for _, name in ipairs(M.Professions()) do hidden[name] = (not show) or nil end
+  FilterChanged()
+end
+
+function M.RowCount()
+  return #Rows()
 end
 
 local ACTIVE_MARK = "|cff33dd33»|r "
@@ -385,6 +438,17 @@ function M.Refresh()
   end
   freshText:SetText(fresh)
 
+  if state.tab == "crafts" then
+    local hidden = HiddenProfessions()
+    for name, button in pairs(filterButtons) do button:SetAlpha(hidden[name] and 0.4 or 1) end
+    filterBar:Show()
+    countText:SetText(("%d de %d recetas"):format(#Rows(), #(data and data.crafts or {})))
+    countText:Show()
+  else
+    filterBar:Hide()
+    countText:Hide()
+  end
+
   for name, button in pairs(tabButtons) do
     if button.LockHighlight then
       if name == state.tab then button:LockHighlight() else button:UnlockHighlight() end
@@ -448,6 +512,7 @@ end
 
 function M.SetTab(tab)
   state.tab, state.offset, state.selected, state.sort, state.desc = tab, 0, nil, nil, false
+  rowsCache = nil
   if tab == "farms" then
     local data = Data()
     state.selected = data and data.verdict and data.verdict.best or nil
@@ -469,13 +534,47 @@ function M.Update()
   for _, row in ipairs(Data() and Data().crafts or {}) do
     row._color, row._crafter = nil, nil
   end
+  rowsCache = nil
   if ns.ScanCarried then pcall(ns.ScanCarried) end
   M.Refresh()
 end
 
 local function Scroll(delta)
-  state.offset = state.offset - delta
+  state.offset = state.offset - delta * (state.tab == "crafts" and CRAFT_SCROLL_STEP or 1)
   M.Refresh()
+end
+
+-- Botones de profesión, en tantas filas como hagan falta. Devuelve la altura que ocupan.
+local function CreateFilterBar()
+  filterBar = CreateFrame("Frame", nil, window)
+  filterBar:SetPoint("TOPLEFT", 12, -164)
+  filterBar:SetWidth(WIDTH - 24)
+
+  local x, y = 0, 0
+  local function AddButton(text, onClick)
+    local width = #text * 6 + 18
+    if x > 0 and x + width > WIDTH - 24 then
+      x, y = 0, y - FILTER_ROW_HEIGHT
+    end
+    local b = CreateFrame("Button", nil, filterBar, "UIPanelButtonTemplate")
+    b:SetSize(width, FILTER_ROW_HEIGHT - 2)
+    b:SetPoint("TOPLEFT", filterBar, "TOPLEFT", x, y)
+    b:SetNormalFontObject(GameFontNormalSmall)
+    b:SetHighlightFontObject(GameFontHighlightSmall)
+    b:SetText(text)
+    b:SetScript("OnClick", onClick)
+    x = x + width + 2
+    return b
+  end
+
+  AddButton("Todas", function() M.ShowAllProfessions(true) end)
+  AddButton("Ninguna", function() M.ShowAllProfessions(false) end)
+  for _, name in ipairs(M.Professions()) do
+    filterButtons[name] = AddButton(name, function() M.ToggleProfession(name) end)
+  end
+  local height = FILTER_ROW_HEIGHT - y
+  filterBar:SetHeight(height)
+  return height
 end
 
 local function CreateWindow()
@@ -528,8 +627,15 @@ local function CreateWindow()
     x = x + 104
   end
 
+  countText = window:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+  countText:SetPoint("TOPLEFT", x + 4, -146)
+
+  local filterHeight = CreateFilterBar()
+  window:SetHeight(HEIGHT + filterHeight)
+  local listTop = -168 - filterHeight
+
   local list = CreateFrame("Frame", nil, window)
-  list:SetPoint("TOPLEFT", 12, -168)
+  list:SetPoint("TOPLEFT", 12, listTop)
   list:SetSize(WIDTH - 24, ROW_HEIGHT * (ROWS + 1))
   list:EnableMouseWheel(true)
   list:SetScript("OnMouseWheel", function(_, delta) Scroll(delta) end)
@@ -545,6 +651,7 @@ local function CreateWindow()
       else
         state.sort, state.desc = self.key, false
       end
+      rowsCache = nil
       M.Refresh()
     end)
     headerButtons[i] = h
@@ -577,7 +684,7 @@ local function CreateWindow()
     rowFrames[i] = row
   end
 
-  local detailTop = -168 - ROW_HEIGHT * (ROWS + 1) - 8
+  local detailTop = listTop - ROW_HEIGHT * (ROWS + 1) - 8
   detailScroll = CreateFrame("ScrollFrame", nil, window)
   detailScroll:SetPoint("TOPLEFT", 12, detailTop)
   detailScroll:SetPoint("BOTTOMRIGHT", -12, 38)
