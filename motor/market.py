@@ -28,6 +28,7 @@ WINDOW_DAYS = 7
 MIN_POINTS = 3            # escaneos mínimos para hablar de tendencia
 MIN_SPAN_DAYS = 1.0       # y que cubran al menos un día
 MAX_PAIR_GAP_HOURS = 12   # escaneos más separados no sirven para contar ventas (las subastas caducan)
+MIN_SALES_HOURS = 6       # con menos tiempo observado, estirarlo a un día da cifras absurdas
 SALE_ZONE = 1.2           # solo cuentan como vendidas las unidades hasta un 20 % sobre el precio de mercado
 DAMPING = 0.5             # la tendencia se proyecta a mitad de fuerza
 REVERSION = 0.8           # cada día se mantiene el 80 % de la distancia a la mediana
@@ -97,7 +98,7 @@ def _slope(xs: list[float], ys: list[float]) -> float | None:
 def estimate_sales(points: list[Point], full_scan_times: list[int]) -> float | None:
     """Unidades vendidas al día. Entre dos escaneos completos seguidos, las unidades que había
     a buen precio y ya no están se cuentan como vendidas. Incluye las que alguien retiró para
-    bajarles el precio, así que es una cota alta."""
+    bajarles el precio, así que es una cota alta. Sin MIN_SALES_HOURS observadas no dice nada."""
     by_time = {p.time: p for p in points if p.kind == "full"}
     sold = 0
     days = 0.0
@@ -114,7 +115,7 @@ def estimate_sales(points: list[Point], full_scan_times: list[int]) -> float | N
             if price <= a.price * SALE_ZONE and price <= visible:
                 sold += max(0, qty - current.get(price, 0))
         days += gap_hours / 24
-    return sold / days if days > 0 else None
+    return sold / days if days * 24 >= MIN_SALES_HOURS else None
 
 
 def _relative_slope(xs: list[float], values: list[float]) -> float | None:

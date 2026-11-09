@@ -156,6 +156,30 @@ function UnitGUID(unit)
 end
 function GetMoney() return Mock.player.money end
 
+-- Instructor: Mock.trainer.services = { { name, kind, skill, rank, level, cost }, ... }. Como en el
+-- juego, la lista solo enseña los tipos que dejan pasar los filtros de la ventana.
+Mock.trainer = { services = {}, filters = { available = true, unavailable = false, used = false } }
+local function TrainerServices()
+  local list = {}
+  for _, s in ipairs(Mock.trainer.services) do
+    if s.kind == "header" or Mock.trainer.filters[s.kind] then list[#list + 1] = s end
+  end
+  return list
+end
+function GetNumTrainerServices() return #TrainerServices() end
+function GetTrainerServiceInfo(i)
+  local s = TrainerServices()[i]
+  if s then return s.name, "", s.kind, true end
+end
+function GetTrainerServiceSkillReq(i)
+  local s = TrainerServices()[i]
+  if s and s.skill then return s.skill, s.rank, true end
+end
+function GetTrainerServiceLevelReq(i) return (TrainerServices()[i] or {}).level end
+function GetTrainerServiceCost(i) return (TrainerServices()[i] or {}).cost end
+function GetTrainerServiceTypeFilter(kind) return Mock.trainer.filters[kind] end
+function SetTrainerServiceTypeFilter(kind, on) Mock.trainer.filters[kind] = on == 1 end
+
 Enum = {
   BagIndex = {
     Backpack = 0, Bag_1 = 1, Bag_2 = 2, Bag_3 = 3, Bag_4 = 4, ReagentBag = 5,

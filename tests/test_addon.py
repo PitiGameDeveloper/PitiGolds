@@ -152,6 +152,48 @@ class FiltroDeProfesiones(unittest.TestCase):
         self.assertEqual(steps, "Fabrica x1 Encantar capa con Brujo.")
 
 
+class Instructores(unittest.TestCase):
+    def setUp(self):
+        self.lua = lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        self.mock = mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        lua.execute('''Mock.trainer.services = {
+          { name = "Sastrería", kind = "header" },
+          { name = "Camisa", kind = "unavailable", skill = "Costura", rank = 150, level = 20, cost = 5000 },
+          { name = "Toga", kind = "available", skill = "Costura", rank = 75, level = 10, cost = 900 },
+          { name = "Trapo", kind = "available", level = 5, cost = 10 },
+        }''')
+
+    def test_apunta_tambien_lo_que_aun_no_puedes_aprender(self):
+        self.mock.Fire("TRAINER_SHOW")
+        self.mock.Advance(1)
+        costura = self.lua.globals().PitiGoldsDB.trainerRecipes["Costura"]
+        self.assertEqual((costura["Camisa"].rank, costura["Camisa"].level, costura["Camisa"].cost), (150, 20, 5000))
+        self.assertEqual(costura["Toga"].rank, 75)
+        self.assertEqual(costura["Trapo"].rank, 0)        # no pide nivel de profesión
+        self.assertIsNone(costura["Sastrería"])
+        # La ventana se queda con los filtros que tenía.
+        self.assertFalse(self.mock.trainer.filters["unavailable"])
+
+    def test_llega_al_motor(self):
+        self.mock.Fire("TRAINER_SHOW")
+        self.mock.Advance(1)
+        saved = self.mock.Serialize("PitiGoldsDB", self.lua.globals().PitiGoldsDB)
+        with tempfile.TemporaryDirectory() as tmp:
+            sv = Path(tmp) / "PitiGolds.lua"
+            sv.write_text(saved, encoding="utf-8")
+            conn = dbmod.connect(Path(tmp) / "p.db")
+            ingest_file(conn, "CUENTA", sv)
+            row = conn.execute("SELECT rank, level, cost FROM trainer_recipes "
+                               "WHERE skill_name = 'Costura' AND name = 'Camisa'").fetchone()
+            self.assertEqual(tuple(row), (150, 20, 5000))
+            conn.close()
+
+
 class OroAlSalir(unittest.TestCase):
     def test_salir_no_machaca_el_oro_guardado(self):
         lua = LuaRuntime(unpack_returned_tuples=True)
@@ -471,7 +513,7 @@ class Farmeo(unittest.TestCase):
         mock.AddMoney(5000)
         mock.Advance(2)
         mock.Fire("MAIL_CLOSED")
-        mock.Advance(1)
+        mock.Advance(3)   # pasado el margen tras cerrar el correo
         # Sigue en otra zona.
         lua.execute("Mock.mapID = 1413")
         mock.Loot(0, 10, 2770, 1)
@@ -542,7 +584,7 @@ class SesionEnVivo(unittest.TestCase):
         mock.AddMoney(5000)
         mock.Advance(2)
         mock.Fire("MAIL_CLOSED")
-        mock.Advance(1)
+        mock.Advance(3)   # pasado el margen tras cerrar el correo
         session = lua.globals().PitiGoldsDB.characters["Brujo-Dio"].session
         cls.items = dict(session["items"].items())
         cls.money = session.money
@@ -618,6 +660,44 @@ class SesionEnVivo(unittest.TestCase):
         S.OnLogin()
         session = self.lua.globals().PitiGoldsDB.characters["Brujo-Dio"].session
         self.assertIsNone(session["items"][2770])
+
+
+class SesionSinComprasNiConjuros(unittest.TestCase):
+    """No cuenta lo comprado que llega tras cerrar el vendedor ni lo que crea un hechizo de clase."""
+
+    def setUp(self):
+        self.lua = lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = self.mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        lua.execute("PitiGoldsDB = nil")
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        mock.Advance(10)
+
+    def session(self):
+        s = self.lua.globals().PitiGoldsDB.characters["Brujo-Dio"].session
+        return dict(s["items"].items()), s.money
+
+    def test_compra_que_llega_tras_cerrar_el_vendedor(self):
+        self.mock.Fire("MERCHANT_SHOW")
+        self.mock.Advance(1)
+        self.mock.Fire("MERCHANT_CLOSED")
+        self.mock.Loot(0, 5, 1708, 20)   # el néctar llega justo después de cerrar
+        self.mock.AddMoney(300)          # y lo vendido, también
+        self.mock.Advance(3)
+        self.mock.Loot(0, 6, 2770, 2)    # pasado el margen, lo looteado sí cuenta
+        self.mock.AddMoney(50)
+        self.mock.Advance(1)
+        self.assertEqual(self.session(), ({2770: 2}, 50))
+
+    def test_lo_que_crea_el_brujo_no_es_botin(self):
+        self.mock.Loot(0, 5, 6265, 3)    # Fragmento de alma
+        self.mock.Loot(0, 6, 5511, 1)    # Piedra de salud inferior
+        self.mock.Loot(0, 7, 2770, 1)
+        self.mock.Advance(1)
+        self.assertEqual(self.session()[0], {2770: 1})
 
 
 ACTIVE_METHODS = """

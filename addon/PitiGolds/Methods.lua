@@ -32,8 +32,8 @@ local COLUMNS = {
     { title = "Crafteo", width = 250, key = "name" },
     { title = "Nota", width = 40, key = "score" },
     { title = "Beneficio/u", width = 110, key = "profit" },
-    { title = "Al día", width = 60, key = "perDay" },
-    { title = "¿Puedo?", width = 230, key = "color" },
+    { title = "Al día", width = 100, key = "perDay" },
+    { title = "¿Puedo?", width = 190, key = "color" },
   },
 }
 
@@ -364,8 +364,10 @@ local function FarmCells(row)
 end
 
 local function CraftCells(row)
-  local profit = row.profit and (ns.Money(row.profit) .. (row.approx and "*" or "")) or "?"
-  local perDay = row.perDay and tostring(row.perDay) or "?"
+  -- Sin cifra, el motor manda qué falta («sin precio», «faltan escaneos»...): se pinta en gris.
+  local function Note(text) return text and ("|cff999999" .. text .. "|r") or "" end
+  local profit = row.profit and (ns.Money(row.profit) .. (row.approx and "*" or "")) or Note(row.profitNote)
+  local perDay = row.perDay and tostring(row.perDay) or Note(row.perDayNote)
   local color = row._color or row.color
   local label = { verde = "Sí", amarillo = "Casi", naranja = "Falta algo", rojo = "Falta mucho" }
   local who = row._crafter and CharName(row._crafter) or row.whoName

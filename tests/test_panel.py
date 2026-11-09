@@ -181,6 +181,48 @@ class Panel(unittest.TestCase):
         # El verdict propone hacer antes el crafteo rápido.
         self.assertIn("Antes, fabrica 4 × Prenda 100 con Grom", "\n".join(panel.verdict.lines))
 
+    def test_de_instructor_sin_nivel_conocido_no_dice_que_solo_falta_aprenderla(self):
+        known_level = self.craft(100, 150)
+        unknown = self.craft(101, 1, skill_unknown=True)
+        rows = {r.recipe_id: r for r in self.build([], [known_level, unknown]).crafts}
+        self.assertEqual(rows[100].color, "amarillo")
+        self.assertIn("solo falta aprender", rows[100].prep[0])
+        self.assertEqual(rows[101].color, "naranja")
+        self.assertEqual(rows[101].prep, ["Grom: no sé a qué nivel de Costura se aprende."])
+        self.assertEqual(rows[101].recipe.way, "instructor_sin_nivel")
+        self.assertIn("él te dirá a qué nivel", rows[101].recipe.text)
+
+    def test_lo_visto_en_el_instructor_cuenta(self):
+        reachable = self.craft(100, 150, trainer_level=45, trainer_cost=5000)
+        far_level = self.craft(101, 150, trainer_level=60)   # Grom es nivel 50
+        rows = {r.recipe_id: r for r in self.build([], [reachable, far_level]).crafts}
+        self.assertEqual(rows[100].color, "amarillo")
+        self.assertIn("por 50 p 0 c", rows[100].recipe.text)
+        self.assertEqual(rows[101].color, "rojo")
+        self.assertIn("Grom: el instructor pide nivel 60 (tiene 50).", rows[101].prep)
+
+    def test_no_propone_mas_de_lo_que_da_tiempo_a_fabricar(self):
+        big = self.craft(100, 150, known=True)
+        big.capacity = Capacity(units_per_day=5000, gold_per_day=500 * G, minutes_per_day=5000, gold_per_hour=G)
+        other = self.craft(101, 150, known=True)
+        other.capacity = Capacity(units_per_day=10, gold_per_day=G, minutes_per_day=10, gold_per_hour=G)
+        panel = self.build([self.pieles()], [big, other])
+        row = next(r for r in panel.crafts if r.recipe_id == 100)
+        # 2 h al día de 5000 min: el 2,4 %.
+        self.assertEqual((row.crafts_day, row.gold_day, round(row.minutes_day)), (120, 12 * G, 120))
+        self.assertEqual(row.per_day, 5000)                # el mercado sigue diciendo lo suyo
+        self.assertTrue(any("Con tus horas de juego te da para 120" in d for d in row.details))
+        lines = "\n".join(panel.verdict.lines)
+        self.assertIn("Antes, fabrica 120 × Prenda 100", lines)
+        self.assertNotIn("Prenda 101", lines)              # ya no queda tiempo ese día
+
+    def test_sin_ventas_medidas_dice_que_faltan_escaneos(self):
+        c = self.craft(100, 150, known=True)
+        c.capacity = None
+        row = self.build([], [c]).crafts[0]
+        self.assertGreater(row.profit_item, 0)
+        self.assertEqual((row.profit_note, row.per_day_note), ("", "faltan escaneos"))
+
     def test_lo_que_sabes_sale_aunque_de_perdida(self):
         def loss(c):
             c.value, c.capacity = 500, None
@@ -191,6 +233,7 @@ class Panel(unittest.TestCase):
         self.assertNotIn(102, rows)                     # no la sabes y da pérdida
         self.assertEqual(rows[100].profit_item, -500)
         self.assertIn("Ahora mismo da pérdida: no compensa fabricarlo para vender.", rows[100].details)
+        self.assertEqual((rows[100].per_day_note, rows[101].per_day_note), ("-", ""))
         # Va detrás de lo que da dinero, aunque aquello aún no lo sepas hacer.
         self.assertEqual([r.recipe_id for r in panel.crafts], [101, 100])
         # El asesor no tiene que revisar cada receta que sabes y no da dinero.
@@ -216,6 +259,8 @@ class Panel(unittest.TestCase):
         self.assertIsNone(by_id[100]["profit"])
         self.assertIn("Aún no sé si da beneficio: falta el precio de Prenda 100.", by_id[100]["details"])
         self.assertIn("No fabrica un objeto, así que no sé calcular su beneficio.", by_id[101]["details"])
+        self.assertEqual((by_id[100]["profitNote"], by_id[101]["profitNote"]), ("sin precio", "no aplica"))
+        self.assertIsNone(by_id[100]["perDayNote"])          # sin beneficio, la otra columna ya lo dice
         self.assertEqual(by_id[100]["knownBy"], ["Grom-R"])
         self.assertNotIn("Prenda 100", render_panel(panel))
 

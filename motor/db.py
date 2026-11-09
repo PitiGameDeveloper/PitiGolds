@@ -10,6 +10,11 @@ SCHEMA_VERSION = 2
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
 
+CREATE TABLE IF NOT EXISTS trainer_recipes (
+  skill_name TEXT, name TEXT, rank INTEGER, level INTEGER, cost INTEGER, updated INTEGER,
+  PRIMARY KEY (skill_name, name)
+);
+
 CREATE TABLE IF NOT EXISTS characters (
   char_key TEXT PRIMARY KEY, account TEXT, name TEXT, realm TEXT, faction TEXT,
   class TEXT, race TEXT, level INTEGER, money INTEGER, mail_money INTEGER,

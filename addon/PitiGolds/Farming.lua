@@ -1,15 +1,38 @@
 -- Registro de farmeos: apunta lo que ganas (objetos que entran en las bolsas y oro) en
 -- tramos de 5 minutos por zona, para que el motor calcule tu oro por hora real en cada
 -- sitio y actividad. Mientras hay farmeos activos en marcha, el tramo lleva su id. No cuenta lo que entra con el correo, la subasta, el banco, un
--- vendedor, un intercambio o la ventana de una profesión abiertos: eso no es lo farmeado.
+-- vendedor, un intercambio o la ventana de una profesión abiertos (ni en los segundos siguientes a
+-- cerrarlos), ni lo que crean los hechizos de clase: eso no es lo farmeado.
 local ADDON, ns = ...
 
 local BUCKET_SECONDS = 300
 local MAX_BUCKETS = 2000
+-- Tras cerrar el vendedor, el correo... lo comprado o cobrado aún puede tardar un poco en llegar
+-- a las bolsas: lo que llega en estos segundos tampoco cuenta.
+local RESUME_GRACE = 2
+
+-- Lo que crean los hechizos de clase (brujo, mago): no es botín ni se puede vender.
+local CREATED = {}
+for _, id in ipairs({
+  6265,                                                          -- Fragmento de alma
+  5512, 19004, 19005, 5511, 19006, 19007, 5509, 19008, 19009,    -- Piedras de salud
+  5510, 19010, 19011, 9421, 19012, 19013,
+  5232, 16892, 16893, 16895, 16896,                              -- Piedras de alma
+  5522, 13602, 13603, 1254, 13699, 13700, 13701,                 -- Piedras de hechizo y de fuego
+  5350, 2288, 2136, 3772, 8077, 8078, 8079,                      -- Agua conjurada
+  5349, 1113, 1114, 1487, 8075, 8076,                            -- Comida conjurada
+  5514, 5513, 8007, 8008,                                        -- Gemas de maná
+}) do CREATED[id] = true end
 
 local pauses = {}   -- motivo -> true
 local snapshot      -- objetos en las bolsas la última vez que se miró
 local lastMoney
+local graceUntil = 0
+local ignoreNextBags = false   -- el cambio de bolsas llegó en pausa o recién cerrada la ventana
+
+local function InGrace()
+  return GetTime() < graceUntil
+end
 
 local function CountCarried()
   local counts = {}
@@ -55,11 +78,13 @@ end
 
 local function OnBagsChanged()
   local counts = CountCarried()
-  if snapshot and not Paused() then
+  local ignore = ignoreNextBags
+  ignoreNextBags = false
+  if snapshot and not Paused() and not ignore then
     local gains, b, tracked = {}, nil, false
     for itemID, n in pairs(counts) do
       local gained = n - (snapshot[itemID] or 0)
-      if gained > 0 then gains[itemID] = gained end
+      if gained > 0 and not CREATED[itemID] then gains[itemID] = gained end
     end
     -- Antes que el tramo: el primer botín pone en marcha el farmeo activo que lo espera, y así
     -- el tramo ya lleva su id.
@@ -80,7 +105,7 @@ end
 
 local function OnMoneyChanged()
   local money = GetMoney()
-  if lastMoney and money > lastMoney and not Paused() then
+  if lastMoney and money > lastMoney and not Paused() and not InGrace() then
     local b = Bucket()
     b.money = b.money + (money - lastMoney)
     if ns.Session then ns.Session.AddMoney(money - lastMoney) end
@@ -108,6 +133,7 @@ local function Resume(reason)
     -- Lo que entró durante la pausa no cuenta: se vuelve a tomar referencia.
     snapshot = CountCarried()
     lastMoney = GetMoney()
+    graceUntil = GetTime() + RESUME_GRACE
   end
 end
 
@@ -150,7 +176,11 @@ ns.On("PLAYER_INTERACTION_MANAGER_FRAME_HIDE", function(_, kind)
   if reason then Resume(reason) end
 end)
 
-ns.On("BAG_UPDATE_DELAYED", function() ns.Debounce("farm", 0.5, OnBagsChanged) end)
+ns.On("BAG_UPDATE_DELAYED", function()
+  -- Se mira la hora del aviso, no la de la cuenta (que va medio segundo después).
+  if Paused() or InGrace() then ignoreNextBags = true end
+  ns.Debounce("farm", 0.5, OnBagsChanged)
+end)
 ns.On("PLAYER_MONEY", OnMoneyChanged)
 
 -- Limpieza: fuera lo que el motor ya ha guardado y, si aun así hay demasiado, lo más viejo.

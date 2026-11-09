@@ -63,6 +63,7 @@ def ingest_file(conn: sqlite3.Connection, account: str, path: Path) -> IngestRep
         _ingest_account(conn, as_dict(db.get("account")))
         report.recipes = _ingest_recipes(conn, db)
         _ingest_vendors(conn, account, as_dict(db.get("vendorItems")))
+        _ingest_trainers(conn, as_dict(db.get("trainerRecipes")))
         report.new_scans, report.new_prices = _ingest_scans(conn, account, as_list(db.get("scans")))
         report.farm_buckets = _ingest_farm(conn, as_dict(db.get("farmLog")))
         report.ledger_events = _ingest_ledger(conn, as_list(db.get("ledger")))
@@ -249,6 +250,14 @@ def _ingest_vendors(conn: sqlite3.Connection, account: str, vendors: dict) -> No
           json.dumps(as_list(v.get("costs")), ensure_ascii=False) if v.get("costs") else None, v.get("time"),
           account, v.get("char"), v.get("zone"))
          for iid, v in vendors.items()],
+    )
+
+
+def _ingest_trainers(conn: sqlite3.Connection, trainers: dict) -> None:
+    conn.executemany(
+        "INSERT OR REPLACE INTO trainer_recipes VALUES (?, ?, ?, ?, ?, ?)",
+        [(skill, name, t.get("rank"), t.get("level"), t.get("cost"), t.get("time"))
+         for skill, recipes in trainers.items() for name, t in as_dict(recipes).items()],
     )
 
 

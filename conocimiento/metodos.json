@@ -129,9 +129,9 @@
       "tipo": "farmeo", "nivel": 28, "zona": "Las Mil Agujas",
       "objetos": ["Vibrant Plume", "Silk Cloth", "Wool Cloth"],
       "por_hora": [{"objeto": "Vibrant Plume", "cantidad": 35}, {"objeto": "Silk Cloth", "cantidad": 20}, {"objeto": "Wool Cloth", "cantidad": 12}], "oro_hora": 3.5,
-      "punto": {"mapa": 1441}, "bichos": ["Arpía"],
-      "notas": "Oro de vendedor: la pluma vibrante se vende al vendedor. No se pueden desollar. Estimado por hora: unos 120 arpías.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "punto": {"mapa": 1441, "x": 27, "y": 51}, "bichos": ["Arpía"],
+      "notas": "Es la cueva Roguefeather Den, en el cañón de las arpías (Screeching Canyon): al oeste de Freewind Post, pegada a la pared sur. Se sube por un camino en la roca; hay arpías dentro y fuera de la cueva (aparecen entre 26-29, 47-56) y un cofre dentro. Oro de vendedor: la pluma vibrante se vende al vendedor. No se pueden desollar. Estimado por hora: unos 120 arpías.",
+      "fuente": "Guía de Studen v1.0; posiciones de Wowhead (Classic) y Goldgoblin", "fecha": "2026-11-08"
     },
     {
       "id": "ocaso-ogros",

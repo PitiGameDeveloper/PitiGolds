@@ -52,6 +52,9 @@ class CraftResult:
     skill_line: int | None = None
     yours: bool = False            # alguno de tus personajes tiene esta profesión
     required_skill: int | None = None
+    skill_unknown: bool = False    # de instructor: Forever no publica a qué nivel se aprende (required_skill dice 1)
+    trainer_level: int | None = None   # nivel de personaje que pide el instructor, si lo hemos visto
+    trainer_cost: int | None = None
     yellow: int | None = None      # nivel al que deja de ser naranja
     grey: int | None = None        # nivel al que deja de dar puntos
     learn_item_id: int | None = None
@@ -176,6 +179,7 @@ def evaluate_recipes(conn: sqlite3.Connection, prices: dict[int, ItemPrice],
     learn_rank = {r["item_id"]: r["required_skill_rank"] for r in conn.execute(
         "SELECT item_id, required_skill_rank FROM gd_items "
         "WHERE item_id IN (SELECT learn_item_id FROM gd_recipes)")}
+    trainers = {(r["skill_name"], r["name"]): r for r in conn.execute("SELECT * FROM trainer_recipes")}
 
     def apply_common(result: CraftResult, game_row: sqlite3.Row | None, fallback_line: int | None) -> None:
         crafted_by = crafters.get(result.recipe_id, [])
@@ -196,7 +200,15 @@ def evaluate_recipes(conn: sqlite3.Connection, prices: dict[int, ItemPrice],
                 result.learn_item_name = learn.name if learn else None
                 result.learn_price = learn.buy_price if learn else None
                 required = max(required, learn_rank.get(learn_id) or 0)
+            # Lo visto en el instructor manda: es el único dato real de las recetas sin patrón.
+            trainer = None if learn_id else (trainers.get((game_row["line_name"], game_row["name"]))
+                                             or trainers.get((game_row["line_name"], result.name)))
+            if trainer is not None:
+                required = max(required, trainer["rank"] or 0)
+                result.trainer_level, result.trainer_cost = trainer["level"], trainer["cost"]
             result.required_skill = required or None
+            result.skill_unknown = (trainer is None and not learn_id and required <= 1
+                                    and game_row["acquire"] != ACQUIRE_WITH_PROFESSION)
             if not result.source:
                 if learn_id:
                     result.source = f"Se aprende con «{result.learn_item_name}»"

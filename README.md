@@ -48,9 +48,9 @@ cada método guardado se vuelve a comprobar con tus últimos precios. Lo nuevo s
 |---|---|
 | Crafteo | Lo que se fabrica y su profesión. |
 | Nota | La del asesor. |
-| Beneficio/u | Por unidad, ya sin materiales ni comisión (* si los precios son de pocos escaneos). |
-| Al día | Las que absorbe el mercado al día sin hundir el precio (o las que deja la espera de la receta). |
-| ¿Puedo? | Verde: ya la sabe hacer un personaje. Amarillo: casi (le faltan 25 puntos o menos y la receta se compra en un momento). Naranja: le falta algo (hasta 75 puntos, un poco de reputación o de divisas, o no se sabe de dónde sale la receta). Rojo: falta mucho (más puntos, receta de botín, mucha reputación o ninguna profesión libre). |
+| Beneficio/u | Por unidad, ya sin materiales ni comisión (* si los precios son de pocos escaneos). «sin precio»: algún material o el objeto no ha salido en tus escaneos de la subasta (el detalle dice cuál). «no aplica»: no fabrica un objeto, como los encantamientos. |
+| Al día | Las que absorbe el mercado al día sin hundir el precio (o las que deja la espera de la receta). «faltan escaneos»: hacen falta escaneos completos que cubran al menos 6 horas, sin más de 12 entre uno y otro. «-»: da pérdida. «0»: no se ha vendido ninguna. |
+| ¿Puedo? | Verde: ya la sabe hacer un personaje. Amarillo: casi (le faltan 25 puntos o menos y la receta se compra en un momento). Naranja: le falta algo (hasta 75 puntos, un poco de reputación o de divisas), o no se sabe de dónde sale la receta o a qué nivel la enseña el instructor. Los datos de Forever no lo dicen: lo apunta el addon al abrir la ventana de cada instructor (cualquier personaje vale), y solo de los que puedes abrir. Rojo: falta mucho (más puntos, receta de botín, mucha reputación o ninguna profesión libre). |
 
 **Al pulsar un método** se despliega lo que se sabe de él: la opinión del asesor y sus pasos, de dónde
 sale el oro, quién puede hacerlo y, si nadie, qué le falta al más cercano y cómo prepararlo. Para subir
@@ -334,7 +334,9 @@ vende ya aunque esté barato, y lo que sube se espera. En el tooltip aparece «b
 
 El addon apunta solo lo que ganas mientras juegas: objetos que entran en las bolsas y oro, en tramos
 de 5 minutos por zona. No cuenta lo que entra con el correo, la subasta, el banco, un vendedor, un
-intercambio o la ventana de una profesión abiertos. Puedes poner nombre a lo que haces con
+intercambio o la ventana de una profesión abiertos, ni en los 2 segundos siguientes a cerrarlos (lo
+comprado o cobrado a veces llega tarde), ni lo que crean los hechizos de clase (fragmentos de alma,
+piedras de salud y de alma, comida, agua y gemas conjuradas). Puedes poner nombre a lo que haces con
 `/pg farmeo <nombre>`; si no, el motor lo deduce de lo que sacas (minería, hierbas, tela, oro...).
 
 El motor une los tramos en sesiones (15 minutos sin ganar nada cortan la sesión) y calcula el **oro por
@@ -369,6 +371,10 @@ El informe saca el **beneficio real** de cada cosa que fabricas o revendes: lo c
 comisión, menos lo que te costaron los materiales a ti (o a precio de mercado si no los compraste) y
 menos los depósitos sin recuperar. Y el **oro por hora de gestión**, comparable con el de tus farmeos.
 Lo que vendes de lo farmeado no cuenta como negocio: ya está en tus farmeos.
+
+Lo vendido al día se mide comparando escaneos completos separados menos de 12 horas, y hacen falta al
+menos 6 horas observadas: con menos no se calcula y sale `?`. La ventana de métodos tampoco propone
+fabricar más de lo que cabe en tus horas de juego al día (`ajustes --horas-semana`).
 
 En los crafteos rentables, la columna **«Como mucho al día»** responde a la diferencia clave con
 farmear: un farmeo lo limita tu tiempo, pero un crafteo lo limita el mercado. Supone que puedes vender

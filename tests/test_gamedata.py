@@ -129,6 +129,13 @@ class Importacion(unittest.TestCase):
         self.assertEqual((axe.yellow, axe.green, axe.grey), (60, 80, 100))
         self.assertEqual(axe.learn_price, 1500)
 
+        self.assertFalse(axe.skill_unknown)          # min_skill 1, pero el diseño dice su nivel
+        self.assertEqual(potion.trainer_level, None)
+        c.execute("INSERT INTO trainer_recipes VALUES ('Alquimia', ?, 185, 20, 5000, 1)",
+                  (c.execute("SELECT name FROM gd_recipes WHERE spell_id = 2330").fetchone()[0],))
+        seen = {r.recipe_id: r for r in analyze(c).crafts}[2330]
+        self.assertEqual((seen.required_skill, seen.trainer_level, seen.trainer_cost, seen.skill_unknown),
+                         (185, 20, 5000, False))
         self.assertEqual(plate.required_skill, 100)  # lo pide el diseño, aunque la receta diga 90
         self.assertEqual([m.name for m in plate.missing], ["Vial vacío"])
 

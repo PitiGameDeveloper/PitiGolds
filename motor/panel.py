@@ -16,7 +16,8 @@ Farmeos (farmeos, pesca y mazmorras del catálogo, más los que has medido tú):
 Crafteos: beneficio por unidad, cuántas absorbe el mercado al día y lo cerca que estás de
 poder hacerlo: verde (ya puedes), amarillo (te faltan 25 puntos o menos y la receta se compra
 en un momento), naranja (te faltan hasta 75 puntos, un poco de reputación o de divisas, o no
-se sabe de dónde sale la receta) y rojo (falta mucho, o la receta es de botín). Lo que ya sabes
+se sabe de dónde sale la receta o a qué nivel la enseña el instructor) y rojo (falta mucho, o la
+receta es de botín). Lo que ya sabes
 fabricar sale aunque dé pérdida; las pérdidas van al final de la lista. La pestaña del addon lleva
 además todas las recetas del juego (`all_crafts`); panel.md y el asesor solo ven la lista corta.
 
@@ -49,6 +50,8 @@ CLOSE_GAP = 25          # puntos de profesión que se suben en un rato
 FAR_GAP = 75
 MAX_CRAFT_ROWS = 40
 HOURS_PER_LEVEL = 1.0   # solo para elegir al personaje más cercano cuando le falta nivel
+MIN_HOURS_PER_DAY = 0.5
+MAX_LEVEL_GAP = 5       # niveles de personaje que aún se suben en un rato
 PRIMARY_CATEGORY = 11   # gd_skill_lines.category de las profesiones principales
 STANDINGS = {1: "odiado", 2: "hostil", 3: "adverso", 4: "neutral", 5: "amistoso", 6: "honorable",
              7: "reverenciado", 8: "exaltado"}
@@ -149,6 +152,9 @@ class CraftRow:
     gold_day: int | None = None
     minutes_day: float | None = None
     crafts_day: int = 1
+    limited_by_time: bool = False      # el mercado se llevaría más de lo que da tiempo a fabricar
+    profit_note: str = ""              # sin beneficio: qué falta, en dos palabras (la columna del addon)
+    per_day_note: str = ""             # sin «al día»: por qué
     color: str = "rojo"
     who: str | None = None             # quién la fabrica, o el que está más cerca
     who_name: str | None = None
@@ -493,7 +499,12 @@ def _recipe_source(ctx: _Context, c: CraftResult, ch: Character | None, vendors:
     if not learn:
         if c.source == "Se aprende al aprender la profesión":
             return RecipeSource(way="profesion", text="Se aprende al aprender la profesión.")
-        return RecipeSource(way="instructor", text=f"Se aprende con el instructor de {c.profession}.")
+        if c.skill_unknown:  # el addon pinta este texto tal cual, sin decirte que vayas a aprenderla ya
+            return RecipeSource(way="instructor_sin_nivel",
+                                text=f"Se aprende con el instructor de {c.profession}; él te dirá a qué nivel.")
+        cost = f" por {format_money(c.trainer_cost)}" if c.trainer_cost else ""
+        return RecipeSource(way="instructor", text=f"Se aprende con el instructor de {c.profession}{cost}.",
+                            price=c.trainer_cost or None)
     name = c.learn_item_name or f"objeto {learn}"
     src = RecipeSource(way="desconocida", text="", item_id=learn, item_name=name)
     v = vendors.get(learn)
@@ -560,6 +571,12 @@ def _status(ctx: _Context, c: CraftResult, ch: Character | None, src: RecipeSour
         rank = max(rank, 2)
     if gap:
         why.append(f"le faltan {gap} puntos de {c.profession} ({have}/{required})")
+    if c.skill_unknown:
+        rank = max(rank, 2)
+        why.append(f"no sé a qué nivel de {c.profession} se aprende")
+    if c.trainer_level and ch is not None and ch.level < c.trainer_level:
+        rank = max(rank, 3 if c.trainer_level - ch.level > MAX_LEVEL_GAP else 2)
+        why.append(f"el instructor pide nivel {c.trainer_level} (tiene {ch.level})")
     if src.way in ("botin", "mision"):
         rank = 3
         why.append("la receta lleva tiempo conseguirla" + (f" ({src.text})" if src.text else ""))
@@ -639,8 +656,13 @@ def _craft_row(ctx: _Context, c: CraftResult, review: Review | None, vendors: di
         row.approx, row.approx_why = bool(approx), "; ".join(approx)
     cap = c.capacity
     if cap is not None:
-        row.per_day, row.gold_day, row.minutes_day = cap.units_per_day, cap.gold_per_day, cap.minutes_per_day
-        row.crafts_day = max(1, math.floor(cap.units_per_day / max(c.output_qty, 1)))
+        # El mercado puede llevarse más de lo que da tiempo a fabricar: no se propone más que tus horas de juego.
+        minutes = max(ctx.settings.hours_per_day, MIN_HOURS_PER_DAY) * 60
+        fit = min(1.0, minutes / cap.minutes_per_day) if cap.minutes_per_day else 1.0
+        row.per_day, row.gold_day, row.minutes_day = cap.units_per_day, round(cap.gold_per_day * fit), cap.minutes_per_day * fit
+        row.crafts_day = max(1, math.floor(cap.units_per_day * fit / max(c.output_qty, 1)))
+        row.limited_by_time = fit < 1
+    row.profit_note, row.per_day_note = _missing_notes(c, row)
     for r in c.reagents:
         v = vendors.get(r.item_id) if r.item_id else None
         row.reagents.append(ReagentRow(item_id=r.item_id, name=r.name, quantity=r.quantity,
@@ -706,6 +728,20 @@ def _no_profit_reason(c: CraftResult) -> str:
     return "Aún no sé si da beneficio: falta el precio de " + ", ".join(missing) + "."
 
 
+def _missing_notes(c: CraftResult, row: CraftRow) -> tuple[str, str]:
+    """Lo que pinta el addon donde no hay cifra de beneficio o de ventas al día."""
+    if row.profit_item is None:
+        return ("no aplica" if not c.output_item_id else "sin precio"), ""
+    if row.per_day is not None:
+        return "", ""
+    if row.profit_item <= 0:
+        return "", "-"
+    s = c.output_signals
+    if s is not None and s.sales_per_day == 0:
+        return "", "0"
+    return "", "faltan escaneos"
+
+
 def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None:
     d = row.details
     if review is not None:
@@ -715,8 +751,8 @@ def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None
     if row.profit_item is None:
         d.append(_no_profit_reason(c))
         if row.recipe is not None and row.recipe.way != "aprendida":
-            d.append(f"Receta: {row.recipe.text}" + (f"; pide {row.recipe.reputation}" if row.recipe.reputation
-                                                     else "") + ".")
+            d.append(f"Receta: {row.recipe.text.rstrip('.')}" + (f"; pide {row.recipe.reputation}"
+                                                                 if row.recipe.reputation else "") + ".")
         return
     d.append(f"Beneficio: {format_money(row.profit_item)} por unidad (se vende a {format_money(row.sell_price)}, "
              f"materiales {format_money(round(c.cost / c.output_qty))})"
@@ -724,8 +760,12 @@ def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None
     if row.per_day is not None:
         cap = c.capacity
         limit = "su espera" if cap.by_cooldown else "el mercado"
-        d.append(f"Por {limit}: unas {row.per_day:.1f} al día, ~{format_money(row.gold_day)} en "
-                 f"~{row.minutes_day:.0f} min.")
+        if row.limited_by_time:
+            d.append(f"Por {limit}: unas {row.per_day:.1f} al día. Con tus horas de juego te da para "
+                     f"{row.crafts_day}: ~{format_money(row.gold_day)} en ~{row.minutes_day:.0f} min.")
+        else:
+            d.append(f"Por {limit}: unas {row.per_day:.1f} al día, ~{format_money(row.gold_day)} en "
+                     f"~{row.minutes_day:.0f} min.")
     elif (row.profit_item or 0) < 0:
         d.append("Ahora mismo da pérdida: no compensa fabricarlo para vender.")
     else:
@@ -733,14 +773,26 @@ def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None
     if row.cooldown_hours:
         d.append(f"Tiene una espera de {_hours(row.cooldown_hours)} entre fabricaciones.")
     if row.recipe is not None and row.recipe.way != "aprendida":
-        d.append(f"Receta: {row.recipe.text}" + (f"; pide {row.recipe.reputation}" if row.recipe.reputation else "")
+        d.append(f"Receta: {row.recipe.text.rstrip('.')}" + (f"; pide {row.recipe.reputation}" if row.recipe.reputation else "")
                  + ".")
 
 
 # El mejor farmeo ------------------------------------------------------------------------
 
+def _quick_crafts(crafts: list[CraftRow], minutes: float) -> list[CraftRow]:
+    """Hasta tres crafteos que dan dinero y caben, juntos, en el tiempo de juego de un día."""
+    quick = []
+    for c in crafts:
+        if c.color == "verde" and c.gold_day and c.gold_day > 0 and c.minutes_day is not None and c.minutes_day <= minutes:
+            quick.append(c)
+            minutes -= c.minutes_day
+            if len(quick) == 3:
+                break
+    return quick
+
+
 def _verdict(farms: list[FarmRow], crafts: list[CraftRow], best_value: int | None, floor: int,
-             a: Analysis, has_chars: bool = True) -> Verdict:
+             a: Analysis, has_chars: bool = True, minutes_day: float = 60.0) -> Verdict:
     usable = [r for r in farms if r.value is not None and not r.pending]
     if not usable:
         lines = []
@@ -762,7 +814,7 @@ def _verdict(farms: list[FarmRow], crafts: list[CraftRow], best_value: int | Non
         return Verdict("investigar", "Ningún método guardado da dinero ahora",
                        [f"Ninguno llega a {format_money(floor)}/h con tus precios: o se han saturado o ya no funcionan.",
                         "Toca investigar: abre el asesor y dile «investiga»."])
-    quick = [c for c in crafts if c.color == "verde" and c.gold_day and c.gold_day > 0][:3]
+    quick = _quick_crafts(crafts, minutes_day)
     quick_lines = [f"Antes, fabrica {c.crafts_day} × {c.name} con {c.who_name}: ~{format_money(c.gold_day)} "
                    f"en ~{c.minutes_day:.0f} min." for c in quick]
     ready = sorted((r for r in usable if r.ready), key=lambda r: -r.value)
@@ -811,7 +863,8 @@ def build_panel(conn: sqlite3.Connection, a: Analysis, settings: Settings | None
     best = _color_farms(panel.farms, floor)
     panel.farms.sort(key=lambda r: (r.pending != "", r.value is None, -(r.value or 0)))
     panel.crafts, panel.all_crafts = _craft_rows(ctx, reviews)
-    panel.verdict = _verdict(panel.farms, panel.crafts, best, floor, a, has_chars=bool(ctx.chars))
+    panel.verdict = _verdict(panel.farms, panel.crafts, best, floor, a, has_chars=bool(ctx.chars),
+                             minutes_day=max(settings.hours_per_day, MIN_HOURS_PER_DAY) * 60)
     panel.unreviewed = ([r.key for r in panel.farms if r.score is None and not r.key.startswith("medido:")]
                         + [str(c.recipe_id) for c in panel.crafts
                            if c.score is None and not (c.known_by and (c.profit_item or 0) <= 0)])
@@ -841,6 +894,7 @@ def panel_export(panel: Panel) -> dict:
         crafts.append({
             "recipe": c.recipe_id, "name": c.name, "prof": c.profession, "line": c.skill_line,
             "score": c.score, "profit": c.profit_item, "approx": c.approx,
+            "profitNote": c.profit_note or None, "perDayNote": c.per_day_note or None,
             "perDay": round(c.per_day, 1) if c.per_day is not None else None, "goldDay": c.gold_day,
             "minutes": round(c.minutes_day) if c.minutes_day is not None else None, "craftsDay": c.crafts_day,
             "color": c.color, "who": c.who, "whoName": c.who_name, "skill": c.who_skill,
@@ -876,7 +930,7 @@ def render_panel(panel: Panel) -> str:
     out += ["", "## Crafteos", "", "| Receta | Objeto | Nota | Beneficio/u | Al día | Color | Quién | Qué falta |",
             "|---|---|---|---|---|---|---|---|"]
     for c in panel.crafts:
-        per_day = f"{c.per_day:.1f}" if c.per_day is not None else "?"
+        per_day = f"{c.per_day:.1f}" if c.per_day is not None else (c.per_day_note or "?")
         missing = "; ".join(c.prep[:2]) if c.color != "verde" else ""
         out.append(f"| {c.recipe_id} | {c.name} ({c.profession}) | {c.score or ''} | "
                    f"{_money_or(c.profit_item, c.approx)} | {per_day} | {c.color} | {c.who_name or ''} | {missing} |")
