@@ -319,8 +319,9 @@ Con al menos 3 escaneos repartidos en más de un día, el motor calcula para cad
   viene, poco.
 - **Unidades a la venta y número de vendedores**: si cada vez hay más, el precio acabará cediendo.
 - **Ventas al día**: unidades que había a buen precio y desaparecen entre dos escaneos completos
-  seguidos (como mucho 12 horas de diferencia). Incluye las que alguien retiró para bajarles el precio,
-  así que es una cota alta.
+  seguidos (como mucho 12 horas de diferencia), menos las que aparecen nuevas a un precio más bajo
+  (alguien que quita su montón y lo vuelve a poner más barato). La subasta no dice si lo que falta se
+  vendió o caducó, así que es una cota alta.
 - **Días de oferta**: para cuántos días de ventas hay género.
 - **Riesgo de bajada (0-100)** y **previsión a 3 y 7 días**, que mezcla la tendencia (a mitad de fuerza)
   con la vuelta a la mediana según lo limpia que sea la tendencia.

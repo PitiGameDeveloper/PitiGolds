@@ -30,6 +30,22 @@ class VentasEstimadas(unittest.TestCase):
         a = Point(T0, 100, 15, 2, "100:10;110:5", "full")
         self.assertAlmostEqual(estimate_sales([a], [T0, T0 + 12 * H]), 30.0)
 
+    def test_lo_que_vuelve_mas_barato_no_es_venta(self):
+        # Alguien quita sus 24 a 100 y pone 20 a 95: solo faltan 4.
+        a = Point(T0, 100, 34, 2, "100:24;105:10", "full")
+        b = Point(T0 + 6 * H, 95, 30, 2, "95:20;105:10", "full")
+        self.assertAlmostEqual(estimate_sales([a, b], [a.time, b.time]), 16.0)
+
+    def test_lo_que_aparece_mas_caro_no_descuenta(self):
+        a = Point(T0, 100, 10, 1, "100:10", "full")
+        b = Point(T0 + 6 * H, 110, 8, 1, "110:8", "full")
+        self.assertAlmostEqual(estimate_sales([a, b], [a.time, b.time]), 40.0)
+
+    def test_si_lo_recoloca_todo_no_hay_ventas(self):
+        a = Point(T0, 100, 24, 1, "100:24", "full")
+        b = Point(T0 + 6 * H, 90, 24, 1, "90:24", "full")
+        self.assertAlmostEqual(estimate_sales([a, b], [a.time, b.time]), 0.0)
+
     def test_con_pocos_minutos_no_se_inventa_las_ventas_del_dia(self):
         # 19 minutos entre escaneos: 100 unidades menos no son 7500 vendidas al día.
         a = Point(T0, 100, 100, 1, "100:100", "full")

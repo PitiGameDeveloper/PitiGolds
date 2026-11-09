@@ -97,8 +97,9 @@ def _slope(xs: list[float], ys: list[float]) -> float | None:
 
 def estimate_sales(points: list[Point], full_scan_times: list[int]) -> float | None:
     """Unidades vendidas al día. Entre dos escaneos completos seguidos, las unidades que había
-    a buen precio y ya no están se cuentan como vendidas. Incluye las que alguien retiró para
-    bajarles el precio, así que es una cota alta. Sin MIN_SALES_HOURS observadas no dice nada."""
+    a buen precio y ya no están se cuentan como vendidas, menos las que aparecen nuevas a un precio
+    más bajo (alguien que retira su montón y lo vuelve a poner más barato). La subasta no dice qué
+    caducó, así que sigue siendo una cota alta. Sin MIN_SALES_HOURS observadas no dice nada."""
     by_time = {p.time: p for p in points if p.kind == "full"}
     sold = 0
     days = 0.0
@@ -108,12 +109,20 @@ def estimate_sales(points: list[Point], full_scan_times: list[int]) -> float | N
         if a is None or not a.book or gap_hours <= 0 or gap_hours > MAX_PAIR_GAP_HOURS:
             continue
         b = by_time.get(b_time)
+        before = dict(parse_book(a.book))
         current = dict(parse_book(b.book)) if b is not None and b.book else {}
         # Solo se puede afirmar que algo falta en precios que el libro nuevo enseña entero.
         visible = max(current) if current else math.inf
-        for price, qty in parse_book(a.book):
-            if price <= a.price * SALE_ZONE and price <= visible:
-                sold += max(0, qty - current.get(price, 0))
+        gone = 0
+        top_gone = 0
+        for price, qty in before.items():
+            missing = qty - current.get(price, 0)
+            if missing > 0 and price <= a.price * SALE_ZONE and price <= visible:
+                gone += missing
+                top_gone = max(top_gone, price)
+        relisted = sum(max(0, qty - before.get(price, 0))
+                       for price, qty in current.items() if price < top_gone)
+        sold += max(0, gone - relisted)
         days += gap_hours / 24
     return sold / days if days * 24 >= MIN_SALES_HOURS else None
 
