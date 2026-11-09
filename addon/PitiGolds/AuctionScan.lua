@@ -174,6 +174,8 @@ local function SendWhenReady(fn)
   end
 end
 
+ns.AuctionSendWhenReady = SendWhenReady
+
 ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", function()
   local fn = Scan.pendingSend
   if fn then

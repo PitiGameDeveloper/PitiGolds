@@ -6,6 +6,8 @@ Lleva:
   prices        "mercado,mediana,tendencia" de tus objetos y de los materiales de tus
                 recetas, para el tooltip. Tendencia: b (baja), s (sube) o vacía.
   craft         coste y beneficio por unidad de lo que sabes fabricar.
+  recipes       "coste,ganancia" de cada fabricación de las recetas de tus profesiones, para
+                la ventana de profesión. Ganancia vacía si lo fabricado no tiene precio.
   lastScan      hora del último escaneo de la subasta.
   methods       la ventana de métodos: el mejor farmeo y las pestañas de farmeos y crafteos
                 (panel.py).
@@ -74,6 +76,12 @@ def render_generated(ingested_up_to: int, analysis: Analysis, now: int | None = 
     lines.append("  craft = {")
     for item_id, c in sorted(analysis.best_known_craft().items()):
         lines.append(f'    [{item_id}] = "{round(c.cost / c.output_qty)},{round(c.profit / c.output_qty)}",')
+    lines.append("  },")
+    lines.append("  recipes = {")
+    for c in sorted(analysis.crafts, key=lambda c: c.recipe_id):
+        if c.yours and c.cost is not None:
+            profit = c.profit if c.profit is not None else ""
+            lines.append(f'    [{c.recipe_id}] = "{c.cost},{profit}",')
     lines.append("  },")
     if analysis.last_scan:
         lines.append(f"  lastScan = {int(analysis.last_scan)},")

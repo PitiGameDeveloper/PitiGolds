@@ -189,6 +189,7 @@ Enum = {
   },
   PlayerInteractionType = { Merchant = 5, Banker = 8, MailInfo = 17, Auctioneer = 21, AccountBanker = 68 },
   TooltipDataType = { Item = 0 },
+  TooltipDataLineType = { SellPrice = 11 },
   ItemClass = { Consumable = 0, Reagent = 5, Tradegoods = 7, Gem = 3, ItemEnhancement = 8, Recipe = 9, Profession = 19 },
   AuctionHouseSortOrder = { Price = 0, Name = 1 },
   BankType = { Character = 0, Guild = 1, Account = 2 },
@@ -281,17 +282,35 @@ function GetMerchantItemCostItem(i, j)
   return 0, c.value, c.link, c.currencyName
 end
 
--- Tooltips: Mock.Tooltip(itemID) devuelve las líneas que añadiría el addon.
+-- Tooltips: Mock.Tooltip(itemID, count, sellTotal) devuelve las líneas del tooltip:
+-- la de «Precio de venta» del juego (si nadie la quita) y las que añade el addon.
 Mock.tooltipCallbacks = {}
+Mock.tooltipLineCallbacks = {}
 TooltipDataProcessor = {
   AddTooltipPostCall = function(_, fn) table.insert(Mock.tooltipCallbacks, fn) end,
+  AddLinePreCall = function(lineType, fn)
+    Mock.tooltipLineCallbacks[lineType] = Mock.tooltipLineCallbacks[lineType] or {}
+    table.insert(Mock.tooltipLineCallbacks[lineType], fn)
+  end,
 }
-function Mock.Tooltip(itemID)
+function Mock.Tooltip(itemID, count, sellTotal)
   local lines = {}
+  local owner = { count = count }
   local tooltip = {
+    GetOwner = function() return owner end,
     AddLine = function(_, text) lines[#lines + 1] = text end,
-    AddDoubleLine = function(_, left, right) lines[#lines + 1] = left .. " = " .. right end,
+    AddDoubleLine = function(_, left, right, lr, lg, lb)
+      local color = (lr == 0.25 and lg == 1) and "[verde] " or ""
+      lines[#lines + 1] = color .. left .. " = " .. right
+    end,
   }
+  if sellTotal then
+    local hidden = false
+    for _, fn in ipairs(Mock.tooltipLineCallbacks[Enum.TooltipDataLineType.SellPrice] or {}) do
+      if fn(tooltip, { price = sellTotal }) then hidden = true break end
+    end
+    if not hidden then lines[#lines + 1] = "Precio de venta: " .. sellTotal end
+  end
   for _, fn in ipairs(Mock.tooltipCallbacks) do fn(tooltip, { id = itemID }) end
   return table.concat(lines, "\n")
 end
@@ -439,6 +458,7 @@ Mock.replicate = {}
 Mock.browseData = {}
 Mock.owned = {}
 Mock.browseQueries = 0
+Mock.itemKeySearches = {}
 
 local browse = { results = {}, all = {} }
 
@@ -465,6 +485,13 @@ C_AuctionHouse = {
     Mock.Schedule(0.5, function() Mock.Fire("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", {}) end)
   end,
   GetBrowseResults = function() return browse.results end,
+  MakeItemKey = function(itemID) return { itemID = itemID, itemLevel = 0, itemSuffix = 0, battlePetSpeciesID = 0 } end,
+  -- Búsquedas por objetos (botón Buscar de la ventana de profesión): se apuntan en Mock.itemKeySearches.
+  SearchForItemKeys = function(keys, sorts)
+    local ids = {}
+    for i, k in ipairs(keys) do ids[i] = k.itemID end
+    table.insert(Mock.itemKeySearches, ids)
+  end,
   HasFullBrowseResults = function() return #browse.results >= #browse.all end,
   QueryOwnedAuctions = function()
     Mock.Schedule(0.5, function() Mock.Fire("OWNED_AUCTIONS_UPDATED") end)

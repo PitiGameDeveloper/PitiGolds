@@ -15,6 +15,7 @@ AuctionScan.lua
 Merchant.lua
 Trainer.lua
 Tooltip.lua
+CraftInfo.lua
 Farming.lua
 Ledger.lua
 Session.lua

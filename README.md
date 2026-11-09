@@ -286,8 +286,19 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    tras otro `/reload`.
 5. Haz doble clic en **`informe.cmd`** para ver qué hacer: crafteos rentables, recetas que te convendría
    aprender y qué vender. Queda guardado también en `datos/informe.md`.
-6. Tras el siguiente `/reload`, al pasar el ratón por un objeto verás su precio de mercado y, si sabes
-   fabricarlo, cuánto cuesta y cuánto ganas.
+6. Tras el siguiente `/reload`, al pasar el ratón por un objeto verás en su tooltip:
+   - **Venta:** lo que paga el vendedor (sustituye a la línea «Precio de venta» del juego).
+   - **Subasta:** el precio de mercado.
+   - Si sabes fabricarlo, cuánto cuesta y cuánto ganas.
+
+   Los precios van por unidad y, si es un montón, con el total al lado (`3p 0c  x5: 15p 0c`). En verde sale
+   lo que más deja por unidad: el vendedor o la subasta, a la que se le quita su 5 % de comisión.
+7. En la ventana de cada profesión, debajo de los materiales de la receta elegida, salen **Fabricar:**
+   (lo que cuestan los materiales de una fabricación, cada uno al mejor precio entre subasta y vendedor)
+   y **Ganancia:** (lo que se cobra vendiendo lo fabricado, ya sin comisión, menos ese coste; en verde o
+   en rojo). Son las mismas cuentas del informe, así que se ponen al día con cada `/reload`. Al lado, el
+   botón **Buscar** busca en la subasta los materiales de la receta; si está cerrada, lo hace al abrirla.
+   Si tienes Auctionator, desactiva su información de fabricación para que no se pisen.
 
 **`estado.cmd`** da el resumen general: oro, profesiones, valor del inventario y divisas de Forever.
 

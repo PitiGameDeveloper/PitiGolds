@@ -75,6 +75,39 @@ class PasosDeUnCrafteoConPerdida(unittest.TestCase):
         self.assertTrue(steps[2].startswith("Hoy: 1 × Madeja"))
 
 
+class TooltipVentaYSubasta(unittest.TestCase):
+    def setUp(self):
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        self.mock = lua.globals().Mock
+        self.mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        # Barra de cobre: 3p en subasta y 10c en el vendedor. Ojo de tigre: 1p 40c y 1p 50c.
+        lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,,", [818] = "140,140," } }')
+
+    def test_quita_la_linea_del_juego_y_pone_venta(self):
+        tooltip = self.mock.Tooltip(2840, 1, 10)
+        self.assertNotIn("Precio de venta", tooltip)
+        self.assertEqual(tooltip.split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c"])
+
+    def test_por_unidad_y_por_el_monton(self):
+        tooltip = self.mock.Tooltip(2840, 5, 50)
+        self.assertIn("Venta: = 10c  |cffccccccx5:|r 50c", tooltip)
+        self.assertIn("[verde] Subasta: = 3p 0c  |cffccccccx5:|r 15p 0c", tooltip)
+
+    def test_el_monton_sale_del_precio_del_juego(self):
+        tooltip = self.mock.Tooltip(2840, None, 70)
+        self.assertIn("|cffccccccx7:|r 21p 0c", tooltip)
+
+    def test_verde_al_vendedor_si_la_subasta_deja_menos(self):
+        # 1p 40c menos el 5 % de comisión no llega al 1p 50c del vendedor.
+        tooltip = self.mock.Tooltip(818, 1, 150)
+        self.assertEqual(tooltip.split("\n"), ["[verde] Venta: = 1p 50c", "Subasta: = 1p 40c"])
+
+    def test_sin_precio_de_venta_solo_subasta(self):
+        self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c")
+
+
 class FiltroDeProfesiones(unittest.TestCase):
     CRAFTS = """PitiGoldsGenerated = { methods = { farms = {}, crafts = {
       { recipe = 1, name = "Camisa", prof = "Costura", profit = 50, reagents = {}, output = 10, color = "verde" },
@@ -439,9 +472,41 @@ class AddonMasMotor(unittest.TestCase):
             self.assertEqual(len(lua.globals().PitiGoldsDB.scans), 0)
 
             tooltip = mock.Tooltip(2840)
-            self.assertIn("PitiGolds subasta = 3p 0c", tooltip)
+            self.assertIn("Subasta: = 3p 0c", tooltip)
             self.assertIn("PitiGolds fabricar = 1p 20c  |cff40ff40+1p 60c|r", tooltip)
             self.assertEqual(mock.Tooltip(123456), "")
+
+            # Ventana de profesión: coste y ganancia de la receta elegida, bajo los materiales.
+            self.assertIn('[1002] = "1900,2750",', content)
+            lua.execute('''
+              local form = Mock.NewFrame()
+              form.Reagents = Mock.NewFrame()
+              form.Init = function(self, recipe) self.recipe = recipe end
+              form.GetRecipeInfo = function(self) return self.recipe end
+              form.CreateFontString = function(self) self.info = Mock.NewFrame(); return self.info end
+              ProfessionsFrame = { CraftingPage = { SchematicForm = form } }
+              Mock.form = form''')
+            mock.Fire("ADDON_LOADED", "Blizzard_Professions")
+            lua.execute("Mock.form:Init({ recipeID = 1002 })")
+            info = mock.form.info
+            self.assertTrue(info.shown, "\n".join(mock.chat.values()))
+            self.assertEqual(info.text, "Fabricar: |cffffffff19p 0c|r\nGanancia: |cff40ff4027p 50c|r")
+            self.assertTrue(lua.eval("Mock.form.info.point[2] == Mock.form.Reagents"))
+
+            # Buscar con la subasta cerrada: se queda preparado y se lanza al abrirla.
+            mock.Fire("AUCTION_HOUSE_CLOSED")
+            self.assertTrue(mock.ClickButton("Buscar"))
+            self.assertIn("abre la subasta y buscaré Barra de cobre, Flujo débil.", "\n".join(mock.chat.values()))
+            self.assertEqual(len(mock.itemKeySearches), 0)
+            mock.Fire("AUCTION_HOUSE_SHOW")
+            mock.Advance(1)
+            self.assertEqual(list(mock.itemKeySearches[1].values()), [2840, 2880])
+            self.assertTrue(mock.ClickButton("Buscar"))  # con la subasta abierta, al momento
+            self.assertEqual(len(mock.itemKeySearches), 2)
+            mock.Fire("AUCTION_HOUSE_CLOSED")
+
+            lua.execute("Mock.form:Init({ recipeID = 999999 })")
+            self.assertFalse(info.shown)
 
             # Ventana de métodos: el hacha ya la sabe hacer, así que salen los pasos con lo que tiene.
             self.assertIn("vendor = \"Grimtak\"", content)
