@@ -233,7 +233,7 @@ Se aplica a las recetas amarillas y verdes, multiplicando su probabilidad (sin p
 
 `conocimiento/metodos.json` es un catálogo de métodos sacados de guías, vídeos y otras fuentes: qué se
 farmea, dónde, a qué nivel, con qué profesión y qué objetos dan el dinero. El primero es la guía de
-Studen (v1.0): 68 métodos entre farmeos, pesca, mazmorras, crafteos, inversiones, vendedores con
+Studen (v1.1): 69 métodos entre farmeos, pesca, mazmorras, crafteos, inversiones, vendedores con
 existencias limitadas y el talento de Legacy Estudio dedicado.
 
 El motor **no usa las cifras de oro de las guías** (cada servidor es distinto). Cada método se valora
@@ -338,7 +338,11 @@ de 5 minutos por zona. No cuenta lo que entra con el correo, la subasta, el banc
 intercambio o la ventana de una profesión abiertos, ni en los 2 segundos siguientes a cerrarlos (lo
 comprado o cobrado a veces llega tarde), ni lo que crean los hechizos de clase (fragmentos de alma,
 piedras de salud y de alma, comida, agua y gemas conjuradas). Puedes poner nombre a lo que haces con
-`/pg farmeo <nombre>`; si no, el motor lo deduce de lo que sacas (minería, hierbas, tela, oro...).
+`/pg farmeo <nombre>`, o pulsando **Farmear este** en la ventana de métodos.
+
+Solo cuentan como **farmeo medido** las sesiones con nombre. Lo que ganas sin nombre (misiones, dar
+vueltas por Orgrimmar...) sale en «Últimas sesiones» del informe, pero no aparece como farmeo en el
+addon ni sirve de referencia para comparar métodos.
 
 El motor une los tramos en sesiones (15 minutos sin ganar nada cortan la sesión) y calcula el **oro por
 hora real** con los precios de hoy y con los previstos a 7 días. Así sabes cuánto rinde de verdad cada

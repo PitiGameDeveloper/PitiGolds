@@ -9,7 +9,7 @@
       "objetos": ["Light Leather", "Light Hide", "Medium Leather", "Medium Hide", "Heavy Leather", "Ruined Leather Scraps"],
       "por_hora": [{"objeto": "Light Leather", "cantidad": 20}, {"objeto": "Light Hide", "cantidad": 1}, {"objeto": "Medium Leather", "cantidad": 8}, {"objeto": "Medium Hide", "cantidad": 0.5}, {"objeto": "Ruined Leather Scraps", "cantidad": 6}], "oro_hora": 1.5,
       "notas": "Al principio nadie compra cuero: véndelo al vendedor. Da para pagar los hechizos del instructor. No te pares a desollar lo que matan otros. Kaychak lo da como lo más seguro para empezar en los megaservidores: no hace falta la subasta, porque el vendedor paga 3 plata la pila de 20 de cuero ligero, 10 la de medio y 30 la de pesado. Si en la subasta se paga bastante más, véndelo allí: con las materias primas casi nadie se dedica a quitarte las ventas como con los crafteos. Se puede dejar Desollar más adelante. Restos de cuero estropeado: con Peletería, 3 hacen 1 cuero ligero, y en Forever hay 100 recetas que piden cuero ligero (según un short, 59 son nuevas: https://www.youtube.com/shorts/dC-7XW0fz6U), así que al principio se venderá bien. Pero al vendedor 3 restos pagan 21 cobre y 1 cuero ligero 15: conviértelos solo si en la subasta el cuero ligero se paga a más de unos 25 cobre. Estimado por hora: unos 40 bichos desollados mientras subes y unos 6 restos.",
-      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-10-31); Wow Forever Moments & Guides, YouTube (2026-10-23)", "fecha": "2026-10-31",
+      "fuente": "Guía de Studen v1.1; Kaychak, YouTube (2026-10-31); Wow Forever Moments & Guides, YouTube (2026-10-23)", "fecha": "2026-10-31",
       "enlace": "https://www.youtube.com/watch?v=ryub9vdTKq0"
     },
     {
@@ -20,7 +20,7 @@
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 50}], "oro_hora": 0.4,
       "punto": {"mapa": 1420},
       "notas": "Oro suelto y tela; buena experiencia. Estimado por hora: unos 150 bichos, tela en uno de cada tres.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "dunmorogh-espias",
@@ -30,7 +30,7 @@
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 55}], "oro_hora": 0.6,
       "punto": {"mapa": 1426}, "bichos": ["Espía Hierro Negro"],
       "notas": "Son de misión y reaparecen muy rápido en poco espacio. Tela, bolsas y verdes. Estimado por hora: unos 170 bichos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "durotar-cueva",
@@ -40,7 +40,7 @@
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 50}], "oro_hora": 0.5,
       "punto": {"mapa": 1411},
       "notas": "Reaparecen rápido; la guía da unos 14 000 de experiencia por hora. Estimado por hora: unos 150 bichos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "baldios-ventura",
@@ -50,7 +50,7 @@
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 35}, {"objeto": "Wool Cloth", "cantidad": 15}], "oro_hora": 1.7,
       "punto": {"mapa": 1413, "x": 56, "y": 8},
       "notas": "Reaparecen sin parar y mueren rápido. Tela, verdes y cajones saqueados (Waylaid Crates). Estimado por hora: unos 150 bichos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "baldios-arpias",
@@ -60,7 +60,7 @@
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 30}, {"objeto": "Wool Cloth", "cantidad": 12}], "oro_hora": 1.5,
       "punto": {"mapa": 1413}, "bichos": ["Arpía"],
       "notas": "Tela, verdes y cajones saqueados; unos 18 000 de experiencia por hora. Estimado por hora: unos 140 bichos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "cardo-veloz",
@@ -70,7 +70,7 @@
       "objetos": ["Swiftthistle", "Mageroyal", "Briarthorn"],
       "por_hora": [{"objeto": "Mageroyal", "cantidad": 30}, {"objeto": "Briarthorn", "cantidad": 35}, {"objeto": "Swiftthistle", "cantidad": 12}],
       "notas": "No tiene nodo propio: sale al recoger Marregal (20-30 %) y Brezospina (35-40 %). Se usa para pociones de rapidez y té de cardo, así que aguanta el precio. Estimado por hora: unos 35 puntos de hierba.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "argenteos-humanoides",
@@ -80,7 +80,7 @@
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 25}, {"objeto": "Wool Cloth", "cantidad": 20}], "oro_hora": 2,
       "punto": {"mapa": 1421},
       "notas": "Tela y equipo ligado al equipar. Estimado por hora: unos 130 bichos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "condores",
@@ -90,7 +90,7 @@
       "por_hora": [{"objeto": "Tough Condor Meat", "cantidad": 50}, {"objeto": "Small Egg", "cantidad": 15}, {"objeto": "Light Feather", "cantidad": 25}], "oro_hora": 0.5,
       "punto": {"mapa": 1433}, "bichos": ["Cóndor"],
       "notas": "Lo que da dinero es la carne dura de cóndor: la piden una misión y la cocina. Estimado por hora: unos 130 bichos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "bael-modan",
@@ -100,7 +100,7 @@
       "por_hora": [{"objeto": "Wool Cloth", "cantidad": 30}, {"objeto": "Linen Cloth", "cantidad": 15}], "oro_hora": 2.7,
       "punto": {"mapa": 1413, "x": 48, "y": 85},
       "notas": "Reaparecen sin parar; tela y verdes. Estimado por hora: unos 120 bichos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "vastagos-dragon",
@@ -110,7 +110,7 @@
       "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 5}, {"objeto": "Sharp Claw", "cantidad": 10}, {"objeto": "Large Fang", "cantidad": 10}, {"objeto": "Tiny Crimson Whelpling", "cantidad": 0.1}], "oro_hora": 1,
       "punto": {"mapa": 1437}, "bichos": ["Vástago"],
       "notas": "Depende de vender en la subasta. Hay una pequeña probabilidad de mascota. Estimado por hora: unos 120 vástagos; la mascota, una de cada mil. La glándula de llamas se estima en unas 5 por hora: según MetaBot (datos de Classic), estos vástagos no están entre los 15 bichos que más la sueltan y el último de esa lista da un 5,6 %. Aun así, CJ Mann los propone para ir guardándolas mientras subes.",
-      "fuente": "Guía de Studen v1.0; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
+      "fuente": "Guía de Studen v1.1; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
@@ -121,7 +121,7 @@
       "por_hora": [{"objeto": "Wool Cloth", "cantidad": 30}, {"objeto": "Silk Cloth", "cantidad": 15}], "oro_hora": 5,
       "punto": {"mapa": 1424}, "bichos": ["Gnoll"],
       "notas": "Muy densos y con cofres en la zona. Estimado por hora: unos 120 gnolls y algún cofre.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "mil-agujas-arpias",
@@ -131,7 +131,7 @@
       "por_hora": [{"objeto": "Vibrant Plume", "cantidad": 35}, {"objeto": "Silk Cloth", "cantidad": 20}, {"objeto": "Wool Cloth", "cantidad": 12}], "oro_hora": 3.5,
       "punto": {"mapa": 1441, "x": 27, "y": 51}, "bichos": ["Arpía"],
       "notas": "Es la cueva Roguefeather Den, en el cañón de las arpías (Screeching Canyon): al oeste de Freewind Post, pegada a la pared sur. Se sube por un camino en la roca; hay arpías dentro y fuera de la cueva (aparecen entre 26-29, 47-56) y un cofre dentro. Oro de vendedor: la pluma vibrante se vende al vendedor. No se pueden desollar. Estimado por hora: unos 120 arpías.",
-      "fuente": "Guía de Studen v1.0; posiciones de Wowhead (Classic) y Goldgoblin", "fecha": "2026-11-08"
+      "fuente": "Guía de Studen v1.1; posiciones de Wowhead (Classic) y Goldgoblin", "fecha": "2026-11-08"
     },
     {
       "id": "ocaso-ogros",
@@ -142,7 +142,7 @@
       "por_hora": [{"objeto": "Silk Cloth", "cantidad": 25}, {"objeto": "Wool Cloth", "cantidad": 15}, {"objeto": "Iron Ore", "cantidad": 4}, {"objeto": "Tin Ore", "cantidad": 6}], "oro_hora": 5.5,
       "punto": {"mapa": 1431, "x": 33, "y": 77},
       "notas": "Ogros que reaparecen rápido, muchos sitios de cofre y vetas dentro y fuera de la cueva. Estimado por hora: unos 120 ogros y algún cofre; el mineral, solo con Minería.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "tuercespina-bestias",
@@ -153,7 +153,7 @@
       "por_hora": [{"objeto": "Bristly Whisker", "cantidad": 45}, {"objeto": "Medium Leather", "cantidad": 30}, {"objeto": "Heavy Leather", "cantidad": 20}], "oro_hora": 1.5,
       "punto": {"mapa": 1434},
       "notas": "Todas se desuellan y sueltan grises que paga bien el vendedor. Se combina con las misiones de Nesingwary. Estimado por hora: unos 130 bichos; el cuero, solo con Desollar.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "tuercespina-basiliscos",
@@ -164,7 +164,7 @@
       "por_hora": [{"objeto": "Intact Basilisk Spine", "cantidad": 20}, {"objeto": "Squishy Basilisk Eye", "cantidad": 20}, {"objeto": "Curved Basilisk Claw", "cantidad": 20}, {"objeto": "Large Basilisk Tail", "cantidad": 15}], "oro_hora": 0.5,
       "punto": {"mapa": 1434}, "bichos": ["Basilisco"],
       "notas": "El mejor oro de vendedor de la guía para este nivel; con Desollar, más. Estimado por hora: unos 120 basiliscos, sin contar Desollar.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "perla-azul",
@@ -174,7 +174,7 @@
       "por_hora": [{"objeto": "Blue Pearl", "cantidad": 3}], "oro_hora": 6,
       "punto": {"mapa": 1434},
       "notas": "La perla azul la pide una misión y se vende muy bien. Cuidado con los élites de al lado. Estimado por hora: unos 120 múrlocs; una almeja de cada tres y pocas traen perla.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "arathi-witherbark",
@@ -184,7 +184,7 @@
       "por_hora": [{"objeto": "Formula: Enchant Gloves - Skinning", "cantidad": 0.3}, {"objeto": "Silk Cloth", "cantidad": 25}], "oro_hora": 6.5,
       "punto": {"mapa": 1417, "x": 68, "y": 68},
       "notas": "Cualquier Secacorteza puede soltar la fórmula, que vale bastante. Mientras, oro suelto y tela. Estimado por hora: unos 120 trolls; la fórmula, una cada tres horas.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "arathi-exiliados",
@@ -205,7 +205,18 @@
       "por_hora": [{"objeto": "Elemental Earth", "cantidad": 15}], "oro_hora": 5,
       "punto": {"mapa": 1418}, "bichos": ["Elemental de roca"],
       "notas": "Oro de vendedor con los grises que sueltan. El autor sacaba unos 10 o/h en el Classic original sin competencia. Estimado por hora: unos 110 elementales.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+    },
+    {
+      "id": "clarofluvial-patriarcas",
+      "nombre": "Patriarcas de las llanuras de Clarofluvial",
+      "tipo": "farmeo", "nivel": 37, "zona": "Clarofluvial",
+      "mejor_con": [393],
+      "objetos": ["Soft Bushy Tail", "Bristly Whisker", "Long Soft Tail", "Heavy Leather"],
+      "por_hora": [{"objeto": "Soft Bushy Tail", "cantidad": 30}, {"objeto": "Bristly Whisker", "cantidad": 30}, {"objeto": "Long Soft Tail", "cantidad": 30}, {"objeto": "Heavy Leather", "cantidad": 40}], "oro_hora": 2,
+      "punto": {"mapa": 2548},
+      "notas": "Zona nueva. Los «Wildplains Patriarch» reaparecen rápido, se desuellan y sueltan grises que paga muy bien el vendedor (7-8 platas cada uno). Están al sureste de Rog'mar, entre la posada y las rocas del sur. Estimado por hora: unos 150 bichos; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-11-09"
     },
     {
       "id": "cableado-fundido",
@@ -215,7 +226,7 @@
       "por_hora": [{"objeto": "Fused Wiring", "cantidad": 18}], "oro_hora": 5,
       "punto": {"mapa": 1434}, "bichos": ["Trituradora"],
       "notas": "Ve a por las trituradoras: el cableado fundido lo usan los ingenieros (robots de reparación, cables de arranque). Estimado por hora: unas 70 trituradoras y los goblins de al lado.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "inhospitas-vastagos",
@@ -225,7 +236,7 @@
       "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 14}], "oro_hora": 1.5,
       "punto": {"mapa": 1418}, "bichos": ["Vástago"],
       "notas": "La glándula de llamas pequeña se usa en la poción de protección contra el Fuego, el chili de aliento de dragón, el batido picante y el deflector de llamas. La guía decía que solo compensa cuando la gente empiece con el Núcleo de Magma, y según la hoja de ruta este no abre el 9 de diciembre (ver «Materiales de pociones de protección»). Estimado por hora: unos 110 vástagos con un 13 % (MetaBot, datos de Classic).",
-      "fuente": "Guía de Studen v1.0; MetaBot; Blizzard Watch (2026-09-13)", "fecha": "2026-11-04"
+      "fuente": "Guía de Studen v1.1; MetaBot; Blizzard Watch (2026-09-13)", "fecha": "2026-11-04"
     },
     {
       "id": "marjal-vastagos",
@@ -246,7 +257,7 @@
       "por_hora": [{"objeto": "Speckled Shell Fragment", "cantidad": 55}], "oro_hora": 1,
       "punto": {"mapa": 1446}, "bichos": ["Tortuga"],
       "notas": "Oro de vendedor; el autor lo combina con la pesca de cajas de la misma costa. Sueltan además almejas de boca grande, cuya carne piden los cocineros para pasar a artesano (ver «Huevos gigantes y carne de almeja»). Estimado por hora: unas 110 tortugas.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "tanaris-errantes",
@@ -256,7 +267,7 @@
       "por_hora": [{"objeto": "Mageweave Cloth", "cantidad": 30}, {"objeto": "Wastewander Water Pouch", "cantidad": 20}], "oro_hora": 9.5,
       "punto": {"mapa": 1446},
       "notas": "La bolsa de agua es para una misión repetible que usa mucha gente para subir alters. Estimado por hora: unos 110 bandidos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "tuercespina-sur",
@@ -266,7 +277,7 @@
       "por_hora": [{"objeto": "Golden Pearl", "cantidad": 0.2}, {"objeto": "Iridescent Pearl", "cantidad": 1.5}, {"objeto": "Mageweave Cloth", "cantidad": 25}], "oro_hora": 10,
       "punto": {"mapa": 1434},
       "notas": "Reaparecen muy rápido, buen oro suelto, perlas de las almejas y algún cofre. Estimado por hora: unas 110 nagas y algún cofre.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "feralas-ciervos",
@@ -276,7 +287,7 @@
       "oro_hora": 6,
       "punto": {"mapa": 1444}, "bichos": ["Ciervo alado"],
       "notas": "Fáciles de matar, reaparecen muy rápido y sueltan muchos grises para el vendedor. Estimado por hora: unos 150 ciervos; solo grises para el vendedor.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "tierras-devastadas",
@@ -287,7 +298,7 @@
       "por_hora": [{"objeto": "Blasted Boar Lung", "cantidad": 8}, {"objeto": "Vulture Gizzard", "cantidad": 8}, {"objeto": "Scorpok Pincer", "cantidad": 8}, {"objeto": "Snickerfang Jowl", "cantidad": 8}, {"objeto": "Basilisk Brain", "cantidad": 8}], "oro_hora": 3,
       "punto": {"mapa": 1419},
       "notas": "Se entregan en una misión repetible que da consumibles de +25 a una característica, así que los compra mucha gente. También oro de grises y pieles. Estimado por hora: unos 110 bichos de todas las clases.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "interior-trolls",
@@ -297,7 +308,7 @@
       "por_hora": [{"objeto": "Mageweave Cloth", "cantidad": 35}, {"objeto": "Wildvine", "cantidad": 3}, {"objeto": "Flask of Mojo", "cantidad": 12}], "oro_hora": 11,
       "punto": {"mapa": 1425},
       "notas": "Grises, verdes y vid salvaje (Tejesueños para sastres y Lente verde para ingenieros). A nivel 60 se hacen también los élites de Jintha'Alor. Estimado por hora: unos 110 trolls.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "silithus-escorpiones",
@@ -308,7 +319,7 @@
       "por_hora": [{"objeto": "Glowing Scorpid Blood", "cantidad": 35}, {"objeto": "Huge Venom Sac", "cantidad": 25}, {"objeto": "Rugged Leather", "cantidad": 20}], "oro_hora": 2,
       "punto": {"mapa": 1451}, "bichos": ["Escórpido"],
       "notas": "Sangre y bolsa de veneno se venden bien al vendedor; con Desollar, cuero basto. Estimado por hora: unos 110 escorpiones; el cuero, solo con Desollar.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "perla-iridiscente",
@@ -318,7 +329,7 @@
       "por_hora": [{"objeto": "Iridescent Pearl", "cantidad": 2.5}], "oro_hora": 2.5,
       "punto": {"mapa": 1437},
       "notas": "Ahora sirven: varias recetas nuevas de Peletería ligadas al recogerlas piden bastantes. Bajarán hacia el final, porque las piden sobre todo los que suben. Estimado por hora: unos 120 múrlocs.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "esencia-agua",
@@ -328,7 +339,7 @@
       "por_hora": [{"objeto": "Essence of Water", "cantidad": 6}], "oro_hora": 3,
       "punto": {"mapa": 1448},
       "notas": "Las esencias suelen dar muy buen oro por hora y en Forever tienen recetas nuevas. Estimado por hora: unas 6 esencias con competencia.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "esencia-fuego",
@@ -338,7 +349,7 @@
       "por_hora": [{"objeto": "Essence of Fire", "cantidad": 6}, {"objeto": "Elemental Fire", "cantidad": 8}], "oro_hora": 3,
       "punto": {"mapa": 1449},
       "notas": "En Frondavil cae menos que en Un'Goro. Los elementales de fuego de Un'Goro sueltan elemental de fuego en un 7-8 % (MetaBot, datos de Classic); CJ Mann propone farmearlos justo antes de llegar a 60 y avisa de que Un'Goro será zona de guerra. Antes de nivel 52, los elementales de 45-49 de La Garganta de Fuego dan un 8-9 %. Estimado por hora: unas 6 esencias y 8 elementales en Un'Goro.",
-      "fuente": "Guía de Studen v1.0; CJ Mann, YouTube (2026-11-03); MetaBot", "fecha": "2026-11-04",
+      "fuente": "Guía de Studen v1.1; CJ Mann, YouTube (2026-11-03); MetaBot", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
@@ -349,7 +360,7 @@
       "por_hora": [{"objeto": "Essence of Air", "cantidad": 4}, {"objeto": "Essence of Earth", "cantidad": 5}], "oro_hora": 3,
       "punto": {"mapa": 1451},
       "notas": "Caen a menudo y reaparecen bien. Estimado por hora: unos 100 elementales.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "esencia-vida",
@@ -359,7 +370,7 @@
       "por_hora": [{"objeto": "Living Essence", "cantidad": 8}], "oro_hora": 3,
       "punto": {"mapa": 1448},
       "notas": "La Masacre da muchas más, así que suele valer menos que las otras esencias. Estimado por hora: unos 100 bichos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "esencia-no-muerte",
@@ -369,7 +380,7 @@
       "por_hora": [{"objeto": "Essence of Undeath", "cantidad": 8}], "oro_hora": 5,
       "punto": {"mapa": 1452},
       "notas": "Buena al principio; baja cuando la gente empieza a repetir Stratholme. Estimado por hora: unos 100 no-muertos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "carne-gusano",
@@ -379,7 +390,7 @@
       "por_hora": [{"objeto": "Sandworm Meat", "cantidad": 40}], "oro_hora": 1,
       "punto": {"mapa": 1451}, "bichos": ["Gusano"],
       "notas": "Para las albóndigas del desierto ahumadas, que usan los que hacen bandas. Estimado por hora: unos 90 gusanos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "furbolgs-invierno",
@@ -389,7 +400,7 @@
       "por_hora": [{"objeto": "Runecloth", "cantidad": 35}, {"objeto": "Winterfall Firewater", "cantidad": 3}, {"objeto": "Winterfall E'ko", "cantidad": 12}], "oro_hora": 15,
       "punto": {"mapa": 1452, "x": 68, "y": 35},
       "notas": "Mucha tela y equipo ligado al equipar; el agua de fuego y el e'ko son para los poderes Juju. Estimado por hora: unos 110 furbolgs.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "seda-arana",
@@ -399,7 +410,7 @@
       "por_hora": [{"objeto": "Ironweb Spider Silk", "cantidad": 20}], "oro_hora": 3,
       "punto": {"mapa": 1422}, "bichos": ["Araña"],
       "notas": "Cae bastante y la piden muchas recetas de Costura y Peletería. Estimado por hora: unas 110 arañas.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "champinon-fantasma",
@@ -410,7 +421,7 @@
       "por_hora": [{"objeto": "Ghost Mushroom", "cantidad": 25}], "oro_hora": 2,
       "punto": {"mapa": 1425},
       "notas": "La cueva está llena de puntos de champiñón fantasma. Estimado por hora: unos 15 puntos de champiñón y los mocos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "perla-dorada",
@@ -420,7 +431,7 @@
       "por_hora": [{"objeto": "Golden Pearl", "cantidad": 0.4}, {"objeto": "Mageweave Cloth", "cantidad": 20}], "oro_hora": 10,
       "punto": {"mapa": 1444},
       "notas": "La perla dorada sale de almejas con muy poca probabilidad, pero siempre se vende. Las nagas son de nivel 44 y reaparecen rápido. Estimado por hora: unas 110 nagas; la perla, una cada dos o tres horas.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "tela-vil",
@@ -430,7 +441,7 @@
       "por_hora": [{"objeto": "Felcloth", "cantidad": 3}, {"objeto": "Runecloth", "cantidad": 30}, {"objeto": "Mageweave Cloth", "cantidad": 10}], "oro_hora": 13,
       "punto": {"mapa": 1447}, "bichos": ["Sátiro"],
       "notas": "En Frondavil la zona buena es la más disputada; algunos dan tejido mágico en vez de tela rúnica. Estimado por hora: unos 110 sátiros.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "formula-fuerza-superior",
@@ -440,7 +451,7 @@
       "por_hora": [{"objeto": "Formula: Enchant Bracer - Superior Strength", "cantidad": 0.15}, {"objeto": "Runecloth", "cantidad": 35}], "oro_hora": 16,
       "punto": {"mapa": 1430}, "bichos": ["Brujo"],
       "notas": "La fórmula solo cae de los brujos y se pide mucho. Mata a todos: tela rúnica y opción de azules y épicos. Estimado por hora: unos 110 bichos; la fórmula, una cada seis o siete horas.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "formula-escalofrio",
@@ -450,7 +461,7 @@
       "por_hora": [{"objeto": "Formula: Enchant Weapon - Icy Chill", "cantidad": 0.1}, {"objeto": "Essence of Undeath", "cantidad": 2}], "oro_hora": 10,
       "punto": {"mapa": 1452}, "bichos": ["Altonato"],
       "notas": "Además de la fórmula, esencias de no-muerte y tres cofres que reaparecen a menudo. Estimado por hora: unos 100 bichos y los cofres; la fórmula, una cada diez horas.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "formula-intelecto",
@@ -460,7 +471,7 @@
       "por_hora": [{"objeto": "Formula: Enchant Bracer - Greater Intellect", "cantidad": 0.15}, {"objeto": "Mageweave Cloth", "cantidad": 35}, {"objeto": "Wildvine", "cantidad": 4}], "oro_hora": 12,
       "punto": {"mapa": 1425, "x": 63, "y": 72}, "bichos": ["Chamán oscuro"],
       "notas": "Mucho tejido mágico, vid salvaje y cofres. Estimado por hora: unos 110 trolls y los cofres.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "formula-cruzado",
@@ -470,7 +481,7 @@
       "por_hora": [{"objeto": "Formula: Enchant Weapon - Crusader", "cantidad": 0.3}, {"objeto": "Runecloth", "cantidad": 12}], "oro_hora": 6,
       "punto": {"mapa": 1422}, "bichos": ["Vinculahechizos"],
       "notas": "Hay muy pocos. Cuanto antes, mejor: luego los acampa todo el mundo. Estimado por hora: unos 40 bichos, porque hay pocos; la fórmula, una cada tres horas.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "acido-larva",
@@ -480,7 +491,7 @@
       "por_hora": [{"objeto": "Larval Acid", "cantidad": 18}], "oro_hora": 2,
       "punto": {"mapa": 1423},
       "notas": "Se pide desde el principio (capa de sanador de La Masacre) y otra vez con Ahn'Qiraj (equipo de resistencia a la naturaleza). Estimado por hora: unas 110 larvas.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "ungoro-mocos",
@@ -490,7 +501,7 @@
       "por_hora": [{"objeto": "Pattern: Devilsaur Leggings", "cantidad": 0.3}, {"objeto": "Oozing Bag", "cantidad": 2}], "oro_hora": 3,
       "punto": {"mapa": 1449}, "bichos": ["Moco"],
       "notas": "El patrón se vende en la subasta y la bolsa puede traer una mascota. Estimado por hora: unos 110 mocos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "rutas-60",
@@ -499,8 +510,8 @@
       "profesiones_alguna": [182, 186],
       "objetos": ["Black Lotus", "Arcane Crystal", "Thorium Ore", "Dreamfoil", "Plaguebloom", "Mountain Silversage", "Icecap"],
       "por_hora": [{"objeto": "Black Lotus", "cantidad": 0.3}, {"objeto": "Arcane Crystal", "cantidad": 0.8}, {"objeto": "Thorium Ore", "cantidad": 30}, {"objeto": "Dreamfoil", "cantidad": 15}, {"objeto": "Plaguebloom", "cantidad": 10}, {"objeto": "Mountain Silversage", "cantidad": 10}, {"objeto": "Icecap", "cantidad": 8}],
-      "notas": "El oro lo hacen el loto y los cristales arcanos. Con GatherMate2 ves dónde salen. El talento de Legacy Bountiful Harvest es prioritario si vas a recolectar en serio. La guía habla de un «Fel Lotus» que no está en los datos del juego; los que sí están y son nuevos son Star Lotus, Death Lotus y Crimson Lotus (por ver dónde salen). Estimado por hora: unos 40 puntos con Botánica y Minería.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "notas": "El oro lo hacen el loto y los cristales arcanos. Con GatherMate2 ves dónde salen. El talento de Legacy Bountiful Harvest es prioritario si vas a recolectar en serio. La v1.0 decía «Fel Lotus» por error; la v1.1 lo corrige a Black Lotus. Otros lotos nuevos en los datos del juego: Star Lotus, Death Lotus y Crimson Lotus (por ver dónde salen). Estimado por hora: unos 40 puntos con Botánica y Minería.",
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "pesca-cajas",
@@ -511,7 +522,7 @@
       "por_hora": [{"objeto": "Bolt of Mageweave", "cantidad": 5}, {"objeto": "Iron Bar", "cantidad": 10}, {"objeto": "Mithril Bar", "cantidad": 8}, {"objeto": "Rugged Leather", "cantidad": 5}], "oro_hora": 10,
       "punto": {"mapa": 1446, "x": 67, "y": 23},
       "notas": "Pesca solo en restos flotantes, no en agua abierta. Hace falta 205 efectivo para lanzar y 300 para que no se escape nada: 225 de habilidad (libro de Pesca experta de Bahía del Botín), caña de +20/+25 y cebo de +75/+100. Los bichos de la costa son neutrales. CJ Mann lo da como el método seguro del primer día: la Pesca llega a 150 desde nivel 5 y a 225 desde nivel 20, así que se puede ir casi desde el principio, y va bien para sesiones cortas de unos 40 minutos. Lo mínimo para lanzar son 125 de habilidad con caña fuerte (+5) y adornos brillantes (+75), que piden Pesca 100, pero así se escapan más capturas y rinde menos. El atractor acuadinámico (+100) también pide Pesca 100, y los vendedores lo tienen con existencias limitadas. Además de lo que se cuenta aquí, cita cuero basto y verdes que el vendedor paga hasta a 3 oros, y habla de hasta 25 oros por hora: es su cifra, y avisa de que el primer día habrá mucha gente pescando. Mídelo con «Farmear este». Estimado por hora: unos 30 restos flotantes; 10 oros de monedas y verdes al vendedor.",
-      "fuente": "Guía de Studen v1.0; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
+      "fuente": "Guía de Studen v1.1; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
@@ -555,7 +566,7 @@
       "por_hora": [{"objeto": "Deviate Fish", "cantidad": 40}], "oro_hora": 0.3,
       "punto": {"mapa": 1413},
       "notas": "Con 150 de Pesca no se escapa ninguno. Con Cocina 85 y la receta (botín del mundo) lo conviertes en delicia desviada sabrosa, que te transforma en humano pirata o ninja y siempre se vende. Si está barata en la subasta, ver «Delicias desviadas baratas». Estimado por hora: unas 120 capturas, un tercio desviados; cocinado vale más.",
-      "fuente": "Guía de Studen v1.0; Method (2026-10-12)", "fecha": "2026-11-04"
+      "fuente": "Guía de Studen v1.1; Method (2026-10-12)", "fecha": "2026-11-04"
     },
     {
       "id": "pesca-whimsyfin",
@@ -566,7 +577,7 @@
       "por_hora": [{"objeto": "Savory Whimsyfin Delight", "cantidad": 25}], "oro_hora": 0.3,
       "punto": {"mapa": 1433},
       "notas": "La receta pide Cocina 85, cae con poca probabilidad de cualquier bicho de Crestagrana y no se liga, así que también se puede vender. El pez solo sale de bancos de la zona, sobre todo en el lago pequeño del este, junto a la aldea múrloc. Te convierte en orco pirata o ninja durante una hora; los múrlocs y ogros que salen en guías antiguas eran de la beta y se quitaron. CJ Mann cuenta que en la beta valía unas cuatro veces más que la delicia desviada por ser nueva. Estimado por hora: unas 25 delicias pescando y cocinando.",
-      "fuente": "Guía de Studen v1.0; Method (2026-10-12); CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
+      "fuente": "Guía de Studen v1.1; Method (2026-10-12); CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
@@ -577,7 +588,7 @@
       "por_hora": [{"objeto": "Necrology Robes", "cantidad": 0.5}, {"objeto": "Gloomshroud Armor", "cantidad": 0.6}, {"objeto": "Wool Cloth", "cantidad": 30}], "oro_hora": 8,
       "punto": {"mapa": 1421, "x": 45, "y": 68},
       "notas": "Para el rango de twinks de nivel 19: azules raros y algún verde con buenas características. Estimado por hora: unos 4 recorridos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "mazmorra-lamentos",
@@ -588,7 +599,7 @@
       "por_hora": [{"objeto": "Perfect Deviate Scale", "cantidad": 6}, {"objeto": "Gloves of the Fang", "cantidad": 0.4}], "oro_hora": 5,
       "punto": {"mapa": 1413, "x": 46, "y": 36},
       "notas": "Rápida y fácil. Mejor con Desollar (escamas desviadas perfectas), Peletería (cinturón de escamas desviadas) y Encantamiento para desencantar. Estimado por hora: unos 3 recorridos con Desollar.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "mazmorra-escarlata",
@@ -598,7 +609,7 @@
       "por_hora": [{"objeto": "Silk Cloth", "cantidad": 80}], "oro_hora": 18,
       "punto": {"mapa": 1420, "x": 83, "y": 33},
       "notas": "Seda, azules ligados al equipar para transfiguración y para subir, y objetos muy raros para coleccionistas. La Catedral es la mejor ala para juntar muchos. Estimado por hora: unos 4 recorridos de la Catedral.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "mazmorra-zulfarrak",
@@ -608,7 +619,7 @@
       "por_hora": [{"objeto": "Mageweave Cloth", "cantidad": 60}], "oro_hora": 18,
       "punto": {"mapa": 1446, "x": 39, "y": 20},
       "notas": "Mucho oro de vendedor. Si el tejido mágico baja, conviértelo en vendas gruesas y véndelas al vendedor (el motor ya calcula cuándo compensa). Estimado por hora: unos 2 recorridos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "mazmorra-maraudon",
@@ -619,7 +630,7 @@
       "por_hora": [{"objeto": "Ghost Mushroom", "cantidad": 10}, {"objeto": "Blindweed", "cantidad": 8}, {"objeto": "Mithril Ore", "cantidad": 10}], "oro_hora": 8,
       "punto": {"mapa": 1443, "x": 29, "y": 62},
       "notas": "Grupos de barrenadores y tortugas en el interior; desuella las tortugas y recoge hierbas y minerales por el camino. Estimado por hora: unos 2 recorridos; hierbas y mineral, solo con la profesión.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "mazmorra-stratholme",
@@ -629,7 +640,7 @@
       "por_hora": [{"objeto": "Runecloth", "cantidad": 50}, {"objeto": "Righteous Orb", "cantidad": 0.5}, {"objeto": "Essence of Undeath", "cantidad": 4}], "oro_hora": 18,
       "punto": {"mapa": 1423, "x": 31, "y": 15},
       "notas": "Tela rúnica en el lado vivo (y orbes justos), esencias de no-muerte en el lado muerto. Lo fácil es la entrada de cada lado. Estimado por hora: unos 2 recorridos de la entrada.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "mazmorra-masacre-este",
@@ -640,7 +651,7 @@
       "por_hora": [{"objeto": "Thorium Ore", "cantidad": 8}, {"objeto": "Arcane Crystal", "cantidad": 0.4}, {"objeto": "Dreamfoil", "cantidad": 15}, {"objeto": "Gromsblood", "cantidad": 15}, {"objeto": "Ghost Mushroom", "cantidad": 6}], "oro_hora": 15,
       "punto": {"mapa": 1444, "x": 59, "y": 44},
       "notas": "Dos o tres vetas de torio enriquecido pasado Alzzin y hierbas por toda la mazmorra. Mira antes los precios de cristal arcano y hierbas. Estimado por hora: unos 2 recorridos; hierbas y mineral, solo con la profesión.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "invernadero-semillas",
@@ -659,7 +670,7 @@
       "tipo": "crafteo",
       "objetos": ["Runecloth Bag", "Dreamweave Gloves", "Dreamweave Vest", "Dreamweave Circlet", "Felcloth Hood", "Felcloth Boots", "Mooncloth", "Mooncloth Reagent Bag", "Bottomless Reagent Bag"],
       "notas": "Bolsas de tela rúnica (comprando la tela y haciendo los rollos) y piezas de Tejesueños y tela vil. Tela lunar: 2 de tela de inferi dan 1, con Costura 230 (personaje de nivel 35 como mínimo) y una espera de 4 días por personaje (95 h en el cliente), así que cada sastre hace una. El patrón lo vende Qia en Cuna del Invierno y se liga al recogerlo: hay que ir con cada sastre. Vi'el, también en Cuna del Invierno, vende tela de inferi a 80 plata en existencias limitadas (2 según Wowhead, lo justo para una tela lunar): pásate antes de comprarla en la subasta. Kaychak espera que en Forever la pidan más que en Classic, por las épicas nuevas de Costura y las bolsas de componentes: la de tela lunar (18 casillas) lleva 1 y la sin fondo (20 casillas) lleva 12, que son 48 días de espera de un sastre, y además 5 de cuero, pellejo y escama prístinos. Según los datos del juego la piden 61 recetas, 10 de ellas épicos que se ligan al equipar. CJ Mann también la pone entre los ingresos pasivos que merece tener en cada alter.",
-      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
+      "fuente": "Guía de Studen v1.1; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
     },
     {
@@ -668,7 +679,7 @@
       "tipo": "crafteo",
       "objetos": ["Devilsaur Leggings", "Devilsaur Gauntlets", "Wolfshead Helm", "Deviate Scale Belt", "Cured Rugged Hide", "Blue Dragonscale Helm", "Black Dragonscale Helm", "Dawn Armor"],
       "notas": "En Forever hay kits de armadura nuevos (defensa, poder con hechizos y poder de ataque) y muchas recetas nuevas con buenas características, aún sin destripar del todo. Pellejo basto curado: 1 pellejo basto y 1 sal de roca refinada dan 2 (ver «Salero»). Kaychak espera más demanda que en Classic por piezas épicas nuevas ligadas al equipar que piden varios: 6 el Yelmo de escamas de dragón azul y 4 el negro y la Armadura del Alba. Según los datos del juego lo piden 144 recetas, 27 de ellas épicos que se ligan al equipar. CJ Mann cuenta además con que las piezas de demosaurio tendrán mucha demanda cuando la gente llegue a 60.",
-      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
+      "fuente": "Guía de Studen v1.1; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
     },
     {
@@ -677,7 +688,7 @@
       "tipo": "crafteo",
       "objetos": ["Mithril Spurs", "Green Iron Hauberk", "Lionheart Helm"],
       "notas": "",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "crafteos-alquimia",
@@ -685,7 +696,7 @@
       "tipo": "crafteo",
       "objetos": ["Arcanite Bar", "Legionite Bar", "Essence of Fire", "Essence of Earth", "Essence of Water", "Essence of Air", "Living Essence", "Essence of Undeath"],
       "notas": "Tienen espera y comparten la misma: una transmutación por personaje cada vez. Por eso compensa tener varios personajes con Alquimia. Forever añade Transmutar: legionita (1 barra de torio pesado y 1 cristal vil, Alquimia 275, nivel 35), con 2 días de espera como la arcanita (47 h en el cliente). Kaychak lo deja como duda, pero las tablas del cliente les dan la misma categoría de espera: cada 2 días eliges una de las dos. A Kaychak no le preocupa, porque así llegan menos barras de cada una a la subasta y aguanta el precio. La legionita la piden sobre todo piezas de nivel 60 ligadas al equipar de Herrería e Ingeniería (12 los Quijotes de campeón y el Yelmo incondicional). Sin resolver: ni Merchant Map ni Wowhead dicen aún dónde se consigue la receta ni de dónde sale el cristal vil (cabe en bolsa de minería, así que seguramente se mine). La barra de torio pesado se funde con Minería 300 y, según guías de la beta, su mineral sale en Monte Hyjal: no cuentes con la legionita al principio. La arcanita (lingote de torio y cristal arcano, con la receta de Alchemist Pestlezugg) la piden 88 recetas, 16 de ellas épicos que se ligan al equipar; la legionita, 22 recetas y 12 épicos. CJ Mann pone las dos entre los mejores ingresos pasivos.",
-      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
+      "fuente": "Guía de Studen v1.1; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
     },
     {
@@ -695,7 +706,7 @@
       "profesiones": [{"id": 197, "nivel": 215}],
       "objetos": ["White Bandit Mask"],
       "notas": "Se fabrica con tejido mágico y se vende al vendedor: oro seguro sin comisión ni esperas cuando el tejido mágico está barato. El patrón es botín del mundo.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "varitas-encantamiento",
@@ -704,7 +715,7 @@
       "profesiones": [{"id": 333, "nivel": 10}],
       "objetos": ["Lesser Magic Wand", "Greater Magic Wand"],
       "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas. Aviso de Kaychak (31-10-2026, https://www.youtube.com/watch?v=ryub9vdTKq0): lo recomiendan muchos vídeos y en los megaservidores lo hará muchísima gente, así que te quitarán las ventas al momento y el margen será mínimo. Además, al final de la beta la subasta empezó a cobrar 1 plata de depósito por cada puesta, que pierdes si no se vende. Antes de fabricar, mira en la subasta cuántos venden y a cuánto. NERF: desde el 1 de octubre de 2026 las varitas se venden al vendedor por 1 cobre (lo avisa Ceedsy en su vídeo de cómo sacar 10 oros el primer día, que se basaba en eso: https://www.youtube.com/watch?v=NDdiw-q_-qw). Los datos del juego aún dicen 1 plata 10 la menor y 2 plata la mayor porque el cambio es del servidor: el addon apunta el precio real en cuanto ve una varita. Solo queda venderlas en la subasta. Desde el nerf, el polvo extraño y las esencias mágicas tienen otra salida: con ellos se llenan los cajones saqueados de curiosidades (ver «Cajones saqueados»), así que se venden en la subasta. CJ Mann (03-11-2026, https://www.youtube.com/watch?v=gzfLo4vBsGo) lo vuelve a proponer para el primer día: comprar lino a poco más de lo que paga el vendedor, hacer verdes, desencantarlos y fabricar varitas con madera simple de vendedor. Los 50 oros que cita son de un amigo suyo en el primer día de Classic, anunciándolas a otros jugadores: aquí solo cuenta la subasta, y él mismo avisa de que a partir del segundo día el precio cae mucho. Él habla de togas y jubones de lino marrón, pero según los datos del juego el jubón es blanco y no se puede desencantar, y la toga gasta 3 madejas donde los pantalones gastan 2: mejor pantalones.",
-      "fuente": "Guía de Studen v1.0; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04"
+      "fuente": "Guía de Studen v1.1; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04"
     },
     {
       "id": "aceite-zahori-menor",
@@ -824,7 +835,7 @@
       "tipo": "inversion",
       "objetos": ["Tough Condor Meat", "Swiftthistle", "Elemental Earth", "Elemental Fire", "Elemental Water", "Elemental Air", "Larval Acid", "Golden Pearl", "Ironweb Spider Silk", "Staff of Jordan"],
       "notas": "Con el tiempo entra más oro en la economía y los materiales suben. También los épicos ligados al equipar.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "invertir-protecciones",
@@ -852,7 +863,7 @@
                   "Tigerstrike Mantle", "Cobalt Crusher", "Zealot Blade", "Staff of the Blessed Seer", "Mantle of Thieves", "Gloomshroud Armor", "Forest Tracker Epaulets", "Hotshot Pilot's Gloves",
                   "Pendulum of Doom", "Staff of Jordan", "Krol Blade", "Bow of Searing Arrows", "Underworld Band"],
       "notas": "Al principio están baratos porque hay poco oro. Ojo: con los cambios de equipo de Forever puede que no sean los mejores esta vez.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "patron-guanteletes-demosaurio",
@@ -861,7 +872,7 @@
       "vendedor": "Nergal",
       "objetos": ["Pattern: Devilsaur Gauntlets"],
       "notas": "Existencias limitadas que se reponen con el tiempo: cómpralos y revéndelos.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "patron-bolsa-runica",
@@ -870,7 +881,7 @@
       "vendedor": "Qia",
       "objetos": ["Pattern: Runecloth Bag"],
       "notas": "Existencias limitadas. Si lo compras siempre tú al principio, se gana muchísimo.",
-      "fuente": "Guía de Studen v1.0", "fecha": "2026-10-30"
+      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
       "id": "estudio-dedicado",
@@ -880,7 +891,7 @@
       "requisito": "todas las profesiones del personaje (las dos principales y las tres secundarias) a 300",
       "objetos": ["Essence of Fire", "Essence of Water", "Essence of Earth", "Essence of Air"],
       "notas": "Una vez al día (23 h, 25 s de lanzamiento): sube un punto tu profesión más baja; con todo a 300 da 2-4 esencias elementales al azar. Cada alter con todo a 300 es otra tirada diaria. Antes de gastar Legacy en esto, la guía aconseja los talentos que aceleran subir de nivel. Kaychak lo ve como un extra para personajes cuyas profesiones ya ibas a subir: Cocina y Primeros auxilios suben pronto y lo lento es Pesca.",
-      "fuente": "Guía de Studen v1.0; Kaychak, YouTube (2026-11-02)", "fecha": "2026-11-04",
+      "fuente": "Guía de Studen v1.1; Kaychak, YouTube (2026-11-02)", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
     },
     {
