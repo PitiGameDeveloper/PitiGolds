@@ -383,9 +383,13 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
                    "entre la primera y la última ganancia de cada sesión, valorado con los precios de hoy "
                    "y con los previstos dentro de 7 días.")
         out.append("")
-        out += _table(["Actividad", "Zona", "Sesiones", "Tiempo", "Oro/h hoy", "Oro/h en 7 días"],
-                      [[g.activity, g.zone, g.sessions, _duration(g.hours), format_money(g.per_hour),
-                        format_money(g.per_hour_week)] for g in a.farm_summary[:limit]])
+        if a.farm_summary:
+            out += _table(["Actividad", "Zona", "Sesiones", "Tiempo", "Oro/h hoy", "Oro/h en 7 días"],
+                          [[g.activity, g.zone, g.sessions, _duration(g.hours), format_money(g.per_hour),
+                            format_money(g.per_hour_week)] for g in a.farm_summary[:limit]])
+        else:
+            out.append("Ningún farmeo medido: solo cuentan las sesiones con nombre (pulsa «Farmear este» "
+                       "o usa /pg farmeo <nombre>). Lo demás es jugar sin más y no se toma como farmeo.")
         recent = sorted(a.farms, key=lambda s: s.start, reverse=True)[:10]
         out += ["", "Últimas sesiones:", ""]
         out += _table(["Cuándo", "Quién", "Zona", "Actividad", "Duración", "Oro/h", "Lo principal"],

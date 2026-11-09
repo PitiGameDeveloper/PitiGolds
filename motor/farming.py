@@ -133,8 +133,15 @@ def value_sessions(conn: sqlite3.Connection, sessions: list[FarmSession], prices
 
 
 def summarize(sessions: list[FarmSession]) -> list[FarmSummary]:
+    """Los farmeos medidos: solo las sesiones con nombre (Farmear este o /pg farmeo <nombre>).
+
+    Lo que se gana jugando sin más (misiones, dar vueltas por la ciudad) también se apunta, pero
+    no es un método de hacer oro: no sale como farmeo ni sirve de referencia.
+    """
     groups: dict[tuple[str, str], FarmSummary] = {}
     for s in sessions:
+        if not s.label:
+            continue
         key = (s.activity, s.zone)
         g = groups.get(key)
         if g is None:

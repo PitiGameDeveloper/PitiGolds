@@ -73,9 +73,17 @@ class Sesiones(unittest.TestCase):
         self.assertLess(mining.per_hour_week, mining.per_hour)
 
     def test_resumen_por_actividad_y_zona(self):
-        summary = summarize(self.sessions())
+        sessions = self.sessions()
+        for s in sessions[:2]:
+            s.label = "Minería"
+        summary = summarize(sessions)
         self.assertEqual(summary[0].activity, "Minería")
         self.assertEqual(sum(g.sessions for g in summary), 3)
+
+    def test_sin_nombre_no_es_un_farmeo(self):
+        # Lo ganado jugando sin más (sin Farmear este ni /pg farmeo) no sale como farmeo medido.
+        summary = summarize(self.sessions())
+        self.assertEqual([(g.activity, g.zone) for g in summary], [("Hierbas", "Los Baldíos")])
 
 
 if __name__ == "__main__":
