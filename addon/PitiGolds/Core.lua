@@ -1,7 +1,7 @@
 -- Núcleo de PitiGolds: base de datos, eventos, utilidades y comandos /pg.
 local ADDON, ns = ...
 
-ns.VERSION = "0.4.7"
+ns.VERSION = "0.4.8"
 ns.SCHEMA = 1
 -- Escaneos que se guardan como máximo mientras el motor no los haya leído.
 -- Un escaneo completo de un mega-reino puede ocupar varios MB y WoW carga todo
