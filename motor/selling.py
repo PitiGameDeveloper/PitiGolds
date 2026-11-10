@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 
 from .business import MARKET_SHARE
 from .crafting import CraftResult
-from .market import forecast_price
+from .market import forecast_price, plazo_previsto
 from .money import format_money, format_pct
 from .pricing import ItemPrice
 
@@ -102,7 +102,7 @@ def sellable_inventory(conn: sqlite3.Connection) -> dict[int, list[tuple[str, st
 
 
 def _why(sig) -> str:
-    return "; ".join(sig.reasons[:2]) or f"previsión a 7 días: {format_money(sig.forecast_7d)}"
+    return "; ".join(sig.reasons[:2]) or f"previsión a {plazo_previsto()}: {format_money(sig.forecast)}"
 
 
 def _places(entries: list[tuple[str, str, int]]) -> str:
@@ -159,11 +159,11 @@ def advise(conn: sqlite3.Connection, prices: dict[int, ItemPrice],
             a.action = "esperar"
             a.unit_price = p.median
             a.total = p.net_of(p.median) * count
-            a.reason = f"está un {format_pct(abs(p.deviation))} por debajo de su mediana de 7 días"
-        elif rising and sig.forecast_7d and sig.forecast_7d > p.market:
+            a.reason = f"está un {format_pct(abs(p.deviation))} por debajo de su mediana de 36 horas"
+        elif rising and sig.forecast and sig.forecast > p.market:
             a.action = "esperar"
-            a.unit_price = sig.forecast_7d
-            a.total = p.net_of(sig.forecast_7d) * count
+            a.unit_price = sig.forecast
+            a.total = p.net_of(sig.forecast) * count
             a.reason = "está subiendo: " + _why(sig)
         else:
             a.action = "subastar"

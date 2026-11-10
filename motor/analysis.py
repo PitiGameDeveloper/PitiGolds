@@ -98,8 +98,8 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
         s = c.output_signals = signals.get(c.output_item_id)
         c.capacity = craft_capacity(c, business.seconds_per_unit)
         out = prices.get(c.output_item_id)
-        if c.complete and s is not None and s.forecast_7d and out is not None:
-            c.profit_week = out.net_of(s.forecast_7d) * c.output_qty - c.cost
+        if c.complete and s is not None and s.forecast and out is not None:
+            c.profit_later = out.net_of(s.forecast) * c.output_qty - c.cost
     sales = advise(conn, prices, crafts, signals)
     last_scan = conn.execute("SELECT MAX(time) FROM scans").fetchone()[0]
     result = Analysis(prices=prices, crafts=crafts, sales=sales, owned=owned, signals=signals,

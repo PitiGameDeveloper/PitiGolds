@@ -1,5 +1,5 @@
 -- Añade al tooltip de cada objeto lo que ha calculado el motor: precio de mercado
--- en la subasta, mediana de los últimos 7 días y cuánto cuesta fabricarlo.
+-- en la subasta, mediana de las últimas 36 horas y cuánto cuesta fabricarlo.
 local ADDON, ns = ...
 
 function ns.Money(copper)
@@ -74,9 +74,10 @@ local function AddLines(tooltip, itemID, sellTotal)
   local craft = type(gen) == "table" and gen.craft and gen.craft[itemID]
   local count = StackCount(tooltip, itemID, sellTotal)
 
-  -- "mercado,mediana7d,tendencia" (tendencia: b = baja, s = sube)
-  local market, median, trend
-  if price then market, median, trend = price:match("^(%d*),(%d*),?(%a*)$") end
+  -- "mercado,mediana,tendencia,ventas" (mediana de 36 horas; tendencia: b = baja, s = sube;
+  -- ventas: unidades vendidas al día, estimadas)
+  local market, median, trend, sales
+  if price then market, median, trend, sales = price:match("^(%d*),(%d*),?(%a*),?([%d%.]*)$") end
   market = tonumber(market)
 
   local sellUnit = sellTotal and (ItemSellPrice(itemID) or math.floor(sellTotal / count))
@@ -97,7 +98,10 @@ local function AddLines(tooltip, itemID, sellTotal)
   if market then
     local right = PriceText(market, count)
     if median ~= "" and tonumber(median) ~= market then
-      right = right .. "  |cff999999(7 días: " .. ns.Money(median) .. ")|r"
+      right = right .. "  |cff999999(36 horas: " .. ns.Money(median) .. ")|r"
+    end
+    if sales and sales ~= "" then
+      right = right .. "  |cffccccccventas/día: " .. sales .. "|r"
     end
     if trend == "b" then
       right = right .. "  |cffff4040baja|r"

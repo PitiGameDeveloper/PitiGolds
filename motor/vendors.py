@@ -44,15 +44,15 @@ class VendorFlip:
     limited: bool
     source: str = "visto"          # visto, Merchant Map o Merchant Map, sin comprobar
     sales_per_day: float | None = None
-    sell_week: int | None = None   # lo que cobrarías con el precio previsto a 7 días
+    sell_later: int | None = None   # lo que cobrarías con el precio previsto a 36 horas
 
     @property
     def profit(self) -> int:
         return self.sell - self.buy
 
     @property
-    def profit_week(self) -> int | None:
-        return None if self.sell_week is None else self.sell_week - self.buy
+    def profit_later(self) -> int | None:
+        return None if self.sell_later is None else self.sell_later - self.buy
 
     @property
     def gold_per_day(self) -> int | None:
@@ -80,7 +80,7 @@ def vendor_flips(conn: sqlite3.Connection, prices: dict[int, ItemPrice], signals
         flips.append(VendorFlip(item_id=item_id, name=p.name, vendor=vendor, buy=buy,
                                 sell=p.net_sale, limited=limited, source=source,
                                 sales_per_day=s.sales_per_day if s is not None else None,
-                                sell_week=p.net_of(s.forecast_7d) if s is not None and s.forecast_7d
+                                sell_later=p.net_of(s.forecast) if s is not None and s.forecast
                                 else None))
     return sorted(flips, key=lambda f: f.gold_per_day or f.profit, reverse=True)
 

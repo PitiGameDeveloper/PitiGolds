@@ -62,7 +62,7 @@ class CraftResult:
     learn_price: int | None = None  # lo que cuesta el objeto de aprendizaje (subasta o vendedor)
     output_signals: object | None = None  # MarketSignals de lo fabricado (lo rellena analysis)
     capacity: object | None = None        # business.Capacity: cuánto da al día como máximo
-    profit_week: int | None = None        # beneficio con el precio previsto a 7 días
+    profit_later: int | None = None        # beneficio con el precio previsto a 36 horas
     cooldown_hours: float | None = None   # espera entre fabricaciones (tela lunar, transmutaciones...)
     cooldown_category: int | None = None  # las recetas de la misma categoría comparten la espera
 

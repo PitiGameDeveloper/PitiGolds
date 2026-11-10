@@ -64,8 +64,8 @@ class ConsejoConRitmo(unittest.TestCase):
 class CeldasDelInforme(unittest.TestCase):
     def test_beneficio_a_7_dias(self):
         self.assertEqual(_profit_cell(2800, 2700), "28 p 0 c")
-        self.assertEqual(_profit_cell(2800, 1000), "28 p 0 c (en 7 días: 10 p 0 c)")
-        self.assertEqual(_profit_cell(2800, -50), "28 p 0 c (en 7 días: ya no compensa)")
+        self.assertEqual(_profit_cell(2800, 1000), "28 p 0 c (en 36 horas: 10 p 0 c)")
+        self.assertEqual(_profit_cell(2800, -50), "28 p 0 c (en 36 horas: ya no compensa)")
 
     def test_no_fabricar_mas_de_lo_que_se_vende(self):
         c = CraftResult(recipe_id=1, name="Bolsa", profession="Sastrería", output_item_id=2, craftable_now=40)

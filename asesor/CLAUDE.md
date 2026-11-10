@@ -5,7 +5,7 @@ y corto. Piti juega; no le hables de código.
 
 ## Qué hay y dónde
 
-El **motor** (Python, sin IA) ya hace todas las cuentas: precios de mercado, previsión a 7 días,
+El **motor** (Python, sin IA) ya hace todas las cuentas: precios de mercado, previsión a 36 horas,
 crafteos rentables, ritmo de venta, farmeos medidos, comparador de métodos y guías de subida. Tú no
 recalculas: lees lo que dice, decides y lo explicas.
 

@@ -2,7 +2,7 @@
 
 El precio mínimo engaña: basta una sola unidad barata para hundirlo. Por eso se usa
 el «precio de mercado»: lo que costaría de media comprar el 15 % más barato de las
-unidades a la venta. Con varios escaneos se calcula además la mediana de 7 días, que
+unidades a la venta. Con varios escaneos se calcula además la mediana de las últimas 36 horas, que
 sirve para no valorar las cosas por un pico puntual y para saber si ahora está barato.
 
 Lo que te queda de una venta descuenta la comisión y el depósito: en Forever cada puesta (una
@@ -23,7 +23,7 @@ from typing import Iterable
 from .merchantmap import KnownVendor, has_data, known_vendors
 
 MARKET_SHARE = 0.15      # parte más barata de las unidades que forma el precio de mercado
-HISTORY_DAYS = 7
+HISTORY_DAYS = 1.5       # ventana de la mediana y de las señales (36 h): el server aún fluctúa mucho
 MIN_HISTORY_SCANS = 3    # escaneos necesarios para fiarse de la mediana
 SPIKE_CAP = 1.25         # nunca se valora por encima de la mediana + 25 %
 AH_CUT = 0.05            # comisión de la casa de subastas
@@ -67,7 +67,7 @@ class ItemPrice:
     auctions: int | None = None
     owners: int | None = None
     seen: int | None = None          # hora del último escaneo en el que apareció
-    median: int | None = None        # mediana del precio de mercado en 7 días
+    median: int | None = None        # mediana del precio de mercado en las últimas 36 horas
     history_scans: int = 0
     vendor_buy: int | None = None    # lo que cuesta comprárselo a un vendedor (visto en el juego)
     vendor_limited: bool = False
@@ -194,8 +194,8 @@ def load_prices(conn: sqlite3.Connection, item_ids: Iterable[int] | None = None)
             p.owners = row["num_owners"]
             p.seen = row["time"]
 
-    # La ventana de 7 días cuenta desde el último escaneo, no desde hoy: si dejas de
-    # escanear una semana, la mediana sigue teniendo datos.
+    # La ventana cuenta desde el último escaneo, no desde hoy: si dejas de
+    # escanear un día y medio, la mediana sigue teniendo datos.
     reference = conn.execute("SELECT MAX(time) FROM scans").fetchone()[0]
     if reference:
         history: dict[int, list[int]] = defaultdict(list)

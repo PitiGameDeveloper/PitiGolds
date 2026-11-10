@@ -12,7 +12,8 @@ T0 = 1_762_000_000
 H = 3600
 
 
-def series(prices, quantities=None, owners=None, step=DAY, kind="browse"):
+def series(prices, quantities=None, owners=None, step=6 * H, kind="browse"):
+    # Por defecto un escaneo cada 6 h: la ventana de la previsión es de 36 h.
     n = len(prices)
     quantities = quantities or [100] * n
     owners = owners or [None] * n
@@ -66,7 +67,7 @@ class Prevision(unittest.TestCase):
                      owners=[5, 5, 6, 7, 7, 8, 9, 10])
         s = compute_signals(pts, [])
         self.assertEqual(s.outlook, "baja")
-        self.assertLess(s.forecast_7d, s.current)
+        self.assertLess(s.forecast, s.current)
         self.assertGreater(s.drop_risk, 50)
         self.assertEqual(s.confidence, "media")
         text = " ".join(s.reasons)
@@ -78,7 +79,7 @@ class Prevision(unittest.TestCase):
         pts = series([50, 53, 57, 61, 66, 70, 75], quantities=[200, 180, 160, 140, 120, 100, 80])
         s = compute_signals(pts, [])
         self.assertEqual(s.outlook, "sube")
-        self.assertGreater(s.forecast_7d, s.current)
+        self.assertGreater(s.forecast, s.current)
 
     def test_mercado_estable(self):
         s = compute_signals(series([100, 102, 99, 101, 100, 98, 101]), [])
@@ -88,12 +89,12 @@ class Prevision(unittest.TestCase):
     def test_sin_historial_no_hay_prevision(self):
         s = compute_signals(series([100, 90]), [])
         self.assertEqual(s.outlook, "sin datos")
-        self.assertIsNone(s.forecast_7d)
+        self.assertIsNone(s.forecast)
 
     def test_backtest(self):
-        falling = series([round(200 * 0.97 ** i) for i in range(25)])
+        falling = series([round(200 * 0.97 ** i) for i in range(40)], step=DAY // 4)
         result = backtest({1: falling}, [])
-        self.assertGreater(result.cases, 10)
+        self.assertGreater(result.cases, 5)
         self.assertGreater(result.accuracy, 0.8)      # bajaba y dijo que bajaba
         self.assertLess(result.baseline, result.accuracy)
 
@@ -110,7 +111,7 @@ class ConsejoConTendencia(unittest.TestCase):
             for day, price in enumerate([100, 100, 100, 100, 95, 85, 75, 65]):
                 scan = f"s{day}"
                 conn.execute("INSERT INTO scans VALUES (?, 'browse', ?, 0, 0, 'R', 'Horde', 'A-R', 1, 'X')",
-                             (scan, T0 + day * DAY))
+                             (scan, T0 + day * 6 * H))
                 conn.execute("INSERT INTO prices VALUES (?, 1, ?, ?, NULL, NULL, NULL, ?)",
                              (scan, price, 100 + day * 20, price))
             conn.commit()

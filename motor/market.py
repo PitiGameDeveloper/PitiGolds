@@ -1,14 +1,15 @@
 """Señales de mercado y previsión de precios a partir del historial de escaneos.
 
-Todo es cálculo, sin IA. Para cada objeto se mira la última semana:
+Todo es cálculo, sin IA. Para cada objeto se miran las últimas 36 horas (al empezar el server los
+precios fluctúan mucho, así que una semana entera daría señales viejas):
   - tendencia del precio (regresión sobre el logaritmo del precio de mercado),
   - si hay cada vez más o menos unidades a la venta, y más o menos vendedores,
   - cuántas unidades se venden al día (comparando escaneos completos seguidos),
   - para cuántos días de ventas hay género («días de oferta»),
   - si el precio está por encima o por debajo de su mediana.
-Con eso se calcula un riesgo de bajada (0-100) y una previsión a 3 y 7 días que mezcla la
-tendencia (amortiguada) con la vuelta a la mediana. Son reglas fijas y explicables; el
-acierto se mide con el propio historial (backtest) para saber cuánto fiarse.
+Con eso se calcula un riesgo de bajada (0-100) y una previsión a 36 horas que mezcla la tendencia
+(amortiguada) con la vuelta a la mediana. «Sube» o «baja» sale de esa misma previsión. Son reglas
+fijas y explicables; el acierto se mide con el propio historial (backtest) para saber cuánto fiarse.
 """
 
 from __future__ import annotations
@@ -21,10 +22,11 @@ from dataclasses import dataclass, field
 from typing import Iterable
 
 from .money import format_pct
-from .pricing import parse_book
+from .pricing import HISTORY_DAYS, parse_book
 
 DAY = 86400
-WINDOW_DAYS = 7
+WINDOW_DAYS = HISTORY_DAYS  # ventana de datos (36 h), la misma que la mediana de pricing.py
+OUTLOOK_DAYS = WINDOW_DAYS  # plazo de la previsión: «sube», «baja» y el precio esperado
 MIN_POINTS = 3            # escaneos mínimos para hablar de tendencia
 MIN_SPAN_DAYS = 1.0       # y que cubran al menos un día
 MAX_PAIR_GAP_HOURS = 12   # escaneos más separados no sirven para contar ventas (las subastas caducan)
@@ -63,17 +65,16 @@ class MarketSignals:
     days_of_supply: float | None = None
     drop_risk: int = 0
     rise_score: int = 0
-    forecast_3d: int | None = None
-    forecast_7d: int | None = None
+    forecast: int | None = None            # precio de mercado previsto a OUTLOOK_DAYS (36 horas)
     outlook: str = "sin datos"             # baja, estable, sube o sin datos
     confidence: str = "baja"
     reasons: list[str] = field(default_factory=list)
 
     @property
-    def week_change(self) -> float | None:
-        if self.forecast_7d is None or not self.current:
+    def outlook_change(self) -> float | None:
+        if self.forecast is None or not self.current:
             return None
-        return self.forecast_7d / self.current - 1
+        return self.forecast / self.current - 1
 
 
 def _fit(xs: list[float], ys: list[float]) -> tuple[float, float] | None:
@@ -137,22 +138,27 @@ def _signed(fraction: float) -> str:
     return ("+" if fraction > 0 else "-") + format_pct(abs(fraction))
 
 
+def plazo_previsto() -> str:
+    """El plazo de la decisión en palabras: «36 horas»."""
+    return f"{round(OUTLOOK_DAYS * 24)} horas"
+
+
 def _score(s: MarketSignals) -> None:
     risk = rise = 0.0
     reasons = []
     days = f"{max(1, round(s.span_days))} días"
     if s.trend_per_day is not None:
         # Una tendencia ruidosa (R² bajo) apenas cuenta.
-        week = (1 + s.trend_per_day) ** 7 - 1
+        week = (1 + s.trend_per_day) ** OUTLOOK_DAYS - 1
         weight = 35 * s.trend_strength
         if week < 0:
             risk += weight * min(1, -week / 0.3)
         else:
             rise += weight * min(1, week / 0.3)
         if abs(week) >= 0.05 and s.trend_strength >= 0.5:
-            reasons.append(f"precio {_signed(week)} a 7 días al ritmo actual")
+            reasons.append(f"precio {_signed(week)} en {plazo_previsto()} al ritmo actual")
     if s.supply_per_day is not None:
-        week = s.supply_per_day * 7
+        week = s.supply_per_day * OUTLOOK_DAYS
         if week > 0:
             risk += 25 * min(1, week / 0.5)
         else:
@@ -160,7 +166,7 @@ def _score(s: MarketSignals) -> None:
         if s.supply_change is not None and abs(s.supply_change) >= 0.15:
             reasons.append(f"{_signed(s.supply_change)} de unidades a la venta en {days}")
     if s.sellers_per_day is not None:
-        week = s.sellers_per_day * 7
+        week = s.sellers_per_day * OUTLOOK_DAYS
         if week > 0:
             risk += 15 * min(1, week / 0.5)
         else:
@@ -241,9 +247,8 @@ def compute_signals(points: list[Point], full_scan_times: list[int], now: int | 
         s.days_of_supply = s.quantity / s.sales_per_day
     _score(s)
     if s.trend_per_day is not None:
-        s.forecast_3d = _forecast(s, 3)
-        s.forecast_7d = _forecast(s, 7)
-        change = s.week_change
+        s.forecast = _forecast(s, OUTLOOK_DAYS)
+        change = s.forecast / s.current - 1 if s.current else 0.0
         net = s.drop_risk - s.rise_score
         if change <= -0.08 or net >= 35:
             s.outlook = "baja"
@@ -251,9 +256,9 @@ def compute_signals(points: list[Point], full_scan_times: list[int], now: int | 
             s.outlook = "sube"
         else:
             s.outlook = "estable"
-        if s.points >= 20 and s.span_days >= 5:
+        if s.points >= 20 and s.span_days >= 1.2:
             s.confidence = "alta"
-        elif s.points >= 6 and s.span_days >= 2:
+        elif s.points >= 6 and s.span_days >= 1:
             s.confidence = "media"
     return s
 
@@ -308,7 +313,7 @@ class Backtest:
         return self.baseline_hits / self.cases if self.cases else None
 
 
-def backtest(series: dict[int, list[Point]], full_scan_times: list[int], horizon_days: float = 3,
+def backtest(series: dict[int, list[Point]], full_scan_times: list[int], horizon_days: float = OUTLOOK_DAYS,
              tolerance: float = 0.05) -> Backtest:
     """Repite la previsión en momentos pasados (una vez al día por objeto) y la compara con lo
     que pasó `horizon_days` después. Acierto: dijo baja y bajó más del 5 %, dijo sube y subió

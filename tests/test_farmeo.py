@@ -67,10 +67,10 @@ class Sesiones(unittest.TestCase):
         self.assertEqual(s[-1].activity, "Hierbas")  # la etiqueta manda
 
     def test_prevision_a_7_dias(self):
-        falling = MarketSignals(current=100, median=100, quantity=10, points=8, span_days=7, forecast_7d=60)
+        falling = MarketSignals(current=100, median=100, quantity=10, points=8, span_days=7, forecast=60)
         mining = self.sessions({1: falling})[0]
-        self.assertEqual(mining.value_week, 60 * 52 + 500)
-        self.assertLess(mining.per_hour_week, mining.per_hour)
+        self.assertEqual(mining.value_later, 60 * 52 + 500)
+        self.assertLess(mining.per_hour_later, mining.per_hour)
 
     def test_resumen_por_actividad_y_zona(self):
         sessions = self.sessions()

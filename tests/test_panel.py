@@ -87,7 +87,7 @@ class Panel(unittest.TestCase):
 
     def test_lo_medido_manda_y_el_que_falta_algo_dice_que_y_cuanto(self):
         measured = FarmSummary(activity="pieles", zone="Feralas", sessions=2, hours=1.5, value_now=45 * G,
-                               value_week=45 * G)
+                               value_later=45 * G)
         row = self.build([self.pieles()], farm_summary=[measured]).farms[0]
         self.assertEqual((row.per_hour, row.measured), (30 * G, True))
         self.assertIsNone(row.who)

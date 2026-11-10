@@ -150,7 +150,7 @@ def _missing_hint(p) -> str:
     return p.name
 
 
-def _week_cell(profit: int, week: int | None) -> str:
+def _later_cell(profit: int, week: int | None) -> str:
     if week is None:
         return ""
     if week <= 0:
@@ -159,10 +159,10 @@ def _week_cell(profit: int, week: int | None) -> str:
 
 
 def _profit_cell(profit: int, week: int | None) -> str:
-    """Beneficio de hoy y, si va a cambiar mucho, el previsto a 7 días."""
+    """Beneficio de hoy y, si va a cambiar mucho, el previsto a 36 horas."""
     text = format_money(profit)
     if week is not None and abs(week - profit) > abs(profit) * 0.1:
-        text += " (en 7 días: " + ("ya no compensa" if week <= 0 else format_money(week)) + ")"
+        text += " (en 36 horas: " + ("ya no compensa" if week <= 0 else format_money(week)) + ")"
     return text
 
 
@@ -226,11 +226,11 @@ def _vendor_sections(a: Analysis, limit: int) -> list[str]:
                 "Vendedores que venden por debajo de lo que pagan en la subasta: los que has visto y los de "
                 "Merchant Map. Los «sin comprobar» salen de la lista del Classic, al precio de los datos del juego: "
                 "abre su ventana para confirmarlo.", ""]
-        out += _table(["Objeto", "Vendedor", "Dato", "Compras a", "Vendes por", "Ganas por unidad", "En 7 días",
+        out += _table(["Objeto", "Vendedor", "Dato", "Compras a", "Vendes por", "Ganas por unidad", "En 36 horas",
                        "Como mucho al día",
                        "Existencias"],
                       [[f.name, f.vendor, f.source, format_money(f.buy), format_money(f.sell), format_money(f.profit),
-                        _week_cell(f.profit, f.profit_week),
+                        _later_cell(f.profit, f.profit_later),
                         format_money(f.gold_per_day) if f.gold_per_day is not None else "",
                         "limitadas" if f.limited else "sin límite"] for f in a.vendor_flips[:limit]])
     candidates = a.vendor_candidates
@@ -288,9 +288,9 @@ def _moving_items(a: Analysis) -> list[list]:
             continue
         p = a.prices.get(item_id)
         sales = f"~{s.sales_per_day:.1f}" if s.sales_per_day else ""
-        rows.append((abs(s.week_change or 0), [
+        rows.append((abs(s.outlook_change or 0), [
             p.name if p else f"objeto {item_id}", format_money(s.current),
-            f"{format_money(s.forecast_7d)} ({s.outlook})", s.quantity, sales, s.drop_risk, s.confidence,
+            f"{format_money(s.forecast)} ({s.outlook})", s.quantity, sales, s.drop_risk, s.confidence,
             "; ".join(s.reasons)]))
     rows.sort(key=lambda r: r[0], reverse=True)
     return [row for _, row in rows]
@@ -330,7 +330,7 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
         for c in known[:limit]:
             skill = c.difficulty_name if c.difficulty is not None and c.difficulty < 3 else ""
             rows.append([c.name, ", ".join(c.known_by), format_money(c.cost), format_money(c.value),
-                         _profit_cell(c.profit, c.profit_week), _craftable_cell(c), skill,
+                         _profit_cell(c.profit, c.profit_later), _craftable_cell(c), skill,
                          _market_cell(c.output_listed, c.output_signals), _capacity_cell(c.capacity, c)])
         out += _table(["Receta", "Quién", "Coste", "Vendes por", "Beneficio", "Ya puedes hacer",
                        "Sube habilidad", "Mercado", "Como mucho al día"], rows)
@@ -362,7 +362,7 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
     moving = _moving_items(a)
     if moving:
         out.append("")
-        out += _table(["Objeto", "Ahora", "En 7 días", "A la venta", "Ventas al día", "Riesgo de bajada",
+        out += _table(["Objeto", "Ahora", "En 36 horas", "A la venta", "Ventas al día", "Riesgo de bajada",
                        "Confianza", "Por qué"], moving[:limit])
     else:
         out.append("")
@@ -381,12 +381,12 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
     if a.farms:
         out.append("Oro por hora real: lo ganado (objetos a precio de mercado sin comisión, más el oro) "
                    "entre la primera y la última ganancia de cada sesión, valorado con los precios de hoy "
-                   "y con los previstos dentro de 7 días.")
+                   "y con los previstos dentro de 36 horas.")
         out.append("")
         if a.farm_summary:
-            out += _table(["Actividad", "Zona", "Sesiones", "Tiempo", "Oro/h hoy", "Oro/h en 7 días"],
+            out += _table(["Actividad", "Zona", "Sesiones", "Tiempo", "Oro/h hoy", "Oro/h en 36 horas"],
                           [[g.activity, g.zone, g.sessions, _duration(g.hours), format_money(g.per_hour),
-                            format_money(g.per_hour_week)] for g in a.farm_summary[:limit]])
+                            format_money(g.per_hour_later)] for g in a.farm_summary[:limit]])
         else:
             out.append("Ningún farmeo medido: solo cuentan las sesiones con nombre (pulsa «Farmear este» "
                        "o usa /pg farmeo <nombre>). Lo demás es jugar sin más y no se toma como farmeo.")
@@ -498,7 +498,7 @@ def _investment_rows(methods) -> list[list]:
                 now = "barato ahora"
             elif p.deviation is not None and p.deviation >= 0.1:
                 now = "caro ahora"
-            outlook = f"{format_money(s.forecast_7d)} ({s.outlook})" if s is not None and s.forecast_7d else ""
+            outlook = f"{format_money(s.forecast)} ({s.outlook})" if s is not None and s.forecast else ""
             sales = f"~{s.sales_per_day:.0f}" if s is not None and s.sales_per_day else ""
             rows.append((p.deviation if p.deviation is not None else 0, [
                 i.name, format_money(p.market), format_money(p.median) if p.has_history else "", outlook, sales, now]))
@@ -561,8 +561,8 @@ def build_guides_section(a: Analysis, limit: int | None = 10, heading: str = "##
     if invest:
         out += ["", f"{sub} Para invertir", "",
                 "Comprar barato ahora para vender cuando haya más oro en el juego. «Barato ahora»: un 10 % o más "
-                "por debajo de su mediana de 7 días.", ""]
-        out += _table(["Objeto", "Ahora", "Mediana 7 días", "En 7 días", "Ventas al día", ""], cut(invest))
+                "por debajo de su mediana de 36 horas.", ""]
+        out += _table(["Objeto", "Ahora", "Mediana 36 horas", "En 36 horas", "Ventas al día", ""], cut(invest))
 
     vendors = _vendor_rows([m for m in methods if m.entry.kind == "vendedor"])
     if vendors:
@@ -636,8 +636,8 @@ def guide_filename(plan) -> str:
 def build_plan_section(methods, baseline, settings) -> list[str]:
     out = ["", "## Qué te conviene hacer", ""]
     if baseline.per_hour:
-        week = (f" (en 7 días: {format_money(baseline.per_hour_week)}/h)"
-                if baseline.per_hour_week is not None and baseline.per_hour_week != baseline.per_hour else "")
+        week = (f" (en 36 horas: {format_money(baseline.per_hour_later)}/h)"
+                if baseline.per_hour_later is not None and baseline.per_hour_later != baseline.per_hour else "")
         out.append(f"Tu referencia: {baseline.name}, {format_money(baseline.per_hour)} por hora medidos{week}.")
     else:
         out.append("Todavía no tienes ningún farmeo medido, así que la referencia es 0: juega un rato y el "
@@ -658,13 +658,13 @@ def build_plan_section(methods, baseline, settings) -> list[str]:
         if m.needs_setup:
             invest = format_money(m.setup_gold) + (f" + {_duration(m.setup_hours)}" if m.setup_hours else "")
         rows.append([m.name, m.kind, m.who or "", format_money(m.per_hour) if m.per_hour is not None else "?",
-                     format_money(m.per_hour_week) if m.per_hour_week is not None else "",
+                     format_money(m.per_hour_later) if m.per_hour_later is not None else "",
                      format_money(m.per_day_cap) if m.per_day_cap is not None else "",
                      invest, m.payback, format_money(m.gain) if m.gain is not None else "?", m.verdict,
                      "; ".join(m.notes)])
     if rows:
         out.append("")
-        out += _table(["Método", "Tipo", "Quién", "Oro/h", "Oro/h en 7 días", "Máx./día", "Inversión",
+        out += _table(["Método", "Tipo", "Quién", "Oro/h", "Oro/h en 36 horas", "Máx./día", "Inversión",
                        "Se recupera en", f"Ganas en {settings.horizon_weeks:g} semanas", "Veredicto", "Notas"],
                       rows)
     guides = [m for m in methods if m.guide is not None and m.guide.steps]

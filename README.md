@@ -6,7 +6,7 @@ Addon personal para WoW Forever que ayuda a decidir en qué gastar el tiempo par
   subasta) y guardarlos con su histórico en una base de datos.
 - **Fase 1 (hecha):** valorar lo que tienes, ver qué crafteos dan beneficio, qué recetas te convendría
   aprender y qué vender, dónde y a qué precio. Los precios salen también en el tooltip de cada objeto.
-- **Fase 2 (hecha):** señales de mercado y previsión a 7 días (con su acierto medido sobre el propio
+- **Fase 2 (hecha):** señales de mercado y previsión a 36 horas (con su acierto medido sobre el propio
   historial), y registro de tus farmeos con tu oro por hora real.
 - **Fase 3 (hecha):** comparador de métodos, guía de subida de profesión con su coste y cuándo se
   recupera la inversión según las horas que juegas. Además, los métodos de tus guías valorados con
@@ -38,7 +38,7 @@ cada método guardado se vuelve a comprobar con tus últimos precios. Lo nuevo s
 | Farmeo | El método. «En espera» si el asesor tiene una pregunta pendiente para ti: no se recomienda hasta que la contestes. |
 | Nota | Del 1 al 10, la que le pone el asesor según tus personajes (`/revisar`). |
 | Rinde | Verde: da al menos el 60 % del mejor. Amarillo: llega al mínimo (5 oro/h; `ajustes --minimo-hora`). Rojo: no da dinero. |
-| Oro/h | Medido si lo has medido; si no, el esperado (con *): lo que da en una hora según la investigación, valorado con tus precios. De cada objeto solo va a la subasta lo que el mercado absorbe en tus horas de juego; el resto, al vendedor. Si sus objetos van a bajar, cuenta lo que valdrán dentro de 7 días. |
+| Oro/h | Medido si lo has medido; si no, el esperado (con *): lo que da en una hora según la investigación, valorado con tus precios. De cada objeto solo va a la subasta lo que el mercado absorbe en tus horas de juego; el resto, al vendedor. Si sus objetos van a bajar, cuenta lo que valdrán dentro de 36 horas. |
 | ¿Puedo? | Sí, con qué personaje, o no; entre paréntesis lo que pide (nivel, profesión). |
 | Nivel | El recomendado y, entre paréntesis, desde cuál ya se puede aunque rinda menos. |
 
@@ -205,7 +205,7 @@ ella a lo largo de 4 semanas según las horas que juegas (por defecto 10 a la se
 
 Entran tus farmeos, tus crafteos rentables, la reventa desde vendedores, las mejores recetas de tus
 profesiones que aún no sabes y la mejor receta de cada profesión que no tienes. Para cada uno: oro por
-hora hoy y en 7 días, máximo al día (crafteos y reventas), **inversión** (oro y horas de subir la
+hora hoy y en 36 horas, máximo al día (crafteos y reventas), **inversión** (oro y horas de subir la
 profesión y aprender la receta), **en cuánto se recupera**, **cuánto ganas** frente a tu referencia en
 esas semanas y un **veredicto**.
 
@@ -213,7 +213,7 @@ Las cuentas:
 - Un **farmeo** ocupa tu tiempo: las horas de preparación no dan nada y el oro invertido se resta.
 - Un **crafteo o una reventa** los limita el mercado, no tu tiempo, así que se hacen además de farmear:
   suman lo que el mercado absorbe cada día y restan el rato que le quitan a tu farmeo.
-- El oro por hora va del de hoy al previsto a 7 días. Si tu farmeo actual va a bajar, un método nuevo
+- El oro por hora va del de hoy al previsto a 36 horas. Si tu farmeo actual va a bajar, un método nuevo
   puede compensar aunque hoy dé casi lo mismo.
 
 Ejemplo: farmeas a 10 o/h y otro farmeo da 12 o/h, pero hay que invertir 300 o y 8 horas. Jugando 10 h a
@@ -302,7 +302,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    aprender y qué vender. Queda guardado también en `datos/informe.md`.
 6. Tras el siguiente `/reload`, al pasar el ratón por un objeto verás en su tooltip:
    - **Venta:** lo que paga el vendedor (sustituye a la línea «Precio de venta» del juego).
-   - **Subasta:** el precio de mercado.
+   - **Subasta:** el precio de mercado, con la mediana de 36 horas, «baja» o «sube» si el motor lo ve
+     así, y **ventas/día**: las unidades que se venden al día en la subasta (estimadas).
    - Si sabes fabricarlo, cuánto cuesta y cuánto ganas.
 
    Los precios van por unidad y, si es un montón, con el total al lado (`3p 0c  x5: 15p 0c`). En verde sale
@@ -348,13 +349,18 @@ Con al menos 3 escaneos repartidos en más de un día, el motor calcula para cad
   (alguien que quita su montón y lo vuelve a poner más barato). La subasta no dice si lo que falta se
   vendió o caducó, así que es una cota alta.
 - **Días de oferta**: para cuántos días de ventas hay género.
-- **Riesgo de bajada (0-100)** y **previsión a 3 y 7 días**, que mezcla la tendencia (a mitad de fuerza)
+- **Riesgo de bajada (0-100)** y **previsión a 36 horas**, que mezcla la tendencia (a mitad de fuerza)
   con la vuelta a la mediana según lo limpia que sea la tendencia.
 
 Son reglas fijas, sin IA, y su acierto se mide repitiendo la previsión en momentos pasados: el informe
 dice qué porcentaje acertó y cuánto habría acertado decir siempre «estable». Si no supera a eso, no te
 fíes de ella. Con confianza media o alta, la previsión cambia los consejos: lo que tiende a bajar se
 vende ya aunque esté barato, y lo que sube se espera. En el tooltip aparece «baja» o «sube».
+
+Todo el motor usa las **últimas 36 horas** (`HISTORY_DAYS` en `motor/pricing.py`): la mediana, la tendencia
+y la previsión. «Sube» o «baja» sale de esa previsión, y el precio al que se espera un objeto que sube es
+la misma previsión a 36 horas. Así, al empezar el server, cuando los precios fluctúan mucho, no mandan
+señales de una semana entera.
 
 ## Tus farmeos
 
@@ -370,7 +376,7 @@ vueltas por Orgrimmar...) sale en «Últimas sesiones» del informe, pero no apa
 addon ni sirve de referencia para comparar métodos.
 
 El motor une los tramos en sesiones (15 minutos sin ganar nada cortan la sesión) y calcula el **oro por
-hora real** con los precios de hoy y con los previstos a 7 días. Así sabes cuánto rinde de verdad cada
+hora real** con los precios de hoy y con los previstos a 36 horas. Así sabes cuánto rinde de verdad cada
 farmeo y si va a dejar de compensar.
 
 **En el juego, al momento.** El panel pequeño se pone al día en cuanto entra algo en las bolsas o cambia
@@ -514,7 +520,7 @@ Con estos datos el informe añade:
 ## Cómo decide el informe
 
 - **Precio de mercado**: la media del 15 % más barato de las unidades a la venta. Así una sola unidad
-  regalada no hunde el precio. Con 3 escaneos o más en los últimos 7 días se usa también la **mediana**,
+  regalada no hunde el precio. Con 3 escaneos o más en las últimas 36 horas se usa también la **mediana**,
   y nada se valora por encima de la mediana + 25 %.
 - **Coste de un crafteo**: cada material al precio más barato entre la subasta y un vendedor (si no tiene
   límite de existencias). Los materiales opcionales no cuentan. Lo que se paga con divisas (Merchant's
@@ -529,7 +535,7 @@ Con estos datos el informe añade:
 - **Qué hacer con cada objeto** (solo los no ligados):
   - **guardar** si es material de una receta tuya que da beneficio;
   - **vendedor** si el vendedor paga más que la subasta;
-  - **esperar** si está un 20 % o más por debajo de su mediana de 7 días;
+  - **esperar** si está un 20 % o más por debajo de su mediana de 36 horas;
   - **subastar** en otro caso, 1 cobre por debajo del más barato (nunca por debajo de lo que paga el
     vendedor). Avisa si tienes más de lo que hay a la venta.
 - **Ritmo de venta**: se supone que puedes vender un 30 % de lo que se vende al día en toda la subasta
@@ -538,7 +544,7 @@ Con estos datos el informe añade:
   si hay muchos vendedores que te van a rebajar el precio, y si lo que no vas a colocar en dos semanas
   compensa vendérselo al vendedor. El total del consejo ya cuenta con ese precio medio.
 - **Crafteos con mercado pequeño**: si puedes fabricar más de lo que se vende, la columna «Ya puedes
-  hacer» dice cuántas hacer al día, y el beneficio enseña también el previsto a 7 días («ya no
+  hacer» dice cuántas hacer al día, y el beneficio enseña también el previsto a 36 horas («ya no
   compensa» si el precio va a dejarlo en pérdidas). Lo mismo en la reventa desde vendedores.
 - **Crafteos con espera** (tela lunar, transmutaciones): el máximo al día es lo que deja la espera, una por
   cada personaje que sabe la receta. Por eso compensa tener varios alters con la misma profesión.

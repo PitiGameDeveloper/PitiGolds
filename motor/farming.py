@@ -1,4 +1,4 @@
-"""Tus farmeos: oro por hora real, a los precios de hoy y a los previstos dentro de 7 días.
+"""Tus farmeos: oro por hora real, a los precios de hoy y a los previstos dentro de 36 horas.
 
 El addon apunta lo que ganas en tramos de 5 minutos por zona. Aquí los tramos seguidos de
 la misma zona y etiqueta se unen en sesiones (más de 15 minutos sin ganar nada corta la
@@ -34,7 +34,7 @@ class FarmSession:
     money: int = 0
     items: dict[int, int] = field(default_factory=dict)
     value_now: int = 0          # lo ganado a precios de hoy (ya sin comisión)
-    value_week: int = 0         # lo mismo con los precios previstos a 7 días
+    value_later: int = 0         # lo mismo con los precios previstos a 36 horas
     activity: str = ""
     top_items: list[str] = field(default_factory=list)
     unpriced: list[str] = field(default_factory=list)
@@ -48,8 +48,8 @@ class FarmSession:
         return round(self.value_now / self.hours)
 
     @property
-    def per_hour_week(self) -> int:
-        return round(self.value_week / self.hours)
+    def per_hour_later(self) -> int:
+        return round(self.value_later / self.hours)
 
 
 @dataclass
@@ -59,15 +59,15 @@ class FarmSummary:
     sessions: int
     hours: float
     value_now: int
-    value_week: int
+    value_later: int
 
     @property
     def per_hour(self) -> int:
         return round(self.value_now / self.hours) if self.hours else 0
 
     @property
-    def per_hour_week(self) -> int:
-        return round(self.value_week / self.hours) if self.hours else 0
+    def per_hour_later(self) -> int:
+        return round(self.value_later / self.hours) if self.hours else 0
 
 
 def load_sessions(conn: sqlite3.Connection, days: float = HISTORY_DAYS) -> list[FarmSession]:
@@ -112,21 +112,21 @@ def value_sessions(conn: sqlite3.Connection, sessions: list[FarmSession], prices
             p = prices.get(item_id)
             name = p.name if p else f"objeto {item_id}"
             unit = (p.net_sale or p.vendor_sell or 0) if p else 0
-            unit_week = unit
+            unit_later = unit
             sig = signals.get(item_id)
-            if p and p.net_sale and sig is not None and sig.forecast_7d:
-                unit_week = p.net_of(sig.forecast_7d)
+            if p and p.net_sale and sig is not None and sig.forecast:
+                unit_later = p.net_of(sig.forecast)
             if not unit:
                 s.unpriced.append(name)
             s.value_now += unit * n
-            s.value_week += unit_week * n
+            s.value_later += unit_later * n
             class_id, subclass = classes.get(item_id, (None, None))
             activity = ACTIVITY_BY_SUBCLASS.get(subclass) if class_id == TRADEGOODS else None
             by_activity[activity or "Otros objetos"] += unit * n
             worth.append((unit * n, f"{name} x{n}"))
         by_activity[MONEY_ACTIVITY] += s.money
         s.value_now += s.money
-        s.value_week += s.money
+        s.value_later += s.money
         best = max(by_activity, key=by_activity.get) if any(by_activity.values()) else "Sin valor"
         s.activity = s.label or best
         s.top_items = [text for _, text in sorted(worth, reverse=True)[:3]]
@@ -146,9 +146,9 @@ def summarize(sessions: list[FarmSession]) -> list[FarmSummary]:
         g = groups.get(key)
         if g is None:
             g = groups[key] = FarmSummary(activity=s.activity, zone=s.zone, sessions=0, hours=0.0,
-                                          value_now=0, value_week=0)
+                                          value_now=0, value_later=0)
         g.sessions += 1
         g.hours += s.hours
         g.value_now += s.value_now
-        g.value_week += s.value_week
+        g.value_later += s.value_later
     return sorted(groups.values(), key=lambda g: g.per_hour, reverse=True)

@@ -8,7 +8,7 @@ horizonte (4 semanas por defecto) según las horas que juegas a la semana:
   - Crafteos y reventas: los limita el mercado, no tu tiempo. Se hacen además de tu farmeo:
     dan lo que el mercado absorbe cada día, menos el rato que le quitan a tu farmeo.
 
-En los dos casos el oro por hora (o por día) va cambiando del de hoy al previsto a 7 días, y
+En los dos casos el oro por hora (o por día) va cambiando del de hoy al previsto a 36 horas, y
 después se mantiene. Así, si tu farmeo actual va a bajar, un método nuevo puede compensar
 aunque hoy dé casi lo mismo.
 """
@@ -24,6 +24,7 @@ from .business import MARKET_SHARE
 from .crafting import profession_levels
 from .db import get_meta, set_meta
 from .leveling import LevelingPlan, plan_leveling
+from .market import OUTLOOK_DAYS
 
 DEFAULT_HOURS_PER_WEEK = 10.0
 DEFAULT_HORIZON_WEEKS = 4.0
@@ -75,9 +76,9 @@ class Method:
     kind: str                         # farmeo, crafteo o reventa
     who: str | None = None
     per_hour: int | None = None       # crafteos y reventas: por hora de gestión
-    per_hour_week: int | None = None
+    per_hour_later: int | None = None
     per_day_cap: int | None = None    # crafteos y reventas: lo máximo al día
-    per_day_cap_week: int | None = None
+    per_day_cap_later: int | None = None
     minutes_per_day: float | None = None
     measured: bool = False
     setup_gold: int = 0
@@ -94,30 +95,30 @@ class Method:
         return bool(self.setup_gold or self.setup_hours)
 
 
-def _rate(now: float, week: float | None, day: float) -> float:
-    """Valor que va del de hoy al de dentro de 7 días y luego se queda fijo."""
-    if week is None:
+def _rate(now: float, later: float | None, day: float) -> float:
+    """Valor que va del de hoy al previsto dentro de 36 horas y luego se queda fijo."""
+    if later is None:
         return now
-    return now + (week - now) * min(day, 7) / 7
+    return now + (later - now) * min(day, OUTLOOK_DAYS) / OUTLOOK_DAYS
 
 
-def time_value(now: float, week: float | None, s: Settings, setup_hours: float = 0.0) -> float:
+def time_value(now: float, later: float | None, s: Settings, setup_hours: float = 0.0) -> float:
     """Oro de un método que ocupa tu tiempo, jugando tus horas, tras `setup_hours` de preparación."""
     total, pending = 0.0, setup_hours
     for day in range(s.horizon_days):
         hours = s.hours_per_day
         used = min(hours, pending)
         pending -= used
-        total += (hours - used) * _rate(now, week, day + 0.5)
+        total += (hours - used) * _rate(now, later, day + 0.5)
     return total
 
 
-def _evaluate(m: Method, base_now: float, base_week: float | None, s: Settings) -> None:
-    base_value = time_value(base_now, base_week, s)
+def _evaluate(m: Method, base_now: float, base_later: float | None, s: Settings) -> None:
+    base_value = time_value(base_now, base_later, s)
     if m.kind == "farmeo":
         if m.per_hour is None:
             return
-        value = time_value(m.per_hour, m.per_hour_week, s, m.setup_hours) - m.setup_gold
+        value = time_value(m.per_hour, m.per_hour_later, s, m.setup_hours) - m.setup_gold
         m.gain = round(value - base_value)
         extra = m.per_hour - base_now
         if m.needs_setup:
@@ -133,8 +134,8 @@ def _evaluate(m: Method, base_now: float, base_week: float | None, s: Settings) 
         start = math.ceil(m.setup_hours / s.hours_per_day) if m.setup_hours else 0
         value = 0.0
         for day in range(start, s.horizon_days):
-            lost = (m.minutes_per_day or 0) / 60 * _rate(base_now, base_week, day + 0.5)
-            value += _rate(m.per_day_cap, m.per_day_cap_week, day + 0.5) - lost
+            lost = (m.minutes_per_day or 0) / 60 * _rate(base_now, base_later, day + 0.5)
+            value += _rate(m.per_day_cap, m.per_day_cap_later, day + 0.5) - lost
         value -= m.setup_gold + m.setup_hours * base_now
         m.gain = round(value)
         daily = m.per_day_cap - (m.minutes_per_day or 0) / 60 * base_now
@@ -172,10 +173,10 @@ def _craft_method(c, name: str, who: str | None) -> Method:
         m.per_hour = cap.gold_per_hour
         m.per_day_cap = cap.gold_per_day
         m.minutes_per_day = cap.minutes_per_day
-        if c.profit_week is not None and c.profit:
-            ratio = max(0.0, c.profit_week / c.profit)
-            m.per_day_cap_week = round(cap.gold_per_day * ratio)
-            m.per_hour_week = round(cap.gold_per_hour * ratio)
+        if c.profit_later is not None and c.profit:
+            ratio = max(0.0, c.profit_later / c.profit)
+            m.per_day_cap_later = round(cap.gold_per_day * ratio)
+            m.per_hour_later = round(cap.gold_per_hour * ratio)
     return m
 
 
@@ -186,13 +187,13 @@ def build_methods(conn: sqlite3.Connection, a: Analysis, s: Settings | None = No
     farms = [g for g in a.farm_summary if g.hours >= MIN_BASELINE_HOURS] or a.farm_summary
     for g in a.farm_summary:
         methods.append(Method(name=f"{g.activity} en {g.zone}", kind="farmeo", per_hour=g.per_hour,
-                              per_hour_week=g.per_hour_week, measured=True))
+                              per_hour_later=g.per_hour_later, measured=True))
     if farms:
         best = max(farms, key=lambda g: g.per_hour)
         baseline = next(m for m in methods if m.name == f"{best.activity} en {best.zone}")
         baseline.is_baseline = True
     else:
-        baseline = Method(name="sin farmeos medidos", kind="farmeo", per_hour=0, per_hour_week=0,
+        baseline = Method(name="sin farmeos medidos", kind="farmeo", per_hour=0, per_hour_later=0,
                           is_baseline=True)
 
     for c in a.crafts:
@@ -205,8 +206,8 @@ def build_methods(conn: sqlite3.Connection, a: Analysis, s: Settings | None = No
             units = f.sales_per_day * MARKET_SHARE
             m.per_day_cap = f.gold_per_day
             m.minutes_per_day = units * FLIP_SECONDS / 60
-            if f.profit_week is not None and f.profit:
-                m.per_day_cap_week = round(f.gold_per_day * max(0.0, f.profit_week / f.profit))
+            if f.profit_later is not None and f.profit:
+                m.per_day_cap_later = round(f.gold_per_day * max(0.0, f.profit_later / f.profit))
         if f.limited:
             m.notes.append("existencias limitadas: el máximo real puede ser menor")
         methods.append(m)
@@ -256,7 +257,7 @@ def build_methods(conn: sqlite3.Connection, a: Analysis, s: Settings | None = No
         methods.append(with_guide(m, c, line, 1, set()))
 
     for m in methods:
-        _evaluate(m, baseline.per_hour or 0, baseline.per_hour_week, s)
+        _evaluate(m, baseline.per_hour or 0, baseline.per_hour_later, s)
     if baseline not in methods:
         _evaluate(baseline, 0, None, s)
     methods.sort(key=lambda m: (not m.is_baseline, m.gain is None, -(m.gain or 0)))

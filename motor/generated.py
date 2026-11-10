@@ -3,8 +3,9 @@
 Lleva:
   ingestedUpTo  hasta qué escaneo ha guardado ya el motor, para que el addon los
                 borre de SavedVariables y el archivo no crezca sin parar.
-  prices        "mercado,mediana,tendencia" de tus objetos y de los materiales de tus
-                recetas, para el tooltip. Tendencia: b (baja), s (sube) o vacía.
+  prices        "mercado,mediana,tendencia,ventas" de tus objetos y de los materiales de tus
+                recetas, para el tooltip. Tendencia: b (baja), s (sube) o vacía. Ventas: unidades
+                vendidas al día (estimadas), o vacío si no hay datos suficientes.
   craft         coste y beneficio por unidad de lo que sabes fabricar.
   recipes       "coste,ganancia" de cada fabricación de las recetas de tus profesiones, para
                 la ventana de profesión. Ganancia vacía si lo fabricado no tiene precio.
@@ -71,7 +72,8 @@ def render_generated(ingested_up_to: int, analysis: Analysis, now: int | None = 
             median = p.median if p.has_history else ""
             s = analysis.signals.get(item_id)
             trend = TREND_CODES.get(s.outlook, "") if s is not None and s.confidence != "baja" else ""
-            lines.append(f'    [{item_id}] = "{p.market},{median},{trend}",')
+            sales = "" if s is None or s.sales_per_day is None else f"{s.sales_per_day:.1f}"
+            lines.append(f'    [{item_id}] = "{p.market},{median},{trend},{sales}",')
     lines.append("  },")
     lines.append("  craft = {")
     for item_id, c in sorted(analysis.best_known_craft().items()):

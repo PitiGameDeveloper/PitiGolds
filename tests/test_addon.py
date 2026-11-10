@@ -81,6 +81,7 @@ class TooltipVentaYSubasta(unittest.TestCase):
         lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
         lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
         self.mock = lua.globals().Mock
+        self.lua = lua
         self.mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
         # Barra de cobre: 3p en subasta y 10c en el vendedor. Ojo de tigre: 1p 40c y 1p 50c.
         lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,,", [818] = "140,140," } }')
@@ -106,6 +107,12 @@ class TooltipVentaYSubasta(unittest.TestCase):
 
     def test_sin_precio_de_venta_solo_subasta(self):
         self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c")
+
+    def test_muestra_las_ventas_diarias_si_el_motor_las_tiene(self):
+        self.lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,,,4.5", [818] = "140,140,s," } }')
+        self.assertIn("|cffccccccventas/día: 4.5|r", self.mock.Tooltip(2840, 1, 10))
+        # Sin ventas en el dato no sale la línea.
+        self.assertNotIn("ventas/día", self.mock.Tooltip(818, 1, 150))
 
     def test_sale_aunque_el_cliente_no_llame_a_los_post_calls(self):
         tooltip = self.mock.Tooltip(2840, 1, 10, True)
@@ -473,7 +480,7 @@ class AddonMasMotor(unittest.TestCase):
             content = generated.read_text(encoding="utf-8")
             up_to = int(re.search(r"ingestedUpTo = (\d+)", content).group(1))
             self.assertGreater(up_to, 0)
-            self.assertIn('[2589] = "40,,",', content)
+            self.assertIn('[2589] = "40,,,"', content)
             self.assertIn('[2845] = "1900,2750",', content)
 
             # Al recargar, el addon carga Generated.lua y borra lo que el motor ya tiene.

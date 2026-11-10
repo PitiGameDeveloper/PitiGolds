@@ -7,7 +7,7 @@ Farmeos (farmeos, pesca y mazmorras del catálogo, más los que has medido tú):
   - oro por hora: el medido si lo has medido; si no, el esperado: lo que da en una hora según
     la investigación (`por_hora` del catálogo) valorado con tus precios. De cada objeto solo va
     a la subasta lo que el mercado absorbe en tus horas de juego; el resto, al vendedor.
-  - para ordenarlos cuenta lo menor entre hoy y lo previsto a 7 días: un farmeo cuyos objetos
+  - para ordenarlos cuenta lo menor entre hoy y lo previsto a 36 horas: un farmeo cuyos objetos
     van a bajar vale lo que valdrán.
   - color: verde si da al menos el 60 % del mejor, amarillo si llega al mínimo (5 oro/h por
     defecto, `ajustes --minimo-hora`), rojo si no llega.
@@ -82,7 +82,7 @@ class FarmRow:
     zone: str = ""
     score: int | None = None
     per_hour: int | None = None
-    per_hour_week: int | None = None
+    per_hour_later: int | None = None
     measured: bool = False
     color: str | None = None
     who: str | None = None       # personaje que ya puede hacerlo
@@ -104,12 +104,12 @@ class FarmRow:
 
     @property
     def value(self) -> int | None:
-        """Lo que cuenta para ordenar: lo menor entre hoy y dentro de 7 días."""
+        """Lo que cuenta para ordenar: lo menor entre hoy y dentro de 36 horas."""
         if self.per_hour is None:
             return None
-        if self.per_hour_week is None:
+        if self.per_hour_later is None:
             return self.per_hour
-        return min(self.per_hour, self.per_hour_week)
+        return min(self.per_hour, self.per_hour_later)
 
     @property
     def ready(self) -> bool:
@@ -328,7 +328,7 @@ def _farm_prep(ctx: _Context, e: CatalogEntry, ch: Character) -> _Prep:
 # Farmeos ------------------------------------------------------------------------------
 
 def _expected(ctx: _Context, e: CatalogEntry, resolved: dict[str, int]) -> tuple[int | None, int | None, list[str]]:
-    """Oro por hora esperado (hoy y a 7 días) según `por_hora`, y su desglose en frases."""
+    """Oro por hora esperado (hoy y a 36 horas) según `por_hora`, y su desglose en frases."""
     if not e.per_hour and not e.coins_per_hour:
         return None, None, []
     hours_day = max(ctx.settings.hours_per_day, 0.5)
@@ -355,9 +355,9 @@ def _expected(ctx: _Context, e: CatalogEntry, resolved: dict[str, int]) -> tuple
         cap = s.sales_per_day * MARKET_SHARE / hours_day if s is not None and s.sales_per_day else None
         to_ah = qty if cap is None else min(qty, cap)
         rest = qty - to_ah
-        ah_week = p.net_of(s.forecast_7d) if s is not None and s.forecast_7d else ah
+        ah_later = p.net_of(s.forecast) if s is not None and s.forecast else ah
         now += to_ah * ah + rest * vendor
-        week += to_ah * max(ah_week, vendor) + rest * vendor
+        week += to_ah * max(ah_later, vendor) + rest * vendor
         text = f"{qty:g} {name}/h a {format_money(ah)} en la subasta"
         if rest > 0:
             text += (f"; el mercado solo se lleva unas {cap:.0f} por hora de juego, el resto "
@@ -399,25 +399,25 @@ def _farm_rows(ctx: _Context, reviews: Reviews) -> list[FarmRow]:
         if m.measured is not None and m.measured.hours > 0:
             g = m.measured
             linked.add((g.activity, g.zone))
-            row.per_hour, row.per_hour_week, row.measured = g.per_hour, g.per_hour_week, True
+            row.per_hour, row.per_hour_later, row.measured = g.per_hour, g.per_hour_later, True
             row.details.append(f"Medido: {format_money(g.per_hour)}/h en {_hours(g.hours)} "
                                f"({g.sessions} sesión{'es' if g.sessions != 1 else ''}).")
             if now is not None:
                 row.details.append(f"La investigación esperaba ~{format_money(now)}/h.")
         else:
-            row.per_hour, row.per_hour_week = now, week
+            row.per_hour, row.per_hour_later = now, week
             if now is not None:
                 row.details.append(f"Esperado con tus precios: ~{format_money(now)}/h (sin medir: pulsa «Farmear "
                                    "este» y se mide solo mientras lo farmeas).")
             elif not e.per_hour:
                 row.details.append("Aún no hay estimación de cuánto da por hora: pídesela al asesor.")
         row.details += ["  " + t for t in value_lines]
-        if row.per_hour and row.per_hour_week is not None:
-            change = row.per_hour_week / row.per_hour - 1 if row.per_hour else 0
+        if row.per_hour and row.per_hour_later is not None:
+            change = row.per_hour_later / row.per_hour - 1 if row.per_hour else 0
             if change <= -0.1:
-                row.details.append(f"Sus objetos van a bajar: en 7 días daría ~{format_money(row.per_hour_week)}/h.")
+                row.details.append(f"Sus objetos van a bajar: en 36 horas daría ~{format_money(row.per_hour_later)}/h.")
             elif change >= 0.1:
-                row.details.append(f"Sus objetos van a subir: en 7 días daría ~{format_money(row.per_hour_week)}/h.")
+                row.details.append(f"Sus objetos van a subir: en 36 horas daría ~{format_money(row.per_hour_later)}/h.")
 
         preps = [_farm_prep(ctx, e, ch) for ch in ctx.chars]
         ready = [p for p in preps if not p.lacking]
@@ -440,7 +440,7 @@ def _farm_rows(ctx: _Context, reviews: Reviews) -> list[FarmRow]:
         if (g.activity, g.zone) in linked or not g.hours:
             continue
         row = FarmRow(key=f"medido:{g.activity}|{g.zone}", name=f"{g.activity} en {g.zone}", zone=g.zone,
-                      per_hour=g.per_hour, per_hour_week=g.per_hour_week, measured=True,
+                      per_hour=g.per_hour, per_hour_later=g.per_hour_later, measured=True,
                       who="tú", requirement="lo has medido tú")
         row.details.append(f"Medido: {format_money(g.per_hour)}/h en {_hours(g.hours)} ({g.sessions} sesiones). "
                            "No está en el catálogo: el asesor puede añadirlo.")
@@ -888,7 +888,7 @@ def panel_export(panel: Panel) -> dict:
     v = panel.verdict
     farms = [{
         "key": r.key, "name": r.name, "kind": r.kind, "score": r.score, "color": r.color,
-        "gph": r.per_hour, "gphWeek": r.per_hour_week, "measured": r.measured, "who": r.who,
+        "gph": r.per_hour, "gphWeek": r.per_hour_later, "measured": r.measured, "who": r.who,
         "req": r.requirement, "closest": r.closest, "lacking": "; ".join(r.lacking),
         "level": r.level or None, "minLevel": r.min_level or None, "pending": bool(r.pending),
         "details": r.details, "zone": r.zone or None, "items": r.items, "coins": r.coins, "point": r.point,

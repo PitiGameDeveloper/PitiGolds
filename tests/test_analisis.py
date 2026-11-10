@@ -1,4 +1,4 @@
-"""Precios de mercado, historial de 7 días y consejos de venta sobre una base de datos inventada."""
+"""Precios de mercado, historial de 36 horas y consejos de venta sobre una base de datos inventada."""
 
 import sqlite3
 import tempfile
@@ -34,15 +34,15 @@ class HistorialYConsejos(unittest.TestCase):
         c.executemany("INSERT INTO items VALUES (?, ?, ?)", [(1, "Hundido", 5), (2, "Disparado", 5)])
         c.executemany("INSERT INTO gd_items (item_id, name, stackable) VALUES (?, ?, 20)",
                       [(1, "Hundido"), (2, "Disparado")])
-        # Cuatro días a 100 y hoy: el 1 cae a 70 y el 2 sube a 200.
+        # Cuatro escaneos a 100 y uno último (6 h después): el 1 cae a 70 y el 2 sube a 200.
         history = [(100, 100)] * 4 + [(70, 200)]
         for day, (p1, p2) in enumerate(history):
             scan = f"s{day}"
             c.execute("INSERT INTO scans VALUES (?, 'browse', ?, 0, 0, 'R', 'Horde', 'A-R', 2, 'X')",
-                      (scan, T0 + day * DAY))
+                      (scan, T0 + day * 6 * 3600))
             c.executemany("INSERT INTO prices VALUES (?, ?, ?, 50, NULL, NULL, NULL, ?)",
                           [(scan, 1, p1, p1), (scan, 2, p2, p2)])
-        # Un escaneo de hace más de 7 días no cuenta para la mediana.
+        # Un escaneo de hace más de 36 horas no cuenta para la mediana.
         c.execute("INSERT INTO scans VALUES ('viejo', 'browse', ?, 0, 0, 'R', 'Horde', 'A-R', 1, 'X')",
                   (T0 - 10 * DAY,))
         c.execute("INSERT INTO prices VALUES ('viejo', 1, 9999, 1, NULL, NULL, NULL, 9999)")
