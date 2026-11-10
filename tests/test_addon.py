@@ -107,6 +107,16 @@ class TooltipVentaYSubasta(unittest.TestCase):
     def test_sin_precio_de_venta_solo_subasta(self):
         self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c")
 
+    def test_sale_aunque_el_cliente_no_llame_a_los_post_calls(self):
+        tooltip = self.mock.Tooltip(2840, 1, 10, True)
+        self.assertEqual(tooltip.split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c"])
+
+    def test_pasar_el_raton_otra_vez_no_repite_ni_pierde_lineas(self):
+        for _ in range(3):
+            self.assertEqual(self.mock.Tooltip(2840, 1, 10).split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c"])
+            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c")
+            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c")
+
 
 class FiltroDeProfesiones(unittest.TestCase):
     CRAFTS = """PitiGoldsGenerated = { methods = { farms = {}, crafts = {

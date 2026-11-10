@@ -340,25 +340,34 @@ TooltipDataProcessor = {
     table.insert(Mock.tooltipLineCallbacks[lineType], fn)
   end,
 }
-function Mock.Tooltip(itemID, count, sellTotal)
+-- Con skipPostCalls, el cliente no llama a los post-calls si alguien quita una línea.
+Mock.tooltipFrames = {}
+function Mock.Tooltip(itemID, count, sellTotal, skipPostCalls)
   local lines = {}
   local owner = { count = count }
-  local tooltip = {
+  local tooltip = Mock.tooltipFrames[1] or {}
+  Mock.tooltipFrames[1] = tooltip
+  if tooltip.onCleared then tooltip.onCleared(tooltip) end
+  tooltip.processingInfo = { tooltipData = { id = itemID } }
+  tooltip.HookScript = function(self, script, fn) if script == "OnTooltipCleared" then self.onCleared = fn end end
+  for k, v in pairs({
     GetOwner = function() return owner end,
     AddLine = function(_, text) lines[#lines + 1] = text end,
     AddDoubleLine = function(_, left, right, lr, lg, lb)
       local color = (lr == 0.25 and lg == 1) and "[verde] " or ""
       lines[#lines + 1] = color .. left .. " = " .. right
     end,
-  }
+  }) do tooltip[k] = v end
+  local hidden = false
   if sellTotal then
-    local hidden = false
     for _, fn in ipairs(Mock.tooltipLineCallbacks[Enum.TooltipDataLineType.SellPrice] or {}) do
       if fn(tooltip, { price = sellTotal }) then hidden = true break end
     end
     if not hidden then lines[#lines + 1] = "Precio de venta: " .. sellTotal end
   end
-  for _, fn in ipairs(Mock.tooltipCallbacks) do fn(tooltip, { id = itemID }) end
+  if not (hidden and skipPostCalls) then
+    for _, fn in ipairs(Mock.tooltipCallbacks) do fn(tooltip, { id = itemID }) end
+  end
   return table.concat(lines, "\n")
 end
 

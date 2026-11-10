@@ -20,9 +20,21 @@ local LABEL_R, LABEL_G, LABEL_B = 0.9, 0.7, 0.1
 local BEST_R, BEST_G, BEST_B = 0.25, 1, 0.25
 local AUCTION_CUT = 0.05 -- la subasta se queda el 5 % de lo vendido
 
--- Precio de venta que el juego iba a poner en cada tooltip (ya multiplicado por el montón).
--- Lo quitamos y lo ponemos nosotros como «Venta», junto a la subasta.
-local sellPrice = {}
+-- Lo que ya hemos puesto en cada tooltip para el objeto que enseña.
+-- Las líneas se ponen en cuanto el juego da su precio de venta (lo quitamos y va como «Venta»),
+-- o al final si el objeto no tiene precio de venta. Así no dependemos del orden en que el
+-- cliente procesa las líneas ni de si llama a los post-calls tras quitar una.
+local shown = {}
+local hooked = {}
+
+-- Marca lo puesto («pre»: con el precio de venta; «post»: al final) y lo olvida al vaciarse.
+local function Mark(tooltip, itemID, by)
+  shown[tooltip] = { id = itemID, by = by }
+  if not hooked[tooltip] and tooltip.HookScript then
+    hooked[tooltip] = true
+    pcall(tooltip.HookScript, tooltip, "OnTooltipCleared", function(self) shown[self] = nil end)
+  end
+end
 
 local function ItemSellPrice(itemID)
   local getInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
@@ -55,9 +67,7 @@ local function PriceText(unit, count)
   return ns.Money(unit)
 end
 
-local function AddLines(tooltip, itemID)
-  local sellTotal = sellPrice[tooltip]
-  sellPrice[tooltip] = nil
+local function AddLines(tooltip, itemID, sellTotal)
   local gen = PitiGoldsGenerated
   if not itemID then return end
   local price = type(gen) == "table" and gen.prices and gen.prices[itemID]
@@ -113,6 +123,18 @@ local function AddLines(tooltip, itemID)
   end
 end
 
+-- Objeto del tooltip mientras el juego lo está rellenando.
+local function TooltipItemID(tooltip)
+  local info = tooltip.processingInfo or tooltip.info
+  local data = type(info) == "table" and info.tooltipData
+  if type(data) == "table" and type(data.id) == "number" then return data.id end
+  if tooltip.GetItem then
+    local _, link, id = tooltip:GetItem()
+    if type(id) == "number" then return id end
+    if type(link) == "string" then return tonumber(link:match("item:(%d+)")) end
+  end
+end
+
 if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and Enum.TooltipDataType then
   local reported = false
   local function Report(err)
@@ -122,17 +144,25 @@ if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and
     end
   end
 
-  -- Quitamos la línea «Precio de venta» del juego y nos guardamos el precio.
-  -- Un precio con máximo (rango) se deja como está.
+  -- Pone nuestras líneas con el precio de venta del juego. Devuelve true si lo ha hecho,
+  -- y entonces quien llama quita la línea del juego. Un precio con máximo (rango) se deja.
+  local function ShowWithSellPrice(tooltip, price, maxPrice)
+    price, maxPrice = tonumber(price), tonumber(maxPrice)
+    if not price or price <= 0 or (maxPrice and maxPrice > price) then return false end
+    local itemID = TooltipItemID(tooltip)
+    if not itemID then return false end
+    AddLines(tooltip, itemID, price)
+    Mark(tooltip, itemID, "pre")
+    return true
+  end
+
+  -- Quitamos la línea «Precio de venta» del juego y ponemos las nuestras en su sitio.
   local lineTypes = Enum.TooltipDataLineType
   if TooltipDataProcessor.AddLinePreCall and lineTypes and lineTypes.SellPrice then
     TooltipDataProcessor.AddLinePreCall(lineTypes.SellPrice, function(tooltip, lineData)
       local ok, hide = pcall(function()
         if not lineData.price and TooltipUtil and TooltipUtil.SurfaceArgs then TooltipUtil.SurfaceArgs(lineData) end
-        local price, maxPrice = tonumber(lineData.price), tonumber(lineData.maxPrice)
-        if not price or price <= 0 or (maxPrice and maxPrice > price) then return false end
-        sellPrice[tooltip] = price
-        return true
+        return ShowWithSellPrice(tooltip, lineData.price, lineData.maxPrice)
       end)
       if not ok then Report(hide) return end
       return hide or nil
@@ -143,18 +173,31 @@ if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and
     local original = GameTooltip:GetScript("OnTooltipAddMoney")
     if original then
       GameTooltip:SetScript("OnTooltipAddMoney", function(self, cost, maxCost, ...)
-        cost, maxCost = tonumber(cost), tonumber(maxCost)
-        if cost and cost > 0 and not (maxCost and maxCost > cost) then
-          sellPrice[self] = cost
-          return
-        end
+        local ok, done = pcall(function()
+          -- Si el post-call ya puso la subasta, aquí solo falta la venta: dejamos la del juego.
+          local mark = shown[self]
+          if mark and mark.by == "post" and mark.id == TooltipItemID(self) then return false end
+          return ShowWithSellPrice(self, cost, maxCost)
+        end)
+        if not ok then Report(done) end
+        if ok and done then return end
         return original(self, cost, maxCost, ...)
       end)
     end
   end
 
   TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip, data)
-    local ok, err = pcall(AddLines, tooltip, data and data.id)
+    local ok, err = pcall(function()
+      local itemID = data and data.id
+      if not itemID then return end
+      local mark = shown[tooltip]
+      if mark and mark.by == "pre" and mark.id == itemID then
+        shown[tooltip] = nil -- ya está puesto; el siguiente refresco empieza de cero
+        return
+      end
+      AddLines(tooltip, itemID)
+      Mark(tooltip, itemID, "post")
+    end)
     if not ok then Report(err) end
   end)
 end
