@@ -535,8 +535,12 @@ Con estos datos el informe añade:
 
 ## Cómo decide el informe
 
-- **Precio de mercado**: la media del 15 % más barato de las unidades a la venta. Así una sola unidad
-  regalada no hunde el precio. Con 3 escaneos o más en las últimas 36 horas se usa también la **mediana**,
+- **Precio de mercado**: la media del 1 % más barato de las unidades a la venta, y nunca menos de 5
+  unidades. Así una sola unidad regalada (o puesta de cebo para que la gente rebaje) no hunde el precio.
+  El addon lo calcula igual, así que el tooltip, el recuadro de fabricación y el informe dan lo mismo
+  con el mismo escaneo. Lo que solo trae el precio mínimo (el escaneo de materiales, o buscar sin abrir
+  el objeto) no rebaja lo que dijo un escaneo completo de hace menos de 6 horas; si el mínimo ha subido,
+  sí manda. Con 3 escaneos o más en las últimas 36 horas se usa también la **mediana**,
   y nada se valora por encima de la mediana + 25 %.
 - **Coste de un crafteo**: cada material al precio más barato entre la subasta y un vendedor (si no tiene
   límite de existencias). Los materiales opcionales no cuentan. Lo que se paga con divisas (Merchant's

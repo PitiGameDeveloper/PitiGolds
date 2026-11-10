@@ -316,7 +316,7 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
     out = ["# PitiGolds: qué hacer", ""]
     priced = sum(1 for p in a.prices.values() if p.market is not None)
     out.append(f"Último escaneo de subasta: {ago(a.last_scan)}. Objetos tuyos o de tus recetas con precio: {priced}.")
-    out.append("Precios de mercado: media del 15 % más barato de lo que hay a la venta. "
+    out.append("Precios de mercado: media del 1 % más barato de lo que hay a la venta (mínimo 5 unidades). "
                "Lo que vendes ya tiene descontado el 5 % de comisión.")
     if plan is not None:
         out += build_plan_section(*plan)

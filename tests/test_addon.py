@@ -830,9 +830,14 @@ class SesionEnVivo(unittest.TestCase):
     def test_precio_del_escaneo_que_el_motor_no_ha_leido(self):
         self.assertEqual(self.value(2770), (185, "subasta"))
         self.assertEqual(self.value(818), (150, "vendedor"))
-        # Escaneo completo: el mercado es la media del 15 % más barato (2 de 10 a 100 c).
+        # Escaneo completo: el mercado es la media del 1 % más barato, mínimo 5 unidades
+        # (2 a 100 c y 3 a 120 c: 112 c, que se quedan en 101 sin comisión ni depósito).
         self.lua.execute('Mock.ns.AddScan({ time = time(), items = { [2770] = "100,10,2,2|100:2;120:8" } })')
-        self.assertEqual(self.value(2770), (90, "escaneo"))
+        self.assertEqual(self.value(2770), (101, "escaneo"))
+        self.mock.Advance(5)
+        # Un mínimo suelto más barato justo después no rebaja el escaneo completo: puede ser cebo.
+        self.lua.execute('Mock.ns.AddScan({ time = time(), items = { [2770] = "50,5" } })')
+        self.assertEqual(self.value(2770), (101, "escaneo"))
         self.mock.Advance(5)
         self.lua.execute('Mock.ns.AddScan({ time = time(), items = { [2770] = "300,5" } })')
         self.assertEqual(self.value(2770), (280, "escaneo"))   # manda el más reciente

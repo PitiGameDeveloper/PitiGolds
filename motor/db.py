@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS scans (
 CREATE INDEX IF NOT EXISTS idx_scans_time ON scans(time);
 
 -- book: "precio:cantidad;precio:cantidad" con los niveles de precio más baratos.
--- market_price: precio medio del 15 % más barato de las unidades (ver pricing.py).
+-- market_price: precio medio del 1 % más barato de las unidades (mínimo 5) (ver pricing.py).
 CREATE TABLE IF NOT EXISTS prices (
   scan_id TEXT, item_id INTEGER, min_price INTEGER, quantity INTEGER,
   num_auctions INTEGER, num_owners INTEGER, book TEXT, market_price INTEGER,
@@ -198,8 +198,9 @@ CREATE INDEX IF NOT EXISTS idx_qd_spawns_area ON qd_spawns(area_id, kind);
 VIEWS = """
 DROP VIEW IF EXISTS latest_prices;
 CREATE VIEW latest_prices AS
-  SELECT item_id, min_price, market_price, quantity, num_auctions, num_owners, time, type FROM (
+  SELECT item_id, min_price, market_price, quantity, num_auctions, num_owners, time, type, has_book FROM (
     SELECT p.item_id, p.min_price, p.market_price, p.quantity, p.num_auctions, p.num_owners, s.time, s.type,
+           (p.book IS NOT NULL AND p.book <> '') AS has_book,
            ROW_NUMBER() OVER (PARTITION BY p.item_id ORDER BY s.time DESC) AS rn
     FROM prices p JOIN scans s ON s.scan_id = p.scan_id
   )

@@ -11,7 +11,11 @@ local ADDON, ns = ...
 
 local AH_CUT = 0.05
 local AH_DEPOSIT = 100               -- depósito mínimo por puesta (una pila), en cobre
-local MARKET_SHARE = 0.15            -- como el motor: media del 15 % más barato a la venta
+-- Como el motor (pricing.py): media del 1 % más barato a la venta, nunca menos de 5 unidades,
+-- y un mínimo suelto no rebaja lo que dijo un escaneo completo de hace menos de 6 horas.
+local MARKET_SHARE = 0.01
+local MARKET_MIN_UNITS = 5
+local BOOK_TRUST = 6 * 3600
 local NEW_SESSION_AFTER = 30 * 60    -- tanto rato sin jugar con el personaje empieza otra sesión
 local MIN_SECONDS = 300              -- el oro por hora no se calcula sobre menos de 5 minutos
 local WIDTH, HEIGHT = 380, 340
@@ -33,8 +37,8 @@ local function MarketFromScan(text)
   local min, qty = (head or ""):match("^(%d+),(%d+)")
   min, qty = tonumber(min), tonumber(qty)
   if not min then return nil end
-  if book == "" or qty <= 0 then return min end
-  local target = math.max(1, math.ceil(qty * MARKET_SHARE))
+  if book == "" or qty <= 0 then return min, false end
+  local target = math.max(MARKET_MIN_UNITS, math.ceil(qty * MARKET_SHARE))
   local taken, cost = 0, 0
   for price, n in book:gmatch("(%d+):(%d+)") do
     local take = math.min(tonumber(n), target - taken)
@@ -42,18 +46,24 @@ local function MarketFromScan(text)
     taken = taken + take
     if taken >= target then break end
   end
-  if taken == 0 then return min end
-  return math.floor(cost / taken + 0.5)
+  if taken == 0 then return min, false end
+  return math.floor(cost / taken + 0.5), true
 end
+ns.MarketFromScan = MarketFromScan
+
+-- scanText[itemID] = { texto, hora } de lo último visto; bookText, de lo último con el libro entero.
+local bookText
 
 local function BuildScanIndex()
-  scanText, scanCache = {}, {}
-  local seen = {}
+  scanText, scanCache, bookText = {}, {}, {}
   for _, scan in ipairs(PitiGoldsDB and PitiGoldsDB.scans or {}) do
     local t = scan.time or 0
     for itemID, text in pairs(scan.items or {}) do
-      if type(text) == "string" and t >= (seen[itemID] or -1) then
-        scanText[itemID], seen[itemID] = text, t
+      if type(text) == "string" then
+        if t >= (scanText[itemID] and scanText[itemID][2] or -1) then scanText[itemID] = { text, t } end
+        if text:find("|", 1, true) and t >= (bookText[itemID] and bookText[itemID][2] or -1) then
+          bookText[itemID] = { text, t }
+        end
       end
     end
   end
@@ -63,8 +73,18 @@ local function ScanPrice(itemID)
   if not scanText then BuildScanIndex() end
   local price = scanCache[itemID]
   if price == nil then
-    local text = scanText[itemID]
-    price = text and MarketFromScan(text) or false
+    local last = scanText[itemID]
+    price = false
+    if last then
+      local hasBook
+      price, hasBook = MarketFromScan(last[1])
+      local book = bookText[itemID]
+      if price and not hasBook and book and last[2] - book[2] <= BOOK_TRUST then
+        local fromBook = MarketFromScan(book[1])
+        if fromBook and fromBook > price then price = fromBook end
+      end
+      price = price or false
+    end
     scanCache[itemID] = price
   end
   return price or nil
@@ -76,13 +96,13 @@ ns.ScanMarket = ScanPrice
 
 -- Hay que llamarla cuando cambia un escaneo pendiente (tus búsquedas lo van completando).
 function ns.InvalidateScanPrices()
-  scanText, scanCache = nil, nil
+  scanText, scanCache, bookText = nil, nil, nil
 end
 
 local addScan = ns.AddScan
 function ns.AddScan(scan)
   addScan(scan)
-  scanText, scanCache = nil, nil
+  scanText, scanCache, bookText = nil, nil, nil
 end
 
 -- Cuántos caben en una pila (1 si no se sabe: lo que no se apila paga la plata entera).

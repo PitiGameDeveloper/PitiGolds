@@ -229,7 +229,13 @@ local function RunSearch(search)
   ns.Print("buscando en la subasta: " .. table.concat(search.names, ", ") .. ".")
 end
 
+local lastSearchRecipe, lastSearchTime
+
 function ns.SearchRecipeReagents(recipeID)
+  -- Varios clics seguidos en Buscar no repiten la búsqueda ni el mensaje.
+  local now = GetTime and GetTime() or 0
+  if ns.ahOpen and recipeID == lastSearchRecipe and lastSearchTime and now - lastSearchTime < 2 then return end
+  if ns.ahOpen then lastSearchRecipe, lastSearchTime = recipeID, now end
   local search = recipeID and ReagentSearch(recipeID)
   if not search then
     ns.Print("esta receta no tiene materiales que buscar en la subasta.")

@@ -1,8 +1,16 @@
 """Precios: cuánto vale de verdad un objeto en la subasta.
 
-El precio mínimo engaña: basta una sola unidad barata para hundirlo. Por eso se usa
-el «precio de mercado»: lo que costaría de media comprar el 15 % más barato de las
-unidades a la venta. Con varios escaneos se calcula además la mediana de las últimas 36 horas, que
+El precio mínimo engaña: basta una sola unidad barata (a veces puesta a propósito para que
+la gente rebaje) para hundirlo. Por eso se usa el «precio de mercado»: lo que costaría de media
+comprar el 1 % más barato de las unidades a la venta, y nunca menos de 5 unidades. El addon lo
+calcula igual (Session.lua), así que la subasta, el tooltip y el motor dan el mismo número.
+
+Algunos escaneos solo traen el precio mínimo de cada objeto, sin el resto de las subastas
+(el de materiales y lo que ves al buscar sin abrir el objeto). Ese mínimo no sustituye a uno
+completo de hace menos de 6 horas, salvo que sea más caro: si el mínimo ha subido, lo de debajo
+ya se vendió; si ha bajado, puede ser una sola unidad de cebo.
+
+Con varios escaneos se calcula además la mediana de las últimas 36 horas, que
 sirve para no valorar las cosas por un pico puntual y para saber si ahora está barato.
 
 Lo que te queda de una venta descuenta la comisión y el depósito: en Forever cada puesta (una
@@ -22,7 +30,10 @@ from typing import Iterable
 
 from .merchantmap import KnownVendor, has_data, known_vendors
 
-MARKET_SHARE = 0.15      # parte más barata de las unidades que forma el precio de mercado
+MARKET_SHARE = 0.01      # parte más barata de las unidades que forma el precio de mercado
+MARKET_MIN_UNITS = 5     # y nunca menos de estas unidades, para que una sola no lo hunda
+MARKET_FORMULA = "1%-5"  # cambia si cambia la cuenta: los precios guardados se recalculan
+BOOK_TRUST_HOURS = 6     # un escaneo completo manda sobre un mínimo suelto más barato durante este rato
 HISTORY_DAYS = 1.5       # ventana de la mediana y de las señales (36 h): el server aún fluctúa mucho
 MIN_HISTORY_SCANS = 3    # escaneos necesarios para fiarse de la mediana
 SPIKE_CAP = 1.25         # nunca se valora por encima de la mediana + 25 %
@@ -46,7 +57,7 @@ def market_price(min_price: int, quantity: int, book: str | None) -> int:
     levels = parse_book(book)
     if not levels or quantity <= 0:
         return min_price
-    target = max(1, math.ceil(quantity * MARKET_SHARE))
+    target = max(MARKET_MIN_UNITS, math.ceil(quantity * MARKET_SHARE))
     taken = cost = 0
     for price, qty in levels:
         take = min(qty, target - taken)
@@ -55,6 +66,22 @@ def market_price(min_price: int, quantity: int, book: str | None) -> int:
         if taken >= target:
             break
     return round(cost / taken)
+
+
+def refresh_market_prices(conn: sqlite3.Connection) -> None:
+    """Recalcula el precio de mercado guardado si ha cambiado la cuenta (MARKET_FORMULA)."""
+    row = conn.execute("SELECT value FROM meta WHERE key = 'market_formula'").fetchone()
+    if row is not None and row[0] == MARKET_FORMULA:
+        return
+    rows = conn.execute(
+        "SELECT scan_id, item_id, min_price, quantity, book FROM prices WHERE book IS NOT NULL AND book <> ''"
+    ).fetchall()
+    conn.executemany(
+        "UPDATE prices SET market_price = ? WHERE scan_id = ? AND item_id = ?",
+        [(market_price(r[2], r[3] or 0, r[4]), r[0], r[1]) for r in rows],
+    )
+    conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES ('market_formula', ?)", (MARKET_FORMULA,))
+    conn.commit()
 
 
 @dataclass
@@ -148,6 +175,7 @@ class ItemPrice:
 def load_prices(conn: sqlite3.Connection, item_ids: Iterable[int] | None = None) -> dict[int, ItemPrice]:
     """Precios de los objetos pedidos (o de todos los conocidos si no se pide ninguno)."""
     wanted = set(item_ids) if item_ids is not None else None
+    refresh_market_prices(conn)
 
     def keep(item_id: int) -> bool:
         return wanted is None or item_id in wanted
@@ -184,6 +212,7 @@ def load_prices(conn: sqlite3.Connection, item_ids: Iterable[int] | None = None)
             p.vendor_buy = row["price"]
             p.vendor_limited = bool(row["limited"])
 
+    min_only: list[ItemPrice] = []
     for row in conn.execute("SELECT * FROM latest_prices"):
         if keep(row["item_id"]):
             p = get(row["item_id"])
@@ -193,6 +222,23 @@ def load_prices(conn: sqlite3.Connection, item_ids: Iterable[int] | None = None)
             p.auctions = row["num_auctions"]
             p.owners = row["num_owners"]
             p.seen = row["time"]
+            if not row["has_book"]:
+                min_only.append(p)
+
+    # Un mínimo suelto no rebaja lo que dijo un escaneo completo reciente (puede ser cebo).
+    if min_only:
+        books = {
+            row["item_id"]: (row["time"], row["market_price"])
+            for row in conn.execute(
+                """SELECT p.item_id, s.time, p.market_price FROM prices p JOIN scans s ON s.scan_id = p.scan_id
+                   WHERE p.book IS NOT NULL AND p.book <> '' AND p.market_price IS NOT NULL
+                   ORDER BY s.time"""
+            )
+        }
+        for p in min_only:
+            book = books.get(p.item_id)
+            if book and p.seen is not None and p.seen - book[0] <= BOOK_TRUST_HOURS * 3600 and book[1] > p.market:
+                p.market = book[1]
 
     # La ventana cuenta desde el último escaneo, no desde hoy: si dejas de
     # escanear un día y medio, la mediana sigue teniendo datos.

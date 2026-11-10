@@ -15,13 +15,17 @@ T0 = 1_762_000_000
 
 class PrecioDeMercado(unittest.TestCase):
     def test_una_unidad_regalada_no_hunde_el_precio(self):
-        # 100 unidades: el 15 % son 15. Una a 10 c y catorce a 100 c -> (10 + 1400) / 15 = 94
-        self.assertEqual(market_price(10, 100, "10:1;100:99"), 94)
+        # 100 unidades: el 1 % es 1, pero se cogen al menos 5. Una a 10 c y cuatro a 100 c -> 82
+        self.assertEqual(market_price(10, 100, "10:1;100:99"), 82)
+
+    def test_el_1_por_ciento_de_mucha_oferta(self):
+        # 24000 unidades: el 1 % son 240. Una de cebo a 89 c y el resto a 190 c -> 190.
+        self.assertEqual(market_price(89, 24000, "89:1;190:23999"), 190)
 
     def test_sin_libro_usa_el_minimo(self):
         self.assertEqual(market_price(50, 10, None), 50)
 
-    def test_libro_mas_corto_que_el_15_por_ciento(self):
+    def test_libro_mas_corto_que_lo_que_se_coge(self):
         # Solo se conocen 3 unidades del libro; se usa la media de esas.
         self.assertEqual(market_price(10, 1000, "10:1;20:2"), 17)
 
@@ -72,6 +76,46 @@ class HistorialYConsejos(unittest.TestCase):
         self.assertEqual(sales[2].action, "subastar")
         self.assertEqual(sales[2].unit_price, 199)
         self.assertIn("buen momento", sales[2].reason)
+
+
+class MinimoSuelto(unittest.TestCase):
+    """Lo que pasó con el Paño de seda: escaneo completo a 1 p 90 c y, 2 minutos después, el de
+    materiales con un mínimo de 89 c que se comía el precio."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.conn = dbmod.connect(Path(self.tmp.name) / "p.db")
+
+    def tearDown(self):
+        self.conn.close()
+        self.tmp.cleanup()
+
+    def scan(self, name, t, item_id, min_price, book=None):
+        self.conn.execute("INSERT INTO scans VALUES (?, 'x', ?, 0, 0, 'R', 'Horde', 'A-R', 1, 'X')", (name, t))
+        self.conn.execute("INSERT INTO prices VALUES (?, ?, ?, 1000, NULL, NULL, ?, ?)",
+                          (name, item_id, min_price, book, market_price(min_price, 1000, book)))
+
+    def test_un_minimo_mas_barato_no_rebaja_el_escaneo_completo(self):
+        self.scan("full", T0, 1, 190, "190:500;200:500")
+        self.scan("browse", T0 + 120, 1, 89)
+        self.assertEqual(load_prices(self.conn)[1].market, 190)
+
+    def test_un_minimo_mas_caro_si_manda(self):
+        self.scan("full", T0, 1, 190, "190:500;200:500")
+        self.scan("browse", T0 + 120, 1, 250)
+        self.assertEqual(load_prices(self.conn)[1].market, 250)
+
+    def test_un_escaneo_completo_viejo_ya_no_manda(self):
+        self.scan("full", T0, 1, 190, "190:500;200:500")
+        self.scan("browse", T0 + 7 * 3600, 1, 89)
+        self.assertEqual(load_prices(self.conn)[1].market, 89)
+
+    def test_los_precios_guardados_se_recalculan(self):
+        self.scan("full", T0, 1, 10, "10:1;100:999")
+        self.conn.execute("UPDATE prices SET market_price = 94")
+        self.conn.execute("UPDATE meta SET value = 'vieja' WHERE key = 'market_formula'")
+        # 1000 unidades: el 1 % son 10. Una a 10 c y nueve a 100 c -> 91.
+        self.assertEqual(load_prices(self.conn)[1].market, 91)
 
 
 class BaseDeDatosAntigua(unittest.TestCase):
