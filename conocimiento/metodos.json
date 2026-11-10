@@ -201,11 +201,12 @@
       "id": "inhospitas-elementales",
       "nombre": "Elementales de roca",
       "tipo": "farmeo", "nivel": 37, "zona": "Tierras Inhóspitas",
-      "objetos": ["Elemental Earth"],
+      "objetos": ["Elemental Earth", "Solid Stone", "Deeprock Salt"],
       "por_hora": [{"objeto": "Elemental Earth", "cantidad": 15}], "oro_hora": 5,
       "punto": {"mapa": 1418}, "bichos": ["Elemental de piedra"],
-      "notas": "Oro de vendedor con los grises que sueltan. El autor sacaba unos 10 o/h en el Classic original sin competencia. Estimado por hora: unos 110 elementales.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+      "notas": "Oro de vendedor con los grises que sueltan (pieza de piedra dentada y similares), más piedra sólida, sal de roca, elemental de tierra y alguna verde, azul o épica. Studen lo ha medido en Forever: unos 10 o/h contando todo, con mago de Escarcha y casi sin competencia; el oro_hora de aquí es solo lo de vendedor, más prudente. Hay cuatro sitios según el nivel y la gente que haya: elementales de piedra inferiores (37-39) en el norte de la zona, elementales de piedra (39-40) más al norte o al sur, elementales de piedra mayores (42-44) en la esquina suroeste y enfurecidos (42-43) en el sur. «Elemental de piedra» los selecciona a todos. La sal de roca es la que pide el Salero (ver ese método). Estimado por hora: unos 110 elementales.",
+      "fuente": "Guía de Studen v1.1; Studen, YouTube", "fecha": "2026-11-11",
+      "enlace": "https://www.youtube.com/watch?v=KH2HykcO6aI"
     },
     {
       "id": "clarofluvial-patriarcas",
@@ -232,11 +233,13 @@
       "id": "inhospitas-vastagos",
       "nombre": "Vástagos (glándula de llamas)",
       "tipo": "farmeo", "nivel": 40, "zona": "Tierras Inhóspitas",
-      "objetos": ["Small Flame Sac"],
-      "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 14}], "oro_hora": 1.5,
+      "mejor_con": [186, 182, 393],
+      "objetos": ["Small Flame Sac", "Dark Whelpling"],
+      "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 14}, {"objeto": "Dark Whelpling", "cantidad": 0.1}], "oro_hora": 1.5,
       "punto": {"mapa": 1418}, "bichos": ["Cría hirviente"],
-      "notas": "La glándula de llamas pequeña se usa en la poción de protección contra el Fuego, el chili de aliento de dragón, el batido picante y el deflector de llamas. La guía decía que solo compensa cuando la gente empiece con el Núcleo de Magma, y según la hoja de ruta este no abre el 9 de diciembre (ver «Materiales de pociones de protección»). Estimado por hora: unos 110 vástagos con un 13 % (MetaBot, datos de Classic).",
-      "fuente": "Guía de Studen v1.1; MetaBot; Blizzard Watch (2026-09-13)", "fecha": "2026-11-04"
+      "notas": "La glándula de llamas pequeña se usa en la poción de protección contra el Fuego, el chili de aliento de dragón, el batido picante y el deflector de llamas. La guía decía que solo compensa cuando la gente empiece con el Núcleo de Magma, y según la hoja de ruta este no abre el 9 de diciembre (ver «Materiales de pociones de protección»). Studen, en cambio, ve la demanda ya en el chili de aliento de dragón, que llevaría todo el que haga mazmorras; del batido picante (espíritu y +5 % de experiencia) no espera mucho. Lo que añade su vídeo de Forever: las crías son dragonantes, así que sueltan plata además de verdes y alguna azul, y tienen botín propio, como la mascota Dracochorro oscuro, que con los logros y colecciones de Forever espera que se venda mejor que en otros Classic. Están en el barranco del sur y en el del norte; entre los dos hay élites, pero se pasa corriendo. Coge antes la misión de al lado que pide el Corazón de draco negro: cae al 1-2 %, así que se completa sola mientras farmeas. Él lleva Desollar, pero recomienda Minería: la zona está llena de vetas de mitril, y también va bien Botánica, recorriendo del sur al norte. A nivel 40 o así da unos 30 000 de experiencia por hora, útil si las misiones están llenas de gente. Según los datos de Forever las crías hirvientes son de nivel 41-43. Estimado por hora: unos 110 vástagos con un 13 % (MetaBot, datos de Classic); la mascota, una de cada mil.",
+      "fuente": "Guía de Studen v1.1; MetaBot; Blizzard Watch (2026-09-13); Studen, YouTube (transcripción que pasó Piti)", "fecha": "2026-11-11",
+      "enlace": "https://www.youtube.com/watch?v=ZZs52VIR1-k"
     },
     {
       "id": "marjal-vastagos",
