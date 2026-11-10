@@ -14,7 +14,9 @@ Inventory.lua
 AuctionScan.lua
 Merchant.lua
 Trainer.lua
+Disenchant.lua
 Tooltip.lua
+Gold.lua
 CraftInfo.lua
 Farming.lua
 Ledger.lua

@@ -244,8 +244,123 @@ local function AdvanceBrowse()
   end
 end
 
+-- Tus búsquedas ------------------------------------------------------------------------
+-- Lo que sale al buscar en la subasta (a mano, con el botón Buscar o desde otro addon) se apunta
+-- en un escaneo «search», uno por visita a la subasta, que se va completando. El tooltip y la
+-- ventana de profesión lo usan al momento y el motor lo lee como cualquier otro escaneo.
+local search          -- el escaneo de esta visita
+local searchExact = {} -- objetos con su lista de subastas entera: un mínimo suelto no los pisa
+
+local function SearchScan()
+  if not search then
+    local now = time()
+    search = {
+      type = "search", time = now, started = now, duration = 0,
+      realm = GetRealmName(), faction = UnitFactionGroup("player"), char = ns.charKey,
+      count = 0, items = {},
+    }
+    ns.AddScan(search)
+  end
+  return search
+end
+
+local function NoteSearch(itemID, text, exact)
+  if not exact and searchExact[itemID] then return end
+  local s = SearchScan()
+  if s.items[itemID] == nil then s.count = s.count + 1 end
+  s.items[itemID] = text
+  if exact then searchExact[itemID] = true end
+  s.time = time()
+  s.duration = s.time - s.started
+  if ns.InvalidateScanPrices then ns.InvalidateScanPrices() end
+  ns.Debounce("ahlive", 0.3, function()
+    if ns.OnLivePrices then ns.OnLivePrices() end
+  end)
+end
+
+-- "mínimo,cantidad,subastas|precio:cantidad;..." como el escaneo completo, sin vendedores.
+local function BookText(book, min, qty, n)
+  local prices = {}
+  for p in pairs(book) do prices[#prices + 1] = p end
+  table.sort(prices)
+  local parts = {}
+  for i = 1, math.min(#prices, BOOK_LEVELS) do
+    parts[i] = Money(prices[i]) .. ":" .. book[prices[i]]
+  end
+  return ("%s,%d,%d|%s"):format(Money(min), qty, n, table.concat(parts, ";"))
+end
+
+-- Lista de resultados: el precio mínimo y la cantidad de cada objeto.
+local function RecordBrowse()
+  if Scan.state ~= "idle" then return end
+  local found = {}
+  for _, r in ipairs(C_AuctionHouse.GetBrowseResults() or {}) do
+    local key = r.itemKey
+    if key and key.itemID and (key.battlePetSpeciesID or 0) == 0 and r.minPrice and r.minPrice > 0 then
+      local a = found[key.itemID]
+      if not a then
+        found[key.itemID] = { min = r.minPrice, qty = r.totalQuantity or 0 }
+      else
+        a.min = math.min(a.min, r.minPrice)
+        a.qty = a.qty + (r.totalQuantity or 0)
+      end
+    end
+  end
+  for itemID, a in pairs(found) do
+    NoteSearch(itemID, Money(a.min) .. "," .. a.qty, false)
+  end
+end
+
+-- Al abrir un objeto que se vende por unidades: todas sus subastas, precio a precio.
+local function RecordCommodity(itemID)
+  local AH = C_AuctionHouse
+  if not (itemID and AH.GetNumCommoditySearchResults and AH.GetCommoditySearchResultInfo) then return end
+  local book, min, qty, n = {}, nil, 0, 0
+  for i = 1, AH.GetNumCommoditySearchResults(itemID) or 0 do
+    local r = AH.GetCommoditySearchResultInfo(itemID, i)
+    if r and r.unitPrice and r.unitPrice > 0 and (r.quantity or 0) > 0 then
+      book[r.unitPrice] = (book[r.unitPrice] or 0) + r.quantity
+      qty, n = qty + r.quantity, n + 1
+      if not min or r.unitPrice < min then min = r.unitPrice end
+    end
+  end
+  if min then NoteSearch(itemID, BookText(book, min, qty, n), true) end
+end
+
+-- Al abrir un objeto que se vende suelto: cada subasta con su precio por unidad.
+local function RecordItem(itemKey)
+  local AH = C_AuctionHouse
+  local itemID = type(itemKey) == "table" and itemKey.itemID
+  if not (itemID and AH.GetNumItemSearchResults and AH.GetItemSearchResultInfo) then return end
+  local book, min, qty, n = {}, nil, 0, 0
+  for i = 1, AH.GetNumItemSearchResults(itemKey) or 0 do
+    local r = AH.GetItemSearchResultInfo(itemKey, i)
+    local count = r and r.quantity or 0
+    if r and r.buyoutAmount and r.buyoutAmount > 0 and count > 0 then
+      local unit = math.floor(r.buyoutAmount / count)
+      book[unit] = (book[unit] or 0) + count
+      qty, n = qty + count, n + 1
+      if not min or unit < min then min = unit end
+    end
+  end
+  if min then NoteSearch(itemID, BookText(book, min, qty, n), true) end
+end
+
+ns.On("COMMODITY_SEARCH_RESULTS_UPDATED", function(_, itemID)
+  if Scan.state ~= "idle" or not itemID then return end
+  ns.Debounce("ahcommodity" .. itemID, 0.3, function() RecordCommodity(itemID) end)
+end)
+ns.On("ITEM_SEARCH_RESULTS_UPDATED", function(_, itemKey)
+  if Scan.state ~= "idle" or type(itemKey) ~= "table" or not itemKey.itemID then return end
+  ns.Debounce("ahitem" .. itemKey.itemID, 0.3, function() RecordItem(itemKey) end)
+end)
+
 local function OnBrowseEvent()
-  if Scan.state == "browse" then ns.Debounce("ahbrowse", 0.3, AdvanceBrowse) end
+  if Scan.state == "browse" then
+    ns.Debounce("ahbrowse", 0.3, AdvanceBrowse)
+  elseif Scan.state == "idle" and ns.ahOpen then
+    ns.Debounce("ahsearch", 0.3, RecordBrowse)
+  end
 end
 ns.On("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", OnBrowseEvent)
 ns.On("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", OnBrowseEvent)
@@ -323,6 +438,7 @@ end
 local function OnAuctionHouseClosed()
   if not ns.ahOpen then return end
   ns.ahOpen = false
+  search, searchExact = nil, {}  -- la próxima visita empieza otro escaneo de búsquedas
   Cancel(Scan.state ~= "idle" and "escaneo cancelado al cerrar la subasta." or nil)
   if ns.HideAuctionButtons then ns.HideAuctionButtons() end
 end

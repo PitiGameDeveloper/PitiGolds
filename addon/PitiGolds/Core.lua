@@ -161,10 +161,22 @@ function ns.NoteItem(itemID, name)
   end
 end
 
+-- Quita escaneos viejos hasta dejar MAX_PENDING_SCANS. Primero se van los de tus búsquedas
+-- (uno por visita a la subasta, con pocos objetos), para no perder un escaneo completo.
+local function TrimScans(scans)
+  while #scans > ns.MAX_PENDING_SCANS do
+    local victim = 1
+    for i = 1, #scans - 1 do
+      if scans[i].type == "search" then victim = i break end
+    end
+    table.remove(scans, victim)
+  end
+end
+
 function ns.AddScan(scan)
   local scans = PitiGoldsDB.scans
   scans[#scans + 1] = scan
-  while #scans > ns.MAX_PENDING_SCANS do table.remove(scans, 1) end
+  TrimScans(scans)
 end
 
 -- Quita los escaneos que el motor ya ha guardado en su base de datos.
@@ -175,7 +187,7 @@ function ns.PruneScans()
   for _, scan in ipairs(PitiGoldsDB.scans) do
     if (scan.time or 0) > upTo then kept[#kept + 1] = scan end
   end
-  while #kept > ns.MAX_PENDING_SCANS do table.remove(kept, 1) end
+  TrimScans(kept)
   PitiGoldsDB.scans = kept
 end
 

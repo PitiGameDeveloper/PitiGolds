@@ -61,7 +61,7 @@ def build_report(conn: sqlite3.Connection, top: int = 10) -> str:
 
     out.append("")
     out.append("Subasta")
-    for kind, label in (("full", "completos"), ("browse", "de materiales")):
+    for kind, label in (("full", "completos"), ("browse", "de materiales"), ("search", "de tus búsquedas")):
         row = conn.execute(
             "SELECT COUNT(*) AS n, MAX(time) AS last FROM scans WHERE type = ?", (kind,)
         ).fetchone()

@@ -2,18 +2,39 @@
 -- en la subasta, mediana de las últimas 36 horas y cuánto cuesta fabricarlo.
 local ADDON, ns = ...
 
+-- Iconos de moneda del juego. GetCoinTextureString ya no es global en todos los clientes
+-- (en Forever no está y salía «5p 0c» en texto), así que se ponen a mano.
+ns.coinIcons = ns.coinIcons or {
+  gold = "|TInterface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t",
+  silver = "|TInterface\\MoneyFrame\\UI-SilverIcon:0:0:2:0|t",
+  copper = "|TInterface\\MoneyFrame\\UI-CopperIcon:0:0:2:0|t",
+}
+
 function ns.Money(copper)
   copper = tonumber(copper)
   if not copper then return "?" end
+  copper = math.floor(copper + 0.5)
   -- Las pérdidas llevan el signo aparte: con módulo, -2 c saldría como 99p 98c.
   if copper < 0 then return "-" .. ns.Money(-copper) end
-  if GetCoinTextureString then return GetCoinTextureString(copper) end
+  local icons = ns.coinIcons
   local gold = math.floor(copper / 10000)
   local silver = math.floor((copper % 10000) / 100)
   local rest = copper % 100
-  if gold > 0 then return ("%do %dp %dc"):format(gold, silver, rest) end
-  if silver > 0 then return ("%dp %dc"):format(silver, rest) end
-  return ("%dc"):format(rest)
+  if gold > 0 then
+    return ("%d%s %d%s %d%s"):format(gold, icons.gold, silver, icons.silver, rest, icons.copper)
+  end
+  if silver > 0 then return ("%d%s %d%s"):format(silver, icons.silver, rest, icons.copper) end
+  return ("%d%s"):format(rest, icons.copper)
+end
+
+-- Precio de mercado de un objeto: lo último visto en la subasta si el motor aún no lo ha leído,
+-- o el del motor.
+function ns.MarketPrice(itemID)
+  local seen = ns.ScanMarket and ns.ScanMarket(itemID)
+  if seen then return seen, true end
+  local gen = PitiGoldsGenerated
+  local text = type(gen) == "table" and gen.prices and gen.prices[itemID]
+  return text and tonumber(text:match("^(%d+)")), false
 end
 
 local LABEL_R, LABEL_G, LABEL_B = 0.9, 0.7, 0.1
@@ -67,6 +88,72 @@ local function PriceText(unit, count)
   return ns.Money(unit)
 end
 
+-- Cuántos tienes: este personaje en bolsas y banco, el banco de banda y tus otros personajes
+-- (de esos, todo junto: bolsas, banco y buzón, según lo último que vio el addon).
+local function CountIn(place, itemID)
+  if type(place) ~= "table" then return 0 end
+  local n = 0
+  for _, list in ipairs({ place.items, place.bound }) do
+    if type(list) == "table" then n = n + (list[itemID] or 0) end
+  end
+  return n
+end
+
+-- Nombre de un personaje guardado; con su reino si no es el tuyo.
+function ns.CharDisplayName(key, c)
+  local name = (type(c) == "table" and c.name) or key:match("^([^-]+)") or key
+  local myRealm = ns.charKey and ns.charKey:match("%-(.+)$")
+  local realm = key:match("%-(.+)$")
+  if realm and myRealm and realm ~= myRealm then name = name .. " (" .. realm .. ")" end
+  return name
+end
+
+function ns.OwnedCounts(itemID)
+  local rows = {}
+  local getCount = C_Item and C_Item.GetItemCount or GetItemCount
+  local bags, bank = 0, 0
+  if getCount then
+    local ok, carried = pcall(getCount, itemID)
+    bags = ok and carried or 0
+    local okBank, all = pcall(getCount, itemID, true, false, true)
+    bank = okBank and math.max(0, (all or 0) - bags) or 0
+  end
+  if bags > 0 then rows[#rows + 1] = { "Bolsas", bags } end
+  if bank > 0 then rows[#rows + 1] = { "Banco", bank } end
+  local db = PitiGoldsDB
+  if type(db) == "table" then
+    local warband = CountIn(db.account and db.account.warbandBank, itemID)
+    if warband > 0 then rows[#rows + 1] = { "Banco de banda", warband } end
+    local others = {}
+    for key, c in pairs(db.characters or {}) do
+      if key ~= ns.charKey and type(c) == "table" and type(c.inventory) == "table" then
+        local inv = c.inventory
+        local n = CountIn(inv.bags, itemID) + CountIn(inv.bank, itemID) + CountIn(inv.mail, itemID)
+        if n > 0 then others[#others + 1] = { ns.CharDisplayName(key, c), n } end
+      end
+    end
+    table.sort(others, function(a, b) return a[2] > b[2] end)
+    for _, row in ipairs(others) do rows[#rows + 1] = row end
+  end
+  return rows
+end
+
+local function AddOwnedLines(tooltip, itemID)
+  local rows = ns.OwnedCounts(itemID)
+  if #rows == 0 then return end
+  local total = 0
+  for _, row in ipairs(rows) do total = total + row[2] end
+  if #rows == 1 then
+    tooltip:AddDoubleLine("Tienes:", total .. " |cffcccccc(" .. rows[1][1]:lower() .. ")|r",
+      LABEL_R, LABEL_G, LABEL_B, 1, 1, 1)
+    return
+  end
+  tooltip:AddDoubleLine("Tienes:", tostring(total), LABEL_R, LABEL_G, LABEL_B, 1, 1, 1)
+  for _, row in ipairs(rows) do
+    tooltip:AddDoubleLine("   " .. row[1], tostring(row[2]), 0.8, 0.8, 0.8, 0.8, 0.8, 0.8)
+  end
+end
+
 local function AddLines(tooltip, itemID, sellTotal)
   local gen = PitiGoldsGenerated
   if not itemID then return end
@@ -79,6 +166,9 @@ local function AddLines(tooltip, itemID, sellTotal)
   local market, median, trend, sales
   if price then market, median, trend, sales = price:match("^(%d*),(%d*),?(%a*),?([%d%.]*)$") end
   market = tonumber(market)
+  -- Lo que acabas de ver en la subasta manda sobre el precio del motor.
+  local seen = ns.ScanMarket and ns.ScanMarket(itemID)
+  if seen then market = seen end
 
   local sellUnit = sellTotal and (ItemSellPrice(itemID) or math.floor(sellTotal / count))
   -- En verde lo que más deja por unidad: la subasta, quitada su comisión, o el vendedor.
@@ -125,6 +215,9 @@ local function AddLines(tooltip, itemID, sellTotal)
         LABEL_R, LABEL_G, LABEL_B, 1, 1, 1)
     end
   end
+
+  if ns.AddDisenchantLines then ns.AddDisenchantLines(tooltip, itemID) end
+  AddOwnedLines(tooltip, itemID)
 end
 
 -- Objeto del tooltip mientras el juego lo está rellenando.

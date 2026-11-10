@@ -9,6 +9,8 @@ Lleva:
   craft         coste y beneficio por unidad de lo que sabes fabricar.
   recipes       "coste,ganancia" de cada fabricación de las recetas de tus profesiones, para
                 la ventana de profesión. Ganancia vacía si lo fabricado no tiene precio.
+  recipeParts   desglose de esas recetas (recipe_parts) para recalcularlas en el juego con lo que
+                se acaba de ver en la subasta.
   lastScan      hora del último escaneo de la subasta.
   methods       la ventana de métodos: el mejor farmeo y las pestañas de farmeos y crafteos
                 (panel.py).
@@ -55,6 +57,35 @@ def lua_value(value, indent: str = "  ") -> str:
     return "{\n" + "".join(f"{inner}{part},\n" for part in parts) + indent + "}"
 
 
+def _num(value) -> str:
+    """Número para recipeParts: entero si lo es, vacío si no hay."""
+    if value is None:
+        return ""
+    if isinstance(value, float) and not value.is_integer():
+        return f"{value:.4g}"
+    return str(int(value))
+
+
+def recipe_parts(c, prices: dict) -> str:
+    """Desglose de una receta para que el addon la recalcule con los precios que ve en la subasta:
+    "objeto,unidades,valor,venta_vendedor,depósito|material:cantidad:coste:tienda;..."
+    valor: lo que el motor cobra por lo fabricado (por fabricación); coste: lo que el motor paga por
+    unidad del material; tienda: lo que cuesta a un vendedor sin límite (vacío si no hay)."""
+    out = prices.get(c.output_item_id) if c.output_item_id else None
+    head = ",".join([
+        _num(c.output_item_id), _num(c.output_qty), _num(c.value),
+        _num(out.vendor_sell if out else None), _num(round(out.deposit_per_unit, 2) if out else None),
+    ])
+    parts = []
+    for r in c.reagents:
+        if r.item_id is None:
+            continue
+        p = prices.get(r.item_id)
+        shop = p.shop_price if p is not None else None
+        parts.append(f"{r.item_id}:{r.quantity}:{_num(r.unit_cost)}:{_num(shop)}")
+    return head + "|" + ";".join(parts)
+
+
 def render_generated(ingested_up_to: int, analysis: Analysis, now: int | None = None,
                      farm_ingested_up_to: int = 0, ledger_ingested_up_to: int = 0,
                      panel: Panel | None = None) -> str:
@@ -84,6 +115,11 @@ def render_generated(ingested_up_to: int, analysis: Analysis, now: int | None = 
         if c.yours and c.cost is not None:
             profit = c.profit if c.profit is not None else ""
             lines.append(f'    [{c.recipe_id}] = "{c.cost},{profit}",')
+    lines.append("  },")
+    lines.append("  recipeParts = {")
+    for c in sorted(analysis.crafts, key=lambda c: c.recipe_id):
+        if c.yours and c.cost is not None:
+            lines.append(f'    [{c.recipe_id}] = "{recipe_parts(c, analysis.prices)}",')
     lines.append("  },")
     if analysis.last_scan:
         lines.append(f"  lastScan = {int(analysis.last_scan)},")

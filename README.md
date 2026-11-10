@@ -294,6 +294,13 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 3. En la casa de subastas aparecen dos botones encima de la ventana:
    - **PG: Materiales**: recorre materiales, consumibles, recetas y gemas. Guarda el precio mínimo y la cantidad total de cada objeto. Se puede repetir cuando quieras.
    - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores. El servidor solo lo permite **cada 15 minutos**.
+   - **Fabricar x**: cuántas veces quieres fabricar la receta del botón **Buscar** (empieza con el número
+     que tengas junto a «Crear todo»). Al abrir uno de sus materiales para comprarlo se marca solo lo que
+     falta: lo que pide la receta por ese número, menos lo que ya tienes en bolsas y banco.
+
+   Además, todo lo que ves al buscar en la subasta (a mano, con **Buscar** o desde otro addon) se apunta al
+   momento: el tooltip y la ventana de profesión usan ese precio sin esperar al motor, y el motor lo lee
+   como un escaneo más («de tus búsquedas» en el informe).
 4. No hace falta exportar nada: el addon apunta solo lo que pasa (al entrar con cada personaje, al lootear,
    al escanear...) y WoW lo guarda en disco al cambiar de personaje, al salir del juego o con `/reload`.
    `vigilar.cmd` lo lee en un par de segundos, y el addon lo enseña al entrar con el siguiente personaje o
@@ -305,15 +312,24 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    - **Subasta:** el precio de mercado, con la mediana de 36 horas, «baja» o «sube» si el motor lo ve
      así, y **ventas/día**: las unidades que se venden al día en la subasta (estimadas).
    - Si sabes fabricarlo, cuánto cuesta y cuánto ganas.
+   - **Desencantar:** si es un arma o armadura verde, azul o morada, lo que sale al desencantarla (con la
+     probabilidad de cada material, de la tabla clásica) y lo que vale cada material en la subasta; arriba,
+     lo que se espera sacar por objeto.
+   - **Tienes:** cuántos tienes en total y dónde: bolsas, banco, banco de banda y cada uno de tus otros
+     personajes (de esos, todo junto, según lo último que vio el addon).
+
+   Al pasar el ratón por el oro de las bolsas sale el **oro de la cuenta**: el total, el de cada personaje y
+   el del banco de banda.
 
    Los precios van por unidad y, si es un montón, con el total al lado (`3p 0c  x5: 15p 0c`). En verde sale
    lo que más deja por unidad: el vendedor o la subasta, a la que se le quita su 5 % de comisión.
 7. En la ventana de cada profesión, debajo de los materiales de la receta elegida, salen **Fabricar:**
    (lo que cuestan los materiales de una fabricación, cada uno al mejor precio entre subasta y vendedor)
    y **Ganancia:** (lo que se cobra vendiendo lo fabricado, ya sin comisión, menos ese coste; en verde o
-   en rojo). Son las mismas cuentas del informe, así que se ponen al día con cada `/reload`. Al lado, el
-   botón **Buscar** busca en la subasta los materiales de la receta; si está cerrada, lo hace al abrirla.
-   Si tienes Auctionator, desactiva su información de fabricación para que no se pisen.
+   en rojo). Son las mismas cuentas del informe, así que se ponen al día con cada `/reload`; si acabas de
+   ver en la subasta alguno de sus materiales o lo fabricado, se recalculan al momento con ese precio
+   (lo dice debajo, en gris). Al lado, el botón **Buscar** busca en la subasta los materiales de la receta;
+   si está cerrada, lo hace al abrirla. Si tienes Auctionator, el recuadro se pone debajo del suyo.
 
 **`estado.cmd`** da el resumen general: oro, profesiones, valor del inventario y divisas de Forever.
 

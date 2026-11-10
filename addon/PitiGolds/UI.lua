@@ -114,7 +114,7 @@ end
 local function CreateAuctionBar()
   local parent = AuctionHouseFrame or UIParent
   ahBar = CreateFrame("Frame", nil, parent)
-  ahBar:SetSize(360, 22)
+  ahBar:SetSize(520, 22)
   if AuctionHouseFrame then
     ahBar:SetPoint("BOTTOMLEFT", AuctionHouseFrame, "TOPLEFT", 60, 2)
   else
@@ -133,8 +133,34 @@ local function CreateAuctionBar()
   mats:SetText("PG: Materiales")
   mats:SetScript("OnClick", function() ns.Scan.StartMaterials() end)
 
+  -- Cuántas veces quieres fabricar la receta del botón Buscar: al abrir uno de sus materiales
+  -- se marca para comprar lo que pide multiplicado por esto (menos lo que ya tienes).
+  local label = ahBar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  label:SetPoint("LEFT", mats, "RIGHT", 10, 0)
+  label:SetText("Fabricar x")
+  local box = CreateFrame("EditBox", nil, ahBar, "InputBoxTemplate")
+  box:SetSize(40, 20)
+  box:SetPoint("LEFT", label, "RIGHT", 8, 0)
+  box:SetAutoFocus(false)
+  box:SetNumeric(true)
+  box:SetMaxLetters(3)
+  box:SetText(tostring(ns.craftCount or 1))
+  local function Commit(self)
+    ns.SetCraftCount(tonumber(self:GetText()) or 1)
+    self:ClearFocus()
+  end
+  box:SetScript("OnEnterPressed", Commit)
+  box:SetScript("OnEditFocusLost", function(self) ns.SetCraftCount(tonumber(self:GetText()) or 1) end)
+  box:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+  ns.craftCountBox = box
+
   ahStatus = ahBar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  ahStatus:SetPoint("LEFT", mats, "RIGHT", 8, 0)
+  ahStatus:SetPoint("LEFT", box, "RIGHT", 8, 0)
+end
+
+function ns.UpdateCraftCountBox()
+  local box = ns.craftCountBox
+  if box and tostring(ns.craftCount) ~= box:GetText() then box:SetText(tostring(ns.craftCount)) end
 end
 
 function ns.ShowAuctionButtons()

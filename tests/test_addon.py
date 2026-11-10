@@ -24,6 +24,8 @@ from motor.report import build_advice_report, build_report
 
 ROOT = Path(__file__).resolve().parent.parent
 ADDON_DIR = ROOT / "addon" / "PitiGolds"
+# Lo que tiene el personaje del escenario de Barra de cobre: 10 en el banco.
+TIENES = "Tienes: = 10 |cffcccccc(banco)|r"
 TESTS_DIR = Path(__file__).resolve().parent
 
 
@@ -89,7 +91,7 @@ class TooltipVentaYSubasta(unittest.TestCase):
     def test_quita_la_linea_del_juego_y_pone_venta(self):
         tooltip = self.mock.Tooltip(2840, 1, 10)
         self.assertNotIn("Precio de venta", tooltip)
-        self.assertEqual(tooltip.split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c"])
+        self.assertEqual(tooltip.split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c", TIENES])
 
     def test_por_unidad_y_por_el_monton(self):
         tooltip = self.mock.Tooltip(2840, 5, 50)
@@ -106,7 +108,7 @@ class TooltipVentaYSubasta(unittest.TestCase):
         self.assertEqual(tooltip.split("\n"), ["[verde] Venta: = 1p 50c", "Subasta: = 1p 40c"])
 
     def test_sin_precio_de_venta_solo_subasta(self):
-        self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c")
+        self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c\n" + TIENES)
 
     def test_muestra_las_ventas_diarias_si_el_motor_las_tiene(self):
         self.lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,,,4.5", [818] = "140,140,s," } }')
@@ -116,13 +118,144 @@ class TooltipVentaYSubasta(unittest.TestCase):
 
     def test_sale_aunque_el_cliente_no_llame_a_los_post_calls(self):
         tooltip = self.mock.Tooltip(2840, 1, 10, True)
-        self.assertEqual(tooltip.split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c"])
+        self.assertEqual(tooltip.split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c", TIENES])
 
     def test_pasar_el_raton_otra_vez_no_repite_ni_pierde_lineas(self):
         for _ in range(3):
-            self.assertEqual(self.mock.Tooltip(2840, 1, 10).split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c"])
-            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c")
-            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c")
+            self.assertEqual(self.mock.Tooltip(2840, 1, 10).split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c", TIENES])
+            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c\n" + TIENES)
+            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c\n" + TIENES)
+
+
+class IconosDeMoneda(unittest.TestCase):
+    def test_en_el_juego_salen_los_iconos(self):
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        lua.execute("Mock.ns.coinIcons = nil")
+        mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        text = mock.ns.Money(12345)
+        self.assertTrue(text.startswith("1|TInterface\\MoneyFrame\\UI-GoldIcon"), text)
+        self.assertIn("23|TInterface\\MoneyFrame\\UI-SilverIcon", text)
+        self.assertIn("45|TInterface\\MoneyFrame\\UI-CopperIcon", text)
+
+
+class SubastaEnVivoYCompra(unittest.TestCase):
+    """Lo que ves buscando en la subasta, la lista de la compra y lo nuevo del tooltip."""
+
+    def setUp(self):
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        lua.execute('''
+          PitiGoldsGenerated = {
+            prices = { [2840] = "300,,", [2845] = "5000,,", [10940] = "10,,", [10939] = "200,,", [10978] = "500,," },
+            recipes = { [1002] = "1900,2750" },
+            recipeParts = { [1002] = "2845,1,4650,18,100|2840:6:300:;2880:1:100:100" },
+          }
+          Mock.commodity = { [2840] = { { unitPrice = 400, quantity = 30 }, { unitPrice = 450, quantity = 20 } } }
+          C_AuctionHouse.GetNumCommoditySearchResults = function(id) return #(Mock.commodity[id] or {}) end
+          C_AuctionHouse.GetCommoditySearchResultInfo = function(id, i) return Mock.commodity[id][i] end
+          AuctionHouseFrame = { CommoditiesBuyFrame = {
+            SetItemIDAndPrice = function() end,
+            IsShown = function() return true end,
+            BuyDisplay = { SetQuantitySelected = function(_, q) Mock.buyQuantity = q end },
+          } }''')
+        self.lua, self.mock = lua, mock
+
+    def last_scan(self):
+        return self.lua.eval("PitiGoldsDB.scans[#PitiGoldsDB.scans]")
+
+    def test_apunta_lo_que_buscas_y_lo_usa_al_momento(self):
+        mock = self.mock
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2840)
+        mock.Advance(1)
+        scan = self.last_scan()
+        self.assertEqual(scan["type"], "search")
+        self.assertEqual(scan["items"][2840], "400,50,2|400:30;450:20")
+        # El tooltip ya enseña el precio nuevo (media del 15 % más barato: 400).
+        self.assertIn("Subasta: = 4p 0c", mock.Tooltip(2840, 1, 10))
+        # Y la receta se recalcula: 6 × 4p + 1p de flujo = 25p; 46p 50c - 25p = 21p 50c.
+        self.assertEqual(mock.ns.CraftInfoText(1002),
+                         "Fabricar: |cffffffff25p 0c|r\nGanancia: |cff40ff4021p 50c|r"
+                         "\n|cff999999con lo que acabas de ver en la subasta|r")
+        # Una lista de resultados después no pisa la lista entera del objeto.
+        self.lua.execute('''Mock.browseData[99] = { { itemKey = { itemID = 2840 }, minPrice = 100, totalQuantity = 5 },
+                                                    { itemKey = { itemID = 2880 }, minPrice = 90, totalQuantity = 7 } }
+                            C_AuctionHouse.SendBrowseQuery({ itemClassFilters = { { classID = 99 } } })''')
+        mock.Advance(2)
+        scan = self.last_scan()
+        self.assertEqual(scan["items"][2840], "400,50,2|400:30;450:20")
+        self.assertEqual(scan["items"][2880], "90,7")
+        # Una visita, un escaneo de búsquedas.
+        self.assertEqual(self.lua.eval('(function() local n = 0 for _, s in ipairs(PitiGoldsDB.scans) do '
+                                       'if s.type == "search" then n = n + 1 end end return n end)()'), 1)
+
+    def test_sin_nada_nuevo_la_receta_es_la_del_motor(self):
+        self.assertEqual(self.mock.ns.CraftInfoText(1002),
+                         "Fabricar: |cffffffff19p 0c|r\nGanancia: |cff40ff4027p 50c|r")
+
+    def test_marca_lo_que_falta_por_el_multiplicador(self):
+        mock = self.mock
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.ns.SearchRecipeReagents(1002)
+        # 6 barras por hacha y ya tiene 10 en el banco.
+        self.assertEqual(mock.ns.ShoppingQuantity(2840), (0, 10))
+        mock.ns.SetCraftCount(3)
+        self.assertEqual(mock.ns.ShoppingQuantity(2840), (8, 10))
+        self.assertEqual(mock.ns.ShoppingQuantity(2880), (3, 0))
+        self.assertIsNone(mock.ns.ShoppingQuantity(2589))  # opcional: no se compra
+        self.lua.execute("AuctionHouseFrame.CommoditiesBuyFrame:SetItemIDAndPrice(2880, 100)")
+        mock.Advance(1)
+        self.assertEqual(self.lua.eval("Mock.buyQuantity"), 3)
+        mock.ns.SetCraftCount(5)
+        self.assertEqual(self.lua.eval("Mock.buyQuantity"), 5)
+        self.assertIn("Flujo débil: marcados 5 para 5 fabricaciones.", "\n".join(mock.chat.values()))
+
+    def test_cuantos_tienes_y_tus_otros_personajes(self):
+        self.lua.execute('''
+          local key = "Alter-" .. Mock.ns.charKey:match("%-(.+)$")
+          PitiGoldsDB.characters[key] = { name = "Alter", inventory = {
+            bags = { items = { [2840] = 4 } }, mail = { items = { [2840] = 1 } } } }''')
+        lines = self.mock.Tooltip(2840).split("\n")
+        self.assertEqual(lines[-3:], ["Tienes: = 15", "   Banco = 10", "   Alter = 5"])
+
+    def test_valor_de_desencantar(self):
+        self.lua.execute('''
+          local getInfo = C_Item.GetItemInfo
+          C_Item.GetItemInfo = function(id)
+            if id == 7000 then return "Botas verdes", nil, 2, 20, 15, nil, nil, 1, "INVTYPE_FEET", nil, 50, 4 end
+            return getInfo(id)
+          end''')
+        lines = self.mock.Tooltip(7000).split("\n")
+        # 75 % × 2,5 × 10c + 20 % × 1,5 × 2p + 5 % × 5p = 1p 3,75c
+        self.assertEqual(lines[0], "Desencantar: = ~1p 4c")
+        self.assertEqual(lines[1], "   objeto 10940 x2-3 |cff999999(75 %)|r = 10c")
+        self.assertEqual(lines[2], "   objeto 10939 x1-2 |cff999999(20 %)|r = 2p 0c")
+        self.assertEqual(lines[3], "   objeto 10978 x1 |cff999999(5 %)|r = 5p 0c")
+        # Lo que no es arma ni armadura no se desencanta.
+        self.assertNotIn("Desencantar", self.mock.Tooltip(2840))
+
+    def test_oro_de_la_cuenta(self):
+        self.lua.execute('''
+          local key = "Alter-" .. Mock.ns.charKey:match("%-(.+)$")
+          PitiGoldsDB.characters[key] = { name = "Alter", money = 20000 }
+          Mock.goldLines = {}
+          Mock.ns.AddGoldLines({ AddDoubleLine = function(_, l, r) table.insert(Mock.goldLines, l .. " = " .. r) end })''')
+        lines = list(self.lua.eval("Mock.goldLines").values())
+        me = self.mock.ns.charKey.split("-")[0]
+        money = self.lua.eval("GetMoney()")
+        total = money + 20000 + 500000
+        self.assertEqual(lines[0], "Oro de la cuenta = " + self.mock.ns.Money(total))
+        self.assertIn("   Alter = 2o 0p 0c", lines)
+        self.assertIn(f"   {me} = " + self.mock.ns.Money(money), lines)
+        self.assertEqual(lines[-1], "   Banco de banda = 50o 0p 0c")
 
 
 class FiltroDeProfesiones(unittest.TestCase):
@@ -495,6 +628,8 @@ class AddonMasMotor(unittest.TestCase):
 
             # Ventana de profesión: coste y ganancia de la receta elegida, bajo los materiales.
             self.assertIn('[1002] = "1900,2750",', content)
+            # Y su desglose, para recalcularla en el juego con lo que se vea en la subasta.
+            self.assertIn('[1002] = "2845,1,4650,18,100|2840:6:300:;2880:1:100:100",', content)
             lua.execute('''
               local form = Mock.NewFrame()
               form.Reagents = Mock.NewFrame()

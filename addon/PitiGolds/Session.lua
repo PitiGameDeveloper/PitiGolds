@@ -49,7 +49,7 @@ end
 local function BuildScanIndex()
   scanText, scanCache = {}, {}
   local seen = {}
-  for _, scan in ipairs(PitiGoldsDB.scans or {}) do
+  for _, scan in ipairs(PitiGoldsDB and PitiGoldsDB.scans or {}) do
     local t = scan.time or 0
     for itemID, text in pairs(scan.items or {}) do
       if type(text) == "string" and t >= (seen[itemID] or -1) then
@@ -68,6 +68,15 @@ local function ScanPrice(itemID)
     scanCache[itemID] = price
   end
   return price or nil
+end
+
+-- Precio de mercado de lo escaneado que el motor aún no ha leído (más nuevo que el suyo), o nil.
+-- Incluye lo que acabas de ver buscando en la subasta.
+ns.ScanMarket = ScanPrice
+
+-- Hay que llamarla cuando cambia un escaneo pendiente (tus búsquedas lo van completando).
+function ns.InvalidateScanPrices()
+  scanText, scanCache = nil, nil
 end
 
 local addScan = ns.AddScan

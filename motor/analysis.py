@@ -69,6 +69,15 @@ def owned_items(conn: sqlite3.Connection) -> dict[int, int]:
     return dict(owned)
 
 
+# Lo que sale al desencantar (polvos, esencias, fragmentos y cristal de nexo): el tooltip del
+# addon valora con ellos lo que da desencantar cada objeto (Disenchant.lua).
+DISENCHANT_MATERIALS = {
+    10940, 11083, 11137, 11176, 16204,
+    10938, 10939, 10998, 11082, 11134, 11135, 11174, 11175, 16202, 16203,
+    10978, 11084, 11138, 11139, 11177, 11178, 14343, 14344, 20725,
+}
+
+
 def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None) -> Analysis:
     """catalog: los métodos de tus guías; sin él se lee conocimiento/metodos.json."""
     catalog_error = None
@@ -82,7 +91,7 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
     ledger_ids = {r[0] for r in conn.execute("SELECT DISTINCT item_id FROM ledger WHERE item_id IS NOT NULL")}
     vendor_ids = {r[0] for r in conn.execute("SELECT item_id FROM vendor_items")}
     ids = (set(owned) | recipe_item_ids(conn) | farm_item_ids(conn) | ledger_ids | vendor_ids
-           | sold_item_ids(conn) | set(resolved.values()))
+           | sold_item_ids(conn) | set(resolved.values()) | DISENCHANT_MATERIALS)
     prices = load_prices(conn, ids)
 
     series, fulls = load_series(conn, ids)

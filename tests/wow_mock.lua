@@ -575,7 +575,8 @@ Mock.commodityPrices = {}
 
 -- Carga del addon y guardado -------------------------------------------------------------------
 
-Mock.ns = {}
+-- En las pruebas el dinero sale en texto («1p 75c») en vez de con los iconos del juego.
+Mock.ns = { coinIcons = { gold = "o", silver = "p", copper = "c" } }
 
 function Mock.LoadAddon(dir, files)
   for _, file in ipairs(files) do
