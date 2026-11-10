@@ -88,7 +88,11 @@ function Mock.NewFrame(name)
   return f
 end
 
-function CreateFrame(_, name) return Mock.NewFrame(name) end
+function CreateFrame(_, name, parent)
+  local f = Mock.NewFrame(name)
+  f.parentFrame = parent
+  return f
+end
 
 UIParent = Mock.NewFrame("UIParent")
 DEFAULT_CHAT_FRAME = { AddMessage = function(_, msg) table.insert(Mock.chat, msg) end }
@@ -215,7 +219,50 @@ C_Map = {
     return 1, { GetXY = function() return north, west end }
   end,
 }
+C_Map.GetPlayerMapPosition = function(id)
+  local corner = Mock.mapCorners[id]
+  if not corner then return nil end
+  local x, y = (corner[2] - Mock.position[2]) / 1000, (corner[1] - Mock.position[1]) / 1000
+  return { GetXY = function() return x, y end }
+end
+-- Los dos mapas de las pruebas están uno encima del otro en el mapa 1414 (el continente), que mide
+-- 1000 x 2000 metros: Durotar arriba y Los Baldíos abajo.
+Mock.mapRects = { [1411] = { 0, 1, 0, 0.5 }, [1413] = { 0, 1, 0.5, 1 } }
+C_Map.GetMapRectOnMap = function(id, top)
+  local r = top == 1414 and Mock.mapRects[id]
+  if r then return r[1], r[2], r[3], r[4] end
+end
 function CreateVector2D(x, y) return { x = x, y = y } end
+
+-- Mapa del mundo: un lienzo de 1000 x 1000 con el mapa que se está viendo.
+function Mock.NewWorldMap()
+  local canvas = Mock.NewFrame()
+  function canvas:GetWidth() return 1000 end
+  function canvas:GetHeight() return 1000 end
+  function canvas:HookScript(name, fn) self.hooks = self.hooks or {}; self.hooks[name] = fn end
+  function canvas:GetFrameLevel() return 1 end
+  local map = Mock.NewFrame("WorldMapFrame")
+  map.ScrollContainer = { Child = canvas }
+  map.mapID = 1413
+  map.shown = false
+  function map:GetMapID() return self.mapID end
+  function map:OnMapChanged() end
+  function map:HookScript(name, fn) self.hooks = self.hooks or {}; self.hooks[name] = fn end
+  return map
+end
+
+-- Las marcas que hay pintadas en el mapa del mundo: { { texture, x, y }, ... }.
+function Mock.MapPins()
+  local canvas = WorldMapFrame and WorldMapFrame.ScrollContainer.Child
+  local list = {}
+  for _, f in ipairs(Mock.frames) do
+    local parent = rawget(f, "parent")
+    if f.shown and parent and rawget(parent, "parentFrame") == canvas and rawget(f, "point") then
+      list[#list + 1] = { texture = f.texture, x = f.point[4], y = f.point[5] }
+    end
+  end
+  return list
+end
 function UnitPosition() return Mock.position[1], Mock.position[2], 0, 1 end
 function GetPlayerFacing() return Mock.facing end
 function GetZoneText() return Mock.mapNames[Mock.mapID] end
@@ -359,7 +406,8 @@ function Mock.MarkedPlates()
   local n = 0
   for _, f in ipairs(Mock.frames) do
     local parent = rawget(f, "parent")
-    if rawget(f, "marksPlate") and parent and parent.shown then n = n + 1 end
+    local onMap = parent and WorldMapFrame and rawget(parent, "parentFrame") == WorldMapFrame.ScrollContainer.Child
+    if rawget(f, "marksPlate") and parent and parent.shown and not onMap then n = n + 1 end
   end
   return n
 end

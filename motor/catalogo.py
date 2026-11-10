@@ -10,8 +10,10 @@ cada servidor es distinto, así que cada método se valora con tus precios:
   - cuántos objetos da por hora (`por_hora`, estimado al investigar) y, cuando lo mides
     («Farmear este» en el addon, o /pg farmeo <id>), tu oro por hora de verdad.
 
-También apunta dónde se farmea (`punto`, para la flecha del addon) y qué bichos (`bichos`, para
-su macro y sus marcas).
+También apunta dónde se farmea (`punto`, para la flecha del addon), qué bichos (`bichos`, el nombre
+en español como sale en el juego, o su principio: para su macro y sus marcas) y qué cosas del mapa se
+abren o recogen (`nodos`: almejas, hierbas...). Con los bichos y los nodos el motor busca dónde
+están de verdad (spawns.py) y el addon los pinta en el mapa.
 
 Los objetos se buscan por su nombre en inglés o en español en los datos del juego, así que
 el catálogo se puede rellenar copiando los nombres de una guía en inglés.
@@ -66,6 +68,7 @@ class CatalogEntry:
     pending: str = ""                    # pregunta sin resolver: no se recomienda hasta resolverla
     point: dict | None = None            # {"map": 1413, "x": 0.56, "y": 0.08}; sin x/y, la zona entera
     mobs: list[str] = field(default_factory=list)   # cómo empieza su nombre en el juego
+    nodes: list[str] = field(default_factory=list)  # cosas del mapa (almejas, hierbas), igual
 
 
 class CatalogError(ValueError):
@@ -154,9 +157,10 @@ def catalog_problems(path: Path = CATALOG_PATH, known_lines: set[int] | None = N
                         and not all(isinstance(c, (int, float)) and 0 <= c <= 100 for c in coords))):
                 problems.append(f"{where}: «punto» es {{\"mapa\": 1413, \"x\": 56, \"y\": 8}} (x e y en %, "
                                 "o sin ellas para la zona entera)")
-        mobs = m.get("bichos", [])
-        if not isinstance(mobs, list) or not all(isinstance(b, str) and b.strip() for b in mobs):
-            problems.append(f"{where}: «bichos» es una lista de nombres, [\"Arpía\"]")
+        for key, example in (("bichos", "Arpía Alabruja"), ("nodos", "Almeja gigante")):
+            names = m.get(key, [])
+            if not isinstance(names, list) or not all(isinstance(b, str) and b.strip() for b in names):
+                problems.append(f"{where}: «{key}» es una lista de nombres, [\"{example}\"]")
         if m.get("enlace") and not str(m["enlace"]).startswith("http"):
             problems.append(f"{where}: «enlace» debe empezar por http")
         if m.get("tipo") == "vendedor" and not m.get("vendedor"):
@@ -204,7 +208,8 @@ def load_catalog(path: Path = CATALOG_PATH) -> list[CatalogEntry]:
             added=m.get("fecha", ""), min_level=m.get("nivel_minimo", 0), per_hour=per_hour,
             coins_per_hour=round(float(m.get("oro_hora", 0)) * 10000), link=m.get("enlace", ""),
             pending=m.get("pendiente", ""), point=_point(m.get("punto")),
-            mobs=[b.strip() for b in m.get("bichos", []) if isinstance(b, str) and b.strip()]))
+            mobs=[b.strip() for b in m.get("bichos", []) if isinstance(b, str) and b.strip()],
+            nodes=[b.strip() for b in m.get("nodos", []) if isinstance(b, str) and b.strip()]))
     return entries
 
 

@@ -1,7 +1,8 @@
 -- Flecha hacia el sitio de tu farmeo activo (el primero de la lista que esté en marcha, o si
 -- no el primero, que tenga sitio en el catálogo), como la de TomTom: gira según hacia dónde
--- miras y dice a cuántos metros está. Si el catálogo solo da la zona, lleva hasta ella y avisa
--- cuando estás dentro. Además pone el punto en el mapa del juego si el cliente lo permite.
+-- miras y dice a cuántos metros está. Si se sabe dónde salen sus bichos (Map.lua), lleva al más
+-- cercano; si no, al sitio del catálogo, y si este solo da la zona, hasta ella, y avisa cuando
+-- estás dentro. Además pone el sitio en el mapa del juego si el cliente lo permite.
 -- Se mueve arrastrándola; clic derecho la esconde (/pg flecha la vuelve a enseñar).
 local ADDON, ns = ...
 
@@ -18,6 +19,11 @@ local destKey
 local function MapName(map)
   local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(map)
   return info and info.name or ("mapa " .. tostring(map))
+end
+
+-- Adonde lleva la flecha: el bicho más cercano del farmeo, o su sitio en el catálogo.
+function A.Target(f, data)
+  return ns.Map and ns.Map.Nearest(f, data) or data.point
 end
 
 -- El farmeo al que lleva la flecha y su fila del motor.
@@ -66,7 +72,7 @@ end
 local function OnTick()
   local f, data = A.Destination()
   if not f then return end
-  local state = A.Compute(data.point)
+  local state = A.Compute(A.Target(f, data))
   if state.angle and arrow.SetRotation then
     arrow:SetRotation(state.angle)
     arrow:Show()
@@ -130,6 +136,7 @@ end
 
 -- Cuando cambian tus farmeos activos.
 function A.Update()
+  if ns.Map then ns.Map.Refresh() end
   local f, data = A.Destination()
   if not f then
     destKey = nil

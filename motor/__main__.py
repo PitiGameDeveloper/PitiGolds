@@ -3,8 +3,8 @@
     python -m motor vigilar    los lee cada vez que WoW los guarda (/reload o salir)
     python -m motor estado     resumen de personajes, oro, profesiones y subasta
     python -m motor informe    qué craftear, qué aprender y qué vender
-    python -m motor datos-juego  descarga las recetas y objetos del juego (wago.tools) y qué vende
-                               cada vendedor (Merchant Map)
+    python -m motor datos-juego  descarga las recetas y objetos del juego (wago.tools), qué vende
+                               cada vendedor (Merchant Map) y dónde salen los bichos (Questie)
     python -m motor chollos    posibles chollos de vendedor que toca comprobar fuera del juego
     python -m motor chollo <id> nadie | vende "detalle"   apunta lo que encuentres
     python -m motor ajustes --horas-semana 10 --semanas 4 --legado-subida 0   para comparar métodos
@@ -28,6 +28,7 @@ from .catalogo import CATALOG_PATH, catalog_problems, load_catalog
 from .config import Config, load_config
 from .gamedata import update_game_data
 from .merchantmap import has_data, update_merchant_map
+from .spawns import catalog_warnings, update_spawns
 from .fuentes import DEFAULT_DAYS, LOCAL_DIR, collect, load_sources, mark_done, word_text
 from .generated import write_generated
 from .ingest import ingest_file
@@ -112,9 +113,16 @@ def cmd_datos_juego(config: Config, force: bool) -> int:
             sold = update_merchant_map(conn, config.db_path.parent / "juego", force=force)
         except (OSError, ValueError) as exc:  # sin Merchant Map se sigue con lo que hubiera
             print(f"No he podido descargar los vendedores de Merchant Map: {exc}")
-            return 0
+            sold = None
         if sold is not None:
             print(f"Vendedores de Merchant Map: {sold} objetos que vende algún PNJ.")
+        try:
+            placed = update_spawns(conn, config.db_path.parent / "juego", force=force)
+        except (OSError, ValueError) as exc:  # sin Questie el mapa solo marca la zona
+            print(f"No he podido descargar dónde salen los bichos (Questie): {exc}")
+            placed = None
+        if placed is not None:
+            print(f"Bichos y objetos del mapa de Questie: {placed} con sitio.")
     finally:
         conn.close()
     return 0
@@ -179,6 +187,7 @@ def cmd_metodos(config: Config) -> int:
         panel = build_panel(conn, analysis)
         write_generated(conn, config.addon_dir, analysis, panel)
         write_report(conn, config, analysis, panel)
+        map_warnings = catalog_warnings(conn, entries)
     finally:
         conn.close()
     kinds: dict[str, int] = {}
@@ -188,6 +197,10 @@ def cmd_metodos(config: Config) -> int:
     unknown = analysis.guide_unknown_items
     if unknown:
         print(f"{len(unknown)} objetos que no salen en los datos del juego: {', '.join(unknown)}.")
+    if map_warnings:
+        print(f"{len(map_warnings)} farmeos sin sitio exacto en el mapa (el addon lo aprende al farmear):")
+        for w in map_warnings:
+            print(f"  - {w}")
     print(f"Todos, con tus precios: {config.db_path.parent / 'metodos.md'}")
     print(f"La ventana de métodos del addon (tras un /reload): {config.db_path.parent / 'panel.md'}")
     print(f"Mejor farmeo: {panel.verdict.title}.")
@@ -276,13 +289,20 @@ def check_game_data(config: Config) -> bool:
         except (OSError, ValueError) as exc:  # se reintenta en la próxima comprobación
             print(f"No he podido comprobar los vendedores de Merchant Map ({exc}).")
             sold = None
-        if report is None and sold is None:
+        try:
+            placed = update_spawns(conn, config.db_path.parent / "juego")
+        except (OSError, ValueError) as exc:
+            print(f"No he podido comprobar dónde salen los bichos (Questie) ({exc}).")
+            placed = None
+        if report is None and sold is None and placed is None:
             return False
         if report is not None:
             print(f"[{time.strftime('%H:%M:%S')}] Datos del juego actualizados: versión {report.build}, "
                   f"{report.recipes} recetas.")
         if sold is not None:
             print(f"[{time.strftime('%H:%M:%S')}] Vendedores de Merchant Map actualizados: {sold} objetos.")
+        if placed is not None:
+            print(f"[{time.strftime('%H:%M:%S')}] Sitios de bichos de Questie actualizados: {placed}.")
         print("  " + refresh_outputs(conn, config))
         return True
     finally:

@@ -39,10 +39,19 @@ cuando quiere métodos nuevos o cuando el addon le avisa de que ningún método 
    - **`punto`**: dónde se farmea, `{"mapa": 1413, "x": 56, "y": 8}`: el número de mapa de la zona (1411
      Durotar, 1413 Los Baldíos... están en la tabla UiMap de wago.tools) y las coordenadas en %. Si no
      sabes el sitio exacto, solo `{"mapa": 1413}`. La flecha del addon lleva hasta ahí;
-   - **`bichos`**: cómo **empieza** el nombre en el juego, en español, de los bichos a matar
-     (`["Arpía"]`). El macro del addon selecciona el más cercano que empiece así, así que basta lo común
-     a todos («Vástago» para «Vástago carmesí» y los demás). Si no lo sabes seguro, no lo pongas: el
-     addon los aprende al lootear;
+   - **`bichos`**: el nombre en el juego, en español, de los bichos a matar, entero o su principio
+     (`["Arpía Alabruja", "Malapluma Alabruja"]`). Sirven para el macro del addon (selecciona el más
+     cercano que empiece así), sus marcas y **el mapa**: el motor busca en Questie dónde aparecen y el
+     addon los pinta. No los traduzcas tú del inglés («Mudsnout» es «Fangorroca»): sácalos de la tabla
+     `qd_names` de `datos/pitigolds.db` (columnas `kind` 'npc' u 'obj', `name_es`, `name_en`,
+     `min_level`, `max_level`), que tiene los de Questie, por ejemplo con
+     `SELECT name_es, min_level FROM qd_names WHERE kind = 'npc' AND name_en LIKE '%Mudsnout%'`.
+     Si el sitio tiene varios campamentos, pon todos los bichos y deja que el mapa los enseñe;
+   - **`nodos`**: igual, para cosas del mapa que se abren o recogen (`["Almeja gigante"]`,
+     `["Champiñón fantasma"]`), con `kind = 'obj'`;
+   - después, `python -m motor metodos` dice qué farmeos se quedan sin sitio exacto en el mapa (nombres
+     que Questie no tiene): corrígelos o, si es una zona nueva de Forever, déjalo (el addon apunta dónde
+     se matan);
    - si ya hay uno parecido, mejóralo (notas, objetos, zona, por hora) en vez de duplicarlo;
    - si algo se ha nerfeado o cambiado, apúntalo en las notas del método que corresponda (y baja su
      `por_hora` si da menos).

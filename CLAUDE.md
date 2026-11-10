@@ -27,7 +27,11 @@ Todo va en español: textos del juego, código, comentarios, mensajes del motor 
   cada PNJ. El precio de catálogo de wago.tools no dice si alguien vende el objeto; esto sí.
   `motor/merchantmap.py`.
 
-`python -m motor datos-juego` baja las dos últimas y comprueba si hay versión nueva.
+- **QuestieDB** (datos del addon Questie, GPLv3; se bajan de GitHub, no se instala): dónde aparece
+  cada PNJ y objeto del mapa en Forever, con su nombre en español, para marcar en el mapa del addon dónde
+  están los bichos de cada farmeo. `motor/spawns.py`.
+
+`python -m motor datos-juego` baja las tres últimas y comprueba si hay versión nueva.
 
 ## Desarrollo
 
@@ -39,8 +43,8 @@ Solo si trabajas desde la raíz del proyecto. Si vienes de `asesor/`, mandan sus
   (`requirements-dev.txt`).
 - Dinero siempre en cobre (enteros); `motor/money.py` lo formatea.
 - Esquema de la base de datos en `motor/db.py`: tablas nuevas en `SCHEMA`, columnas nuevas en
-  `ADDED_COLUMNS` para que se creen en bases antiguas. Las tablas `gd_*` y `mm_*` se rehacen en
-  cada importación.
+  `ADDED_COLUMNS` para que se creen en bases antiguas. Las tablas `gd_*`, `mm_*` y `qd_*` se
+  rehacen en cada importación.
 - Si cambia lo que se importa de wago.tools, sube `FORMAT` en `gamedata.py`.
 - El addon llega al juego con WowUp, desde las releases de GitHub: una etiqueta `vX.Y.Z` las crea
   (versión igual en `PitiGolds.toc` y `Core.lua`). Para probar sin publicar: `probar-addon.cmd`.

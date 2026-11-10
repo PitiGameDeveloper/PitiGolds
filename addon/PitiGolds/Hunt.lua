@@ -8,7 +8,8 @@
 --     de enemigos, tecla V). Es dibujo del addon: las marcas de banda de verdad no se pueden
 --     poner desde un addon.
 --   - Aprende: al lootear un objeto de un farmeo en marcha, apunta el bicho que lo soltó; y
---     «Añadir objetivo» apunta el que tengas seleccionado.
+--     «Añadir objetivo» apunta el que tengas seleccionado. Al lootear un bicho del farmeo, apunta
+--     también dónde estás, para el mapa (Map.lua).
 local ADDON, ns = ...
 
 local H = {}
@@ -279,29 +280,49 @@ local function NameOf(guid)
   end
 end
 
--- Al abrir un botín: el bicho que soltó un objeto de un farmeo en marcha (con sitio fijo: los
--- de «cualquier zona» apuntarían todo lo que matas) es de ese farmeo.
+-- ¿Es este bicho de un farmeo? Por su número (apuntado) o por su nombre.
+local function IsMobOf(r, id, name)
+  if r.f.mobs and r.f.mobs[id] then return true end
+  if not name then return false end
+  for _, wanted in ipairs(r.names) do
+    if StartsWith(name, wanted) then return true end
+  end
+  return false
+end
+
+-- Al abrir un botín de un farmeo en marcha con sitio fijo (los de «cualquier zona» apuntarían
+-- todo lo que matas):
+--   - el bicho que soltó uno de sus objetos es de ese farmeo;
+--   - si el bicho es del farmeo, apunta dónde estás para pintarlo en el mapa (Map.lua).
 local function OnLoot()
   if not GetNumLootItems or not GetLootSourceInfo then return end
   local running = {}
   for _, f in ipairs(ns.Tracker.List()) do
     local data = f.kind == "farm" and f.started and ns.Tracker.Data(f)
-    if data and data.point and data.items and #data.items > 0 then running[#running + 1] = { f = f, data = data } end
+    if data and data.point then running[#running + 1] = { f = f, data = data } end
   end
   if #running == 0 then return end
-  local learned = false
+  local learned, recorded = false, {}
   for slot = 1, GetNumLootItems() do
     local link = GetLootSlotLink(slot)
     local itemID = link and tonumber(link:match("item:(%d+)"))
-    if itemID then
-      local sources = { GetLootSourceInfo(slot) }
-      for i = 1, #sources, 2 do
-        local guid = sources[i]
-        local id = NpcID(guid)
-        local name = id and NameOf(guid)
-        if name then
-          for _, r in ipairs(running) do
-            if ns.Tracker.IsFarmItem(r.data, itemID) and H.Learn(r.f, id, name) then learned = true end
+    local sources = { GetLootSourceInfo(slot) }
+    for i = 1, #sources, 2 do
+      local guid = sources[i]
+      local id = NpcID(guid)
+      local name = id and NameOf(guid)
+      if id then
+        for _, r in ipairs(running) do
+          if itemID and name and r.data.items and #r.data.items > 0 and ns.Tracker.IsFarmItem(r.data, itemID)
+              and H.Learn(r.f, id, name) then
+            learned = true
+          end
+          if not recorded[r.f.key] then
+            r.names = r.names or H.Names(r.f)
+            if IsMobOf(r, id, name) then
+              recorded[r.f.key] = true
+              if ns.Map then ns.Map.Record(r.f.key) end
+            end
           end
         end
       end

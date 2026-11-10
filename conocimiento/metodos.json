@@ -1,5 +1,5 @@
 {
-  "_formato": "Métodos para ganar oro sacados de guías, vídeos y otras fuentes. El motor no se fía de lo que dicen: los cruza con los precios de tu subasta, tus personajes y lo que mides al farmear. objetos: nombres en inglés o en español, como salen en el juego. profesiones: id de la profesión (393 Desollar, 182 Botánica, 186 Minería, 356 Pesca, 197 Costura, 165 Peletería, 171 Alquimia, 333 Encantamiento, 202 Ingeniería, 164 Herrería, 185 Cocina, 129 Primeros auxilios) y nivel mínimo. tipo: farmeo, pesca, mazmorra, crafteo, inversion, vendedor o diario. id: el nombre que le das al medirlo con /pg farmeo <id>. nivel: el recomendado; nivel_minimo: desde el que ya se puede, aunque rinda menos. por_hora: lo que da en una hora, [{\"objeto\": \"Thick Leather\", \"cantidad\": 40}], estimado al investigar (el motor lo valora con tus precios hasta que lo midas). oro_hora: oro por hora de monedas y basura de vendedor. punto: dónde se farmea, {\"mapa\": 1413, \"x\": 56, \"y\": 8} (el número de mapa del juego y las coordenadas en %; sin x/y, la zona entera): la flecha del addon lleva hasta ahí. bichos: cómo empieza el nombre en el juego (en español) de los bichos que hay que matar, [\"Arpía\"]: el macro «PG Objetivo» selecciona el más cercano que empiece así y el addon los marca. enlace: el vídeo o la página de donde sale. pendiente: pregunta sin resolver; mientras la tenga, el método no se recomienda.",
+  "_formato": "Métodos para ganar oro sacados de guías, vídeos y otras fuentes. El motor no se fía de lo que dicen: los cruza con los precios de tu subasta, tus personajes y lo que mides al farmear. objetos: nombres en inglés o en español, como salen en el juego. profesiones: id de la profesión (393 Desollar, 182 Botánica, 186 Minería, 356 Pesca, 197 Costura, 165 Peletería, 171 Alquimia, 333 Encantamiento, 202 Ingeniería, 164 Herrería, 185 Cocina, 129 Primeros auxilios) y nivel mínimo. tipo: farmeo, pesca, mazmorra, crafteo, inversion, vendedor o diario. id: el nombre que le das al medirlo con /pg farmeo <id>. nivel: el recomendado; nivel_minimo: desde el que ya se puede, aunque rinda menos. por_hora: lo que da en una hora, [{\"objeto\": \"Thick Leather\", \"cantidad\": 40}], estimado al investigar (el motor lo valora con tus precios hasta que lo midas). oro_hora: oro por hora de monedas y basura de vendedor. punto: dónde se farmea, {\"mapa\": 1413, \"x\": 56, \"y\": 8} (el número de mapa del juego y las coordenadas en %; sin x/y, la zona entera): la flecha del addon lleva hasta ahí. punto con x/y: solo cuentan los bichos y nodos que estén cerca; sin x/y, el motor pone el punto en el grupo más denso. bichos: el nombre en el juego (en español) de los bichos que hay que matar, o cómo empieza, [\"Arpía Alabruja\"]: el macro «PG Objetivo» selecciona el más cercano que empiece así, el addon los marca y el motor busca en Questie dónde aparecen para pintarlos en el mapa (python -m motor metodos avisa si no los encuentra). nodos: igual, para cosas del mapa que se abren o recogen (almejas, hierbas), [\"Almeja gigante\"]. enlace: el vídeo o la página de donde sale. pendiente: pregunta sin resolver; mientras la tenga, el método no se recomienda.",
   "metodos": [
     {
       "id": "desollar-al-subir",
@@ -18,7 +18,7 @@
       "tipo": "farmeo", "nivel": 7, "zona": "Claros de Tirisfal",
       "objetos": ["Linen Cloth"],
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 50}], "oro_hora": 0.4,
-      "punto": {"mapa": 1420},
+      "punto": {"mapa": 1420}, "bichos": ["Guerrero Escarlata", "Gnoll Putrepellejo", "Asaltatumbas Putrepellejo", "Bastardo Putrepellejo"],
       "notas": "Oro suelto y tela; buena experiencia. Estimado por hora: unos 150 bichos, tela en uno de cada tres.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -38,7 +38,7 @@
       "tipo": "farmeo", "nivel": 8, "zona": "Durotar",
       "objetos": ["Linen Cloth"],
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 50}], "oro_hora": 0.5,
-      "punto": {"mapa": 1411},
+      "punto": {"mapa": 1411}, "bichos": ["Matón Filo Ardiente", "Neófito Filo Ardiente", "Fiel Filo Ardiente"],
       "notas": "Reaparecen rápido; la guía da unos 14 000 de experiencia por hora. Estimado por hora: unos 150 bichos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -48,7 +48,7 @@
       "tipo": "farmeo", "nivel": 14, "zona": "Los Baldíos",
       "objetos": ["Linen Cloth", "Wool Cloth"],
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 35}, {"objeto": "Wool Cloth", "cantidad": 15}], "oro_hora": 1.7,
-      "punto": {"mapa": 1413, "x": 56, "y": 8},
+      "punto": {"mapa": 1413, "x": 56, "y": 8}, "bichos": ["Peón de Ventura", "Esclavo de Ventura", "Déspota de Ventura", "Mercenario de Ventura", "Sobrestante de Ventura"],
       "notas": "Reaparecen sin parar y mueren rápido. Tela, verdes y cajones saqueados (Waylaid Crates). Estimado por hora: unos 150 bichos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -58,7 +58,7 @@
       "tipo": "farmeo", "nivel": 14, "zona": "Los Baldíos",
       "objetos": ["Linen Cloth", "Wool Cloth"],
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 30}, {"objeto": "Wool Cloth", "cantidad": 12}], "oro_hora": 1.5,
-      "punto": {"mapa": 1413}, "bichos": ["Arpía"],
+      "punto": {"mapa": 1413}, "bichos": ["Arpía Alabruja", "Malapluma Alabruja", "Destripador Alabruja", "Clamavientos Alabruja"],
       "notas": "Tela, verdes y cajones saqueados; unos 18 000 de experiencia por hora. Estimado por hora: unos 140 bichos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -78,7 +78,7 @@
       "tipo": "farmeo", "nivel": 16, "zona": "Bosque de Argénteos",
       "objetos": ["Linen Cloth", "Wool Cloth"],
       "por_hora": [{"objeto": "Linen Cloth", "cantidad": 25}, {"objeto": "Wool Cloth", "cantidad": 20}], "oro_hora": 2,
-      "punto": {"mapa": 1421},
+      "punto": {"mapa": 1421}, "bichos": ["Tosco Putrepellejo", "Siembrapestes Putrepellejo", "Salvaje Putrepellejo", "Putrepellejo enfurecido", "Esclavo Corvozarpa", "Guardián Corvozarpa"],
       "notas": "Tela y equipo ligado al equipar. Estimado por hora: unos 130 bichos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -88,7 +88,7 @@
       "tipo": "farmeo", "nivel": 16, "zona": "Montañas Crestagrana (según el mapa de la guía)",
       "objetos": ["Tough Condor Meat", "Small Egg", "Light Feather"],
       "por_hora": [{"objeto": "Tough Condor Meat", "cantidad": 50}, {"objeto": "Small Egg", "cantidad": 15}, {"objeto": "Light Feather", "cantidad": 25}], "oro_hora": 0.5,
-      "punto": {"mapa": 1433}, "bichos": ["Cóndor"],
+      "punto": {"mapa": 1433}, "bichos": ["Cóndor temible"],
       "notas": "Lo que da dinero es la carne dura de cóndor: la piden una misión y la cocina. Estimado por hora: unos 130 bichos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -98,7 +98,7 @@
       "tipo": "farmeo", "nivel": 20, "zona": "Sur de Los Baldíos",
       "objetos": ["Wool Cloth", "Linen Cloth"],
       "por_hora": [{"objeto": "Wool Cloth", "cantidad": 30}, {"objeto": "Linen Cloth", "cantidad": 15}], "oro_hora": 2.7,
-      "punto": {"mapa": 1413, "x": 48, "y": 85},
+      "punto": {"mapa": 1413, "x": 48, "y": 85}, "bichos": ["Excavador de Bael'dun", "Supervisor de Bael'dun", "Soldado Bael'dun", "Fusilero Bael'dun", "Oficial Bael'dun"],
       "notas": "Reaparecen sin parar; tela y verdes. Estimado por hora: unos 120 bichos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -108,18 +108,18 @@
       "tipo": "farmeo", "nivel": 24, "zona": "Los Humedales",
       "objetos": ["Small Flame Sac", "Sharp Claw", "Large Fang", "Tiny Crimson Whelpling"],
       "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 5}, {"objeto": "Sharp Claw", "cantidad": 10}, {"objeto": "Large Fang", "cantidad": 10}, {"objeto": "Tiny Crimson Whelpling", "cantidad": 0.1}], "oro_hora": 1,
-      "punto": {"mapa": 1437}, "bichos": ["Vástago"],
+      "punto": {"mapa": 1437}, "bichos": ["Cría roja", "Cría perdida", "Cría carmesí", "Cría escupefuego"],
       "notas": "Depende de vender en la subasta. Hay una pequeña probabilidad de mascota. Estimado por hora: unos 120 vástagos; la mascota, una de cada mil. La glándula de llamas se estima en unas 5 por hora: según MetaBot (datos de Classic), estos vástagos no están entre los 15 bichos que más la sueltan y el último de esa lista da un 5,6 %. Aun así, CJ Mann los propone para ir guardándolas mientras subes.",
       "fuente": "Guía de Studen v1.1; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
     },
     {
       "id": "trabalomas-gnolls",
-      "nombre": "Gnolls Hociclodo",
+      "nombre": "Gnolls Fangorroca",
       "tipo": "farmeo", "nivel": 26, "zona": "Laderas de Trabalomas",
       "objetos": ["Wool Cloth", "Silk Cloth"],
       "por_hora": [{"objeto": "Wool Cloth", "cantidad": 30}, {"objeto": "Silk Cloth", "cantidad": 15}], "oro_hora": 5,
-      "punto": {"mapa": 1424}, "bichos": ["Gnoll"],
+      "punto": {"mapa": 1424}, "bichos": ["Gnoll Fangorroca", "Chamán Fangorroca"],
       "notas": "Muy densos y con cofres en la zona. Estimado por hora: unos 120 gnolls y algún cofre.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -129,7 +129,7 @@
       "tipo": "farmeo", "nivel": 28, "zona": "Las Mil Agujas",
       "objetos": ["Vibrant Plume", "Silk Cloth", "Wool Cloth"],
       "por_hora": [{"objeto": "Vibrant Plume", "cantidad": 35}, {"objeto": "Silk Cloth", "cantidad": 20}, {"objeto": "Wool Cloth", "cantidad": 12}], "oro_hora": 3.5,
-      "punto": {"mapa": 1441, "x": 27, "y": 51}, "bichos": ["Arpía"],
+      "punto": {"mapa": 1441, "x": 27, "y": 51}, "bichos": ["Arpía estridente", "Malapluma estridente", "Clamavientos estridente"],
       "notas": "Es la cueva Roguefeather Den, en el cañón de las arpías (Screeching Canyon): al oeste de Freewind Post, pegada a la pared sur. Se sube por un camino en la roca; hay arpías dentro y fuera de la cueva (aparecen entre 26-29, 47-56) y un cofre dentro. Oro de vendedor: la pluma vibrante se vende al vendedor. No se pueden desollar. Estimado por hora: unos 120 arpías.",
       "fuente": "Guía de Studen v1.1; posiciones de Wowhead (Classic) y Goldgoblin", "fecha": "2026-11-08"
     },
@@ -140,7 +140,7 @@
       "mejor_con": [186],
       "objetos": ["Silk Cloth", "Wool Cloth", "Iron Ore", "Tin Ore"],
       "por_hora": [{"objeto": "Silk Cloth", "cantidad": 25}, {"objeto": "Wool Cloth", "cantidad": 15}, {"objeto": "Iron Ore", "cantidad": 4}, {"objeto": "Tin Ore", "cantidad": 6}], "oro_hora": 5.5,
-      "punto": {"mapa": 1431, "x": 33, "y": 77},
+      "punto": {"mapa": 1431, "x": 33, "y": 77}, "bichos": ["Ogro Puñastilla", "Tejefuego Puñastilla", "Capataz Puñastilla", "Temófogo Puñastilla", "Guerrero Puñastilla", "Esclavista Puñastilla"],
       "notas": "Ogros que reaparecen rápido, muchos sitios de cofre y vetas dentro y fuera de la cueva. Estimado por hora: unos 120 ogros y algún cofre; el mineral, solo con Minería.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -151,7 +151,7 @@
       "mejor_con": [393],
       "objetos": ["Bristly Whisker", "Medium Leather", "Heavy Leather"],
       "por_hora": [{"objeto": "Bristly Whisker", "cantidad": 45}, {"objeto": "Medium Leather", "cantidad": 30}, {"objeto": "Heavy Leather", "cantidad": 20}], "oro_hora": 1.5,
-      "punto": {"mapa": 1434},
+      "punto": {"mapa": 1434, "x": 35, "y": 15}, "bichos": ["Tigre joven de Tuercespina", "Tigre de Tuercespina", "Pantera joven", "Pantera", "Raptor joven de Tuercespina", "Raptor de Tuercespina", "Raptor colazote", "Gorila Velo de Bruma"],
       "notas": "Todas se desuellan y sueltan grises que paga bien el vendedor. Se combina con las misiones de Nesingwary. Estimado por hora: unos 130 bichos; el cuero, solo con Desollar.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -162,7 +162,7 @@
       "mejor_con": [393],
       "objetos": ["Intact Basilisk Spine", "Squishy Basilisk Eye", "Curved Basilisk Claw", "Large Basilisk Tail"],
       "por_hora": [{"objeto": "Intact Basilisk Spine", "cantidad": 20}, {"objeto": "Squishy Basilisk Eye", "cantidad": 20}, {"objeto": "Curved Basilisk Claw", "cantidad": 20}, {"objeto": "Large Basilisk Tail", "cantidad": 15}], "oro_hora": 0.5,
-      "punto": {"mapa": 1434}, "bichos": ["Basilisco"],
+      "punto": {"mapa": 1434}, "bichos": ["Basilisco Espina de Cristal"],
       "notas": "El mejor oro de vendedor de la guía para este nivel; con Desollar, más. Estimado por hora: unos 120 basiliscos, sin contar Desollar.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -172,7 +172,7 @@
       "tipo": "farmeo", "nivel": 30, "zona": "Vega de Tuercespina",
       "objetos": ["Blue Pearl"],
       "por_hora": [{"objeto": "Blue Pearl", "cantidad": 3}], "oro_hora": 6,
-      "punto": {"mapa": 1434},
+      "punto": {"mapa": 1434}, "nodos": ["Almeja gigante"],
       "notas": "La perla azul la pide una misión y se vende muy bien. Cuidado con los élites de al lado. Estimado por hora: unos 120 múrlocs; una almeja de cada tres y pocas traen perla.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -182,7 +182,7 @@
       "tipo": "farmeo", "nivel": 30, "zona": "Tierras Altas de Arathi",
       "objetos": ["Formula: Enchant Gloves - Skinning", "Silk Cloth"],
       "por_hora": [{"objeto": "Formula: Enchant Gloves - Skinning", "cantidad": 0.3}, {"objeto": "Silk Cloth", "cantidad": 25}], "oro_hora": 6.5,
-      "punto": {"mapa": 1417, "x": 68, "y": 68},
+      "punto": {"mapa": 1417, "x": 68, "y": 68}, "bichos": ["Lanzahachas Secacorteza", "Médico brujo Secacorteza", "Rebanacabezas Secacorteza", "Cazador de las Sombras Secacorteza"],
       "notas": "Cualquier Secacorteza puede soltar la fórmula, que vale bastante. Mientras, oro suelto y tela. Estimado por hora: unos 120 trolls; la fórmula, una cada tres horas.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -203,7 +203,7 @@
       "tipo": "farmeo", "nivel": 37, "zona": "Tierras Inhóspitas",
       "objetos": ["Elemental Earth"],
       "por_hora": [{"objeto": "Elemental Earth", "cantidad": 15}], "oro_hora": 5,
-      "punto": {"mapa": 1418}, "bichos": ["Elemental de roca"],
+      "punto": {"mapa": 1418}, "bichos": ["Elemental de piedra"],
       "notas": "Oro de vendedor con los grises que sueltan. El autor sacaba unos 10 o/h en el Classic original sin competencia. Estimado por hora: unos 110 elementales.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -224,7 +224,7 @@
       "tipo": "farmeo", "nivel": 37, "zona": "Vega de Tuercespina",
       "objetos": ["Fused Wiring"],
       "por_hora": [{"objeto": "Fused Wiring", "cantidad": 18}], "oro_hora": 5,
-      "punto": {"mapa": 1434}, "bichos": ["Trituradora"],
+      "punto": {"mapa": 1434, "x": 45, "y": 21}, "bichos": ["Machacador de Ventura", "Geólogo de Ventura", "Mecánico de Ventura", "Leñador de Ventura"],
       "notas": "Ve a por las trituradoras: el cableado fundido lo usan los ingenieros (robots de reparación, cables de arranque). Estimado por hora: unas 70 trituradoras y los goblins de al lado.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -234,7 +234,7 @@
       "tipo": "farmeo", "nivel": 40, "zona": "Tierras Inhóspitas",
       "objetos": ["Small Flame Sac"],
       "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 14}], "oro_hora": 1.5,
-      "punto": {"mapa": 1418}, "bichos": ["Vástago"],
+      "punto": {"mapa": 1418}, "bichos": ["Cría hirviente"],
       "notas": "La glándula de llamas pequeña se usa en la poción de protección contra el Fuego, el chili de aliento de dragón, el batido picante y el deflector de llamas. La guía decía que solo compensa cuando la gente empiece con el Núcleo de Magma, y según la hoja de ruta este no abre el 9 de diciembre (ver «Materiales de pociones de protección»). Estimado por hora: unos 110 vástagos con un 13 % (MetaBot, datos de Classic).",
       "fuente": "Guía de Studen v1.1; MetaBot; Blizzard Watch (2026-09-13)", "fecha": "2026-11-04"
     },
@@ -244,7 +244,7 @@
       "tipo": "farmeo", "nivel": 42, "zona": "Marjal Revolcafango",
       "objetos": ["Small Flame Sac"],
       "por_hora": [{"objeto": "Small Flame Sac", "cantidad": 15}], "oro_hora": 1.5,
-      "punto": {"mapa": 1445},
+      "punto": {"mapa": 1445}, "bichos": ["Cría abrasadora"],
       "notas": "Searing Whelp en inglés, de nivel 42-43, con un 13 % de glándula de llamas pequeña (MetaBot, datos de Classic). MetaBot los pone en Las Mil Agujas, pero Wowhead y el vídeo dicen el Marjal. Otra opción antes de este nivel: los vástagos de 34-36 del Pantano de las Penas, con un 9-10 %. Estimado por hora: unos 120 vástagos. Para qué sirve la glándula y hasta cuándo guardarla: ver «Materiales de pociones de protección».",
       "fuente": "CJ Mann, YouTube (2026-11-03); MetaBot; Wowhead", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
@@ -255,7 +255,7 @@
       "tipo": "farmeo", "nivel": 42, "zona": "Tanaris",
       "objetos": ["Speckled Shell Fragment", "Big-mouth Clam"],
       "por_hora": [{"objeto": "Speckled Shell Fragment", "cantidad": 55}], "oro_hora": 1,
-      "punto": {"mapa": 1446}, "bichos": ["Tortuga"],
+      "punto": {"mapa": 1446}, "bichos": ["Planoleador"],
       "notas": "Oro de vendedor; el autor lo combina con la pesca de cajas de la misma costa. Sueltan además almejas de boca grande, cuya carne piden los cocineros para pasar a artesano (ver «Huevos gigantes y carne de almeja»). Estimado por hora: unas 110 tortugas.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -265,7 +265,7 @@
       "tipo": "farmeo", "nivel": 42, "zona": "Tanaris",
       "objetos": ["Mageweave Cloth", "Wastewander Water Pouch"],
       "por_hora": [{"objeto": "Mageweave Cloth", "cantidad": 30}, {"objeto": "Wastewander Water Pouch", "cantidad": 20}], "oro_hora": 9.5,
-      "punto": {"mapa": 1446},
+      "punto": {"mapa": 1446}, "bichos": ["Ladrón Deambulador", "Bandido Deambulador", "Mago oscuro Deambulador", "Pícaro Deambulador", "Asesino Deambulador"],
       "notas": "La bolsa de agua es para una misión repetible que usa mucha gente para subir alters. Estimado por hora: unos 110 bandidos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -275,7 +275,7 @@
       "tipo": "farmeo", "nivel": 43, "zona": "Vega de Tuercespina",
       "objetos": ["Golden Pearl", "Iridescent Pearl", "Mageweave Cloth"],
       "por_hora": [{"objeto": "Golden Pearl", "cantidad": 0.2}, {"objeto": "Iridescent Pearl", "cantidad": 1.5}, {"objeto": "Mageweave Cloth", "cantidad": 25}], "oro_hora": 10,
-      "punto": {"mapa": 1434},
+      "punto": {"mapa": 1434}, "bichos": ["Expedicionario naga"],
       "notas": "Reaparecen muy rápido, buen oro suelto, perlas de las almejas y algún cofre. Estimado por hora: unas 110 nagas y algún cofre.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -285,7 +285,7 @@
       "tipo": "farmeo", "nivel": 45, "zona": "Feralas",
       "objetos": [],
       "oro_hora": 6,
-      "punto": {"mapa": 1444}, "bichos": ["Ciervo alado"],
+      "punto": {"mapa": 1444}, "bichos": ["Alacervo Plumavieja"],
       "notas": "Fáciles de matar, reaparecen muy rápido y sueltan muchos grises para el vendedor. Estimado por hora: unos 150 ciervos; solo grises para el vendedor.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -296,7 +296,7 @@
       "mejor_con": [393],
       "objetos": ["Blasted Boar Lung", "Vulture Gizzard", "Scorpok Pincer", "Snickerfang Jowl", "Basilisk Brain"],
       "por_hora": [{"objeto": "Blasted Boar Lung", "cantidad": 8}, {"objeto": "Vulture Gizzard", "cantidad": 8}, {"objeto": "Scorpok Pincer", "cantidad": 8}, {"objeto": "Snickerfang Jowl", "cantidad": 8}, {"objeto": "Basilisk Brain", "cantidad": 8}], "oro_hora": 3,
-      "punto": {"mapa": 1419},
+      "punto": {"mapa": 1419}, "bichos": ["Jabalí Cenicrín", "Destripador negro", "Aguijonero Scorpok", "Hiena risitas", "Basilisco Rocarroja", "Vitropiel Rocarroja"],
       "notas": "Se entregan en una misión repetible que da consumibles de +25 a una característica, así que los compra mucha gente. También oro de grises y pieles. Estimado por hora: unos 110 bichos de todas las clases.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -306,7 +306,7 @@
       "tipo": "farmeo", "nivel": 45, "zona": "Tierras del Interior (Jintha'Alor a nivel 60)",
       "objetos": ["Wildvine", "Mageweave Cloth", "Flask of Mojo"],
       "por_hora": [{"objeto": "Mageweave Cloth", "cantidad": 35}, {"objeto": "Wildvine", "cantidad": 3}, {"objeto": "Flask of Mojo", "cantidad": 12}], "oro_hora": 11,
-      "punto": {"mapa": 1425},
+      "punto": {"mapa": 1425}, "bichos": ["Zelote Secacorteza", "Desollador Secacorteza", "Sangreveneno Secacorteza", "Sádico Secacorteza", "Guardia de la prole Secacorteza", "Clamador Secacorteza"],
       "notas": "Grises, verdes y vid salvaje (Tejesueños para sastres y Lente verde para ingenieros). A nivel 60 se hacen también los élites de Jintha'Alor. Estimado por hora: unos 110 trolls.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -317,7 +317,7 @@
       "mejor_con": [393],
       "objetos": ["Glowing Scorpid Blood", "Huge Venom Sac", "Rugged Leather"],
       "por_hora": [{"objeto": "Glowing Scorpid Blood", "cantidad": 35}, {"objeto": "Huge Venom Sac", "cantidad": 25}, {"objeto": "Rugged Leather", "cantidad": 20}], "oro_hora": 2,
-      "punto": {"mapa": 1451}, "bichos": ["Escórpido"],
+      "punto": {"mapa": 1451}, "bichos": ["Escórpido Latigosólido", "Tnazario Latigosólido"],
       "notas": "Sangre y bolsa de veneno se venden bien al vendedor; con Desollar, cuero basto. Estimado por hora: unos 110 escorpiones; el cuero, solo con Desollar.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -327,7 +327,7 @@
       "tipo": "farmeo", "nivel": 20, "zona": "Los Humedales (norte a 20, sur a 25); nagas del sur de Tuercespina a 43",
       "objetos": ["Iridescent Pearl"],
       "por_hora": [{"objeto": "Iridescent Pearl", "cantidad": 2.5}], "oro_hora": 2.5,
-      "punto": {"mapa": 1437},
+      "punto": {"mapa": 1437}, "bichos": ["Múrloc Branquiazul", "Saltacharco Branquiazul", "Batidor Branquiazul", "Habitabosta Branquiazul", "Guerrero Branquiazul", "Oráculo Branquiazul", "Asaltante Branquiazul"],
       "notas": "Ahora sirven: varias recetas nuevas de Peletería ligadas al recogerlas piden bastantes. Bajarán hacia el final, porque las piden sobre todo los que suben. Estimado por hora: unos 120 múrlocs.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -337,7 +337,7 @@
       "tipo": "farmeo", "nivel": 50, "zona": "Frondavil (sin bucear, con competencia) o Tierras de la Peste del Este (buceando)",
       "objetos": ["Essence of Water"],
       "por_hora": [{"objeto": "Essence of Water", "cantidad": 6}], "oro_hora": 3,
-      "punto": {"mapa": 1448},
+      "punto": {"mapa": 1448}, "bichos": ["Horror tóxico"],
       "notas": "Las esencias suelen dar muy buen oro por hora y en Forever tienen recetas nuevas. Estimado por hora: unas 6 esencias con competencia.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -347,7 +347,7 @@
       "tipo": "farmeo", "nivel": 52, "zona": "Cráter de Un'Goro (bichos 53-56) o Frondavil",
       "objetos": ["Essence of Fire", "Elemental Fire"],
       "por_hora": [{"objeto": "Essence of Fire", "cantidad": 6}, {"objeto": "Elemental Fire", "cantidad": 8}], "oro_hora": 3,
-      "punto": {"mapa": 1449},
+      "punto": {"mapa": 1449}, "bichos": ["Llamarada viviente", "Elemental agostador"],
       "notas": "En Frondavil cae menos que en Un'Goro. Los elementales de fuego de Un'Goro sueltan elemental de fuego en un 7-8 % (MetaBot, datos de Classic); CJ Mann propone farmearlos justo antes de llegar a 60 y avisa de que Un'Goro será zona de guerra. Antes de nivel 52, los elementales de 45-49 de La Garganta de Fuego dan un 8-9 %. Estimado por hora: unas 6 esencias y 8 elementales en Un'Goro.",
       "fuente": "Guía de Studen v1.1; CJ Mann, YouTube (2026-11-03); MetaBot", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
@@ -358,7 +358,7 @@
       "tipo": "farmeo", "nivel": 55, "zona": "Noroeste de Silithus",
       "objetos": ["Essence of Air", "Essence of Earth"],
       "por_hora": [{"objeto": "Essence of Air", "cantidad": 4}, {"objeto": "Essence of Earth", "cantidad": 5}], "oro_hora": 3,
-      "punto": {"mapa": 1451},
+      "punto": {"mapa": 1451}, "bichos": ["Sirocoso", "Estruendor del desierto"],
       "notas": "Caen a menudo y reaparecen bien. Estimado por hora: unos 100 elementales.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -368,7 +368,7 @@
       "tipo": "farmeo", "nivel": 50, "zona": "Frondavil (también en la cueva)",
       "objetos": ["Living Essence"],
       "por_hora": [{"objeto": "Living Essence", "cantidad": 8}], "oro_hora": 3,
-      "punto": {"mapa": 1448},
+      "punto": {"mapa": 1448}, "bichos": ["Arrancamusgo Alabeo", "Machacador Alabeo"],
       "notas": "La Masacre da muchas más, así que suele valer menos que las otras esencias. Estimado por hora: unos 100 bichos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -378,7 +378,7 @@
       "tipo": "farmeo", "nivel": 55, "zona": "Lago de Cuna del Invierno",
       "objetos": ["Essence of Undeath"],
       "por_hora": [{"objeto": "Essence of Undeath", "cantidad": 8}], "oro_hora": 5,
-      "punto": {"mapa": 1452},
+      "punto": {"mapa": 1452}, "bichos": ["Altonato"],
       "notas": "Buena al principio; baja cuando la gente empieza a repetir Stratholme. Estimado por hora: unos 100 no-muertos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -388,7 +388,7 @@
       "tipo": "farmeo", "nivel": 55, "zona": "Silithus (mejor los del norte)",
       "objetos": ["Sandworm Meat"],
       "por_hora": [{"objeto": "Sandworm Meat", "cantidad": 40}], "oro_hora": 1,
-      "punto": {"mapa": 1451}, "bichos": ["Gusano"],
+      "punto": {"mapa": 1451}, "bichos": ["Artillero de arrastre", "Triturador de arrastre"],
       "notas": "Para las albóndigas del desierto ahumadas, que usan los que hacen bandas. Estimado por hora: unos 90 gusanos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -398,7 +398,7 @@
       "tipo": "farmeo", "nivel": 53, "zona": "Cuna del Invierno, al este de Vista Eterna",
       "objetos": ["Winterfall Firewater", "Winterfall E'ko", "Runecloth"],
       "por_hora": [{"objeto": "Runecloth", "cantidad": 35}, {"objeto": "Winterfall Firewater", "cantidad": 3}, {"objeto": "Winterfall E'ko", "cantidad": 12}], "oro_hora": 15,
-      "punto": {"mapa": 1452, "x": 68, "y": 35},
+      "punto": {"mapa": 1452, "x": 68, "y": 35}, "bichos": ["Chamán Nevada", "Ursa Nevada", "Vigilante del cubil Nevada"],
       "notas": "Mucha tela y equipo ligado al equipar; el agua de fuego y el e'ko son para los poderes Juju. Estimado por hora: unos 110 furbolgs.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -408,7 +408,7 @@
       "tipo": "farmeo", "nivel": 50, "zona": "Tierras de la Peste del Oeste",
       "objetos": ["Ironweb Spider Silk"],
       "por_hora": [{"objeto": "Ironweb Spider Silk", "cantidad": 20}], "oro_hora": 3,
-      "punto": {"mapa": 1422}, "bichos": ["Araña"],
+      "punto": {"mapa": 1422}, "bichos": ["Rondador Brumatósigo", "Rondador carroñero", "Rondador de peste"],
       "notas": "Cae bastante y la piden muchas recetas de Costura y Peletería. Estimado por hora: unas 110 arañas.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -419,7 +419,7 @@
       "profesiones": [{"id": 182, "nivel": 245}],
       "objetos": ["Ghost Mushroom"],
       "por_hora": [{"objeto": "Ghost Mushroom", "cantidad": 25}], "oro_hora": 2,
-      "punto": {"mapa": 1425},
+      "punto": {"mapa": 1425}, "nodos": ["Champiñón fantasma"], "bichos": ["Moco de jade", "Barroso verde"],
       "notas": "La cueva está llena de puntos de champiñón fantasma. Estimado por hora: unos 15 puntos de champiñón y los mocos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -429,7 +429,7 @@
       "tipo": "farmeo", "nivel": 44, "zona": "Feralas",
       "objetos": ["Golden Pearl"],
       "por_hora": [{"objeto": "Golden Pearl", "cantidad": 0.4}, {"objeto": "Mageweave Cloth", "cantidad": 20}], "oro_hora": 10,
-      "punto": {"mapa": 1444},
+      "punto": {"mapa": 1444}, "bichos": ["Jinete de olas Crestafuria", "Gritón Crestafuria", "Guerrero Crestafuria", "Sirena Crestafuria", "Myrmidón Crestafuria", "Hechicera Crestafuria", "Guardia serpiente Crestafuria"],
       "notas": "La perla dorada sale de almejas con muy poca probabilidad, pero siempre se vende. Las nagas son de nivel 44 y reaparecen rápido. Estimado por hora: unas 110 nagas; la perla, una cada dos o tres horas.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -439,7 +439,7 @@
       "tipo": "farmeo", "nivel": 50, "zona": "Azshara (tres campamentos) o Frondavil",
       "objetos": ["Felcloth", "Runecloth", "Mageweave Cloth"],
       "por_hora": [{"objeto": "Felcloth", "cantidad": 3}, {"objeto": "Runecloth", "cantidad": 30}, {"objeto": "Mageweave Cloth", "cantidad": 10}], "oro_hora": 13,
-      "punto": {"mapa": 1447}, "bichos": ["Sátiro"],
+      "punto": {"mapa": 1447}, "bichos": ["Sátiro Legashi", "Pícaro Legashi", "Clamainferno Legashi"],
       "notas": "En Frondavil la zona buena es la más disputada; algunos dan tejido mágico en vez de tela rúnica. Estimado por hora: unos 110 sátiros.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -449,7 +449,7 @@
       "tipo": "farmeo", "nivel": 55, "zona": "Paso de la Muerte",
       "objetos": ["Formula: Enchant Bracer - Superior Strength", "Runecloth"],
       "por_hora": [{"objeto": "Formula: Enchant Bracer - Superior Strength", "cantidad": 0.15}, {"objeto": "Runecloth", "cantidad": 35}], "oro_hora": 16,
-      "punto": {"mapa": 1430}, "bichos": ["Brujo"],
+      "punto": {"mapa": 1430}, "bichos": ["Brujo Vientomuerto"],
       "notas": "La fórmula solo cae de los brujos y se pide mucho. Mata a todos: tela rúnica y opción de azules y épicos. Estimado por hora: unos 110 bichos; la fórmula, una cada seis o siete horas.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -469,7 +469,7 @@
       "tipo": "farmeo", "nivel": 47, "zona": "Tierras del Interior (Jintha'Alor)",
       "objetos": ["Formula: Enchant Bracer - Greater Intellect", "Mageweave Cloth", "Wildvine"],
       "por_hora": [{"objeto": "Formula: Enchant Bracer - Greater Intellect", "cantidad": 0.15}, {"objeto": "Mageweave Cloth", "cantidad": 35}, {"objeto": "Wildvine", "cantidad": 4}], "oro_hora": 12,
-      "punto": {"mapa": 1425, "x": 63, "y": 72}, "bichos": ["Chamán oscuro"],
+      "punto": {"mapa": 1425, "x": 63, "y": 72}, "bichos": ["Nigromante Vilrama"],
       "notas": "Mucho tejido mágico, vid salvaje y cofres. Estimado por hora: unos 110 trolls y los cofres.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -479,7 +479,7 @@
       "tipo": "farmeo", "nivel": 58, "zona": "Tierras de la Peste del Oeste",
       "objetos": ["Formula: Enchant Weapon - Crusader"],
       "por_hora": [{"objeto": "Formula: Enchant Weapon - Crusader", "cantidad": 0.3}, {"objeto": "Runecloth", "cantidad": 12}], "oro_hora": 6,
-      "punto": {"mapa": 1422}, "bichos": ["Vinculahechizos"],
+      "punto": {"mapa": 1422}, "bichos": ["Vinculador de hechizos escarlata"],
       "notas": "Hay muy pocos. Cuanto antes, mejor: luego los acampa todo el mundo. Estimado por hora: unos 40 bichos, porque hay pocos; la fórmula, una cada tres horas.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
@@ -489,7 +489,7 @@
       "tipo": "farmeo", "nivel": 53, "zona": "Tierras de la Peste del Este",
       "objetos": ["Larval Acid"],
       "por_hora": [{"objeto": "Larval Acid", "cantidad": 18}], "oro_hora": 2,
-      "punto": {"mapa": 1423},
+      "punto": {"mapa": 1423}, "bichos": ["Larva carroñera", "Devorador carroñero"],
       "notas": "Se pide desde el principio (capa de sanador de La Masacre) y otra vez con Ahn'Qiraj (equipo de resistencia a la naturaleza). Estimado por hora: unas 110 larvas.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },

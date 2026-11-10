@@ -767,13 +767,15 @@ class SesionSinComprasNiConjuros(unittest.TestCase):
 
 ACTIVE_METHODS = """
 PitiGoldsDB = nil
+Mock.NewWorldMap()
 PitiGoldsGenerated = {
   prices = { [2770] = "200,,", [2589] = "40,," },
   methods = {
     verdict = { state = "mejor", title = "Arpías", lines = {}, best = "baldios-arpias" },
     farms = {
       { key = "baldios-arpias", name = "Arpías", kind = "farmeo", gph = 20000, items = { 2589 }, coins = true,
-        point = { map = 1413, x = 0.5, y = 0.5 }, mobs = { "Arpía" }, zone = "Los Baldíos", details = {}, req = "" },
+        point = { map = 1413, x = 0.5, y = 0.5 }, mobs = { "Arpía" }, zone = "Los Baldíos", details = {}, req = "",
+        spawns = "500,500;500,600", nodes = "250,750" },
       { key = "cobre", name = "Cobre en Durotar", kind = "farmeo", items = { 2770 }, coins = false,
         point = { map = 1411 }, mobs = {}, details = {}, req = "" },
     },
@@ -818,6 +820,12 @@ class FarmeosActivos(unittest.TestCase):
     def farm(self, key):
         return self.T.Find(key)[0]
 
+    def unfold(self, key):
+        """Despliega el recuadro de un farmeo (se queda como estaba en otras pruebas)."""
+        texts = "\n" + self.T.BoxTexts()
+        if f"\n+ {self.farm(key).name}\n" in texts:
+            self.T.ToggleOpen(key)
+
     def activate_from_window(self, tab, index):
         self.ns.Methods.Open(tab)
         self.ns.Methods.Select(index)
@@ -838,21 +846,27 @@ class FarmeosActivos(unittest.TestCase):
         self.assertEqual(self.mock.macros[1].body, "/pg objetivo")
 
     def test_el_primer_botin_pone_en_marcha_el_reloj_y_cuenta_lo_suyo(self):
-        self.activate_from_window("farms", 1)
-        self.mock.Loot(0, 10, 2589, 3)     # paño de lino: es de las arpías
-        self.mock.Loot(0, 11, 2770, 2)     # mineral de cobre: no
-        self.mock.AddMoney(250)            # monedas: este farmeo las da
+        self.activate_from_window("farms", 1)    # arpías: de bichos (da monedas)
+        self.activate_from_window("farms", 2)    # cobre: de recolectar
+        self.mock.Loot(0, 10, 2589, 3)     # paño de lino: de las arpías
+        self.mock.Loot(0, 11, 2770, 2)     # mineral de cobre: del cobre, y también cuenta en las arpías
+        self.mock.AddMoney(250)            # monedas: solo las arpías las dan
         self.mock.Advance(1)
+        # Un farmeo de bichos cuenta todo lo que sueltan (verdes, otra tela...), como la sesión.
         f = self.farm("baldios-arpias")
         self.assertIsNotNone(f.started)
-        self.assertEqual(dict(f["items"].items()), {2589: 3})
+        self.assertEqual(dict(f["items"].items()), {2589: 3, 2770: 2})
         self.assertEqual(f.money, 250)
+        # Uno de recolectar, solo lo suyo.
+        cobre = self.farm("cobre")
+        self.assertEqual(dict(cobre["items"].items()), {2770: 2})
+        self.assertEqual(cobre.money, 0)
         texts = self.T.BoxTexts()
         self.assertIn("Paño de lino ×3", texts)
-        self.assertNotIn("Mineral de cobre", texts)
-        # Lo farmeado queda apuntado con su id para que el motor lo mida.
+        self.assertIn("Mineral de cobre ×2", texts)
+        # Lo farmeado queda apuntado con sus ids (los dos van en marcha) para que el motor lo mida.
         labels = {b.label for b in self.lua.globals().PitiGoldsDB.farmLog.values()}
-        self.assertIn("baldios-arpias", labels)
+        self.assertIn("baldios-arpias+cobre", labels)
 
     def test_parar_reiniciar_y_acabar(self):
         self.activate_from_window("farms", 1)
@@ -972,6 +986,66 @@ class FarmeosActivos(unittest.TestCase):
         self.assertIn("Arpías\n1000 m", A.Text())
         # Solo la zona: dentro de ella, avisa.
         self.assertEqual(A.Compute(self.lua.eval("{ map = 1411 }")).text, "Estás en Durotar")
+
+    def test_mapa_con_los_sitios_de_los_bichos(self):
+        M = self.ns.Map
+        self.lua.execute("PitiGoldsDB.spots = nil; WorldMapFrame.shown = true; WorldMapFrame.mapID = 1413")
+        self.activate_from_window("farms", 1)    # arpías: dos sitios de bichos y una almeja
+        pins = sorted((p.texture[-1], round(p.x), round(p.y)) for p in self.mock.MapPins().values())
+        self.assertEqual(pins, [("3", 250, -750), ("8", 500, -600), ("8", 500, -500)])
+        self.unfold("baldios-arpias")
+        self.assertIn("En el mapa (M): 2 sitios de bichos, 1 de cosas del mapa", self.T.BoxTexts())
+        # En el mapa del continente, Los Baldíos ocupan la mitad de abajo.
+        self.lua.execute("WorldMapFrame.mapID = 1414")
+        self.assertEqual(M.Refresh(), 3)
+        ys = sorted(round(p.y) for p in self.mock.MapPins().values())
+        self.assertEqual(ys, [-875, -800, -750])
+        # En otro mapa no sale nada; con el mapa cerrado, tampoco.
+        self.lua.execute("WorldMapFrame.mapID = 1411")
+        self.assertEqual(M.Refresh(), 0)
+        self.lua.execute("WorldMapFrame.shown = false; WorldMapFrame.mapID = 1413")
+        self.assertEqual(M.Refresh(), 0)
+        # La flecha lleva al sitio más cercano: estás en Durotar, 1000 m al norte del primero.
+        f = self.farm("baldios-arpias")
+        nearest = M.Nearest(f, self.T.Data(f))
+        self.assertEqual((nearest.x, nearest.y, nearest.kind), (0.5, 0.5, "spawn"))
+
+    def test_apunta_donde_matas_los_bichos_del_farmeo(self):
+        M = self.ns.Map
+        self.lua.execute("PitiGoldsDB.spots = nil; WorldMapFrame.shown = true; WorldMapFrame.mapID = 1413")
+        self.activate_from_window("farms", 2)    # cobre: sin sitios de bichos
+        self.unfold("cobre")
+        self.assertIn("|cff999999En el mapa: solo la zona; apunto dónde matas sus bichos al lootearlos.|r",
+                      self.T.BoxTexts())
+        self.T.StartStop("cobre")
+        self.addCleanup(self.lua.execute, "Mock.position = { 500, 4500 }; Mock.mapID = 1411; Mock.loot = {}")
+        self.lua.execute("""
+          Mock.mapID = 1413
+          Mock.position = { -300, 4800 }    -- en Los Baldíos, en 0.2, 0.3
+          Mock.units.target = { name = "Peón de Ventura", guid = "Creature-0-1-0-1-3284-0002" }
+          Mock.loot = { { itemID = 2770, sources = { "Creature-0-1-0-1-3284-0002", 1 } } }
+        """)
+        self.mock.Fire("LOOT_OPENED")    # aprende el bicho y apunta el sitio
+        spots = self.lua.eval("PitiGoldsDB.spots.cobre")
+        self.assertEqual(len(spots), 1)
+        self.assertEqual((spots[1].map, spots[1].x, spots[1].y), (1413, 0.2, 0.3))
+        self.mock.Fire("LOOT_OPENED")    # el mismo sitio no se repite
+        self.assertEqual(len(self.lua.eval("PitiGoldsDB.spots.cobre")), 1)
+        # Un bicho que no es del farmeo no cuenta.
+        self.lua.execute("""
+          Mock.position = { -600, 4800 }
+          Mock.units.target = { name = "Jabalí", guid = "Creature-0-1-0-1-3099-0003" }
+          Mock.loot = { { sources = { "Creature-0-1-0-1-3099-0003", 1 } } }
+        """)
+        self.mock.Fire("LOOT_OPENED")
+        self.assertEqual(len(self.lua.eval("PitiGoldsDB.spots.cobre")), 1)
+        self.assertEqual([p.texture[-1] for p in self.mock.MapPins().values()], ["4"])
+        self.assertIn("En el mapa (M): 1 donde has matado tú", self.T.BoxTexts())
+        # La flecha lleva a ese sitio; /pg olvidar lo borra.
+        f = self.farm("cobre")
+        self.assertEqual(M.Nearest(f, self.T.Data(f)).kind, "seen")
+        self.mock.Slash("olvidar cobre")
+        self.assertIsNone(self.lua.eval("PitiGoldsDB.spots.cobre"))
 
 
 class Contabilidad(unittest.TestCase):

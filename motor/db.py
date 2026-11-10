@@ -182,6 +182,16 @@ CREATE TABLE IF NOT EXISTS mm_vendor_items (
   limited INTEGER, currency INTEGER, verified INTEGER, holiday INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_mm_vendor_items_item ON mm_vendor_items(item_id);
+
+-- Dónde aparece cada PNJ (kind 'npc') y cada objeto del mapa (kind 'obj') según QuestieDB
+-- (spawns.py). Se rehacen en cada importación. rank: 0 normal, 1 élite, 2 raro élite, 3 jefe, 4 raro
+-- (los objetos no tienen nivel). qd_spawns: area_id de AreaTable, x e y en % del mapa de esa zona.
+CREATE TABLE IF NOT EXISTS qd_names (
+  kind TEXT, id INTEGER, name_en TEXT, name_es TEXT, min_level INTEGER, max_level INTEGER, rank INTEGER,
+  PRIMARY KEY (kind, id)
+);
+CREATE TABLE IF NOT EXISTS qd_spawns (kind TEXT, id INTEGER, area_id INTEGER, x REAL, y REAL);
+CREATE INDEX IF NOT EXISTS idx_qd_spawns_area ON qd_spawns(area_id, kind);
 """
 
 # La vista se rehace siempre para que coja las columnas nuevas.

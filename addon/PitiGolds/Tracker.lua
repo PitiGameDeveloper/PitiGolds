@@ -76,12 +76,6 @@ function T.Label()
   return table.concat(keys, "+")
 end
 
-local function Quality(itemID)
-  if C_Item and C_Item.GetItemQualityByID then return C_Item.GetItemQualityByID(itemID) end
-  local getInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
-  if getInfo then return (select(3, getInfo(itemID))) end
-end
-
 -- Si el objeto es de los que da el farmeo según el catálogo.
 function T.IsFarmItem(data, itemID)
   for _, id in ipairs(data and data.items or {}) do
@@ -90,12 +84,13 @@ function T.IsFarmItem(data, itemID)
   return false
 end
 
--- Lo que cuenta para un farmeo: sus objetos y, si da monedas, la basura gris. Si no dice qué
+-- Lo que cuenta para un farmeo. Si da monedas es de matar bichos: todo lo que sueltan (grises,
+-- verdes, tela que no es la del catálogo...), igual que la sesión y que el motor al medirlo. Si no,
+-- es de recolectar: solo sus objetos, para no sumarle lo que recoges de paso. Si no dice qué
 -- objetos da (o es uno que has medido tú), todo.
 local function Counts(data, itemID)
-  if not data or not data.items or #data.items == 0 then return true end
-  if T.IsFarmItem(data, itemID) then return true end
-  return data.coins and Quality(itemID) == 0 or false
+  if not data or not data.items or #data.items == 0 or data.coins then return true end
+  return T.IsFarmItem(data, itemID)
 end
 
 local function CountsMoney(data)
@@ -314,6 +309,18 @@ local function FarmLines(f, data, open)
   end
   if s.money > 0 then extra[#extra + 1] = "Monedas: " .. ns.Money(s.money) end
   if data and data.zone then extra[#extra + 1] = "Zona: " .. data.zone end
+  if data and ns.Map then
+    local c = ns.Map.Counts(f, data)
+    local parts = {}
+    if c.spawn > 0 then parts[#parts + 1] = c.spawn .. " sitios de bichos" end
+    if c.node > 0 then parts[#parts + 1] = c.node .. " de cosas del mapa" end
+    if c.seen > 0 then parts[#parts + 1] = c.seen .. " donde has matado tú" end
+    if #parts > 0 then
+      extra[#extra + 1] = "En el mapa (M): " .. table.concat(parts, ", ")
+    elseif data.point then
+      extra[#extra + 1] = "|cff999999En el mapa: solo la zona; apunto dónde matas sus bichos al lootearlos.|r"
+    end
+  end
   local mobs = ns.Hunt and ns.Hunt.Names(f) or {}
   if #mobs > 0 then
     extra[#extra + 1] = "Bichos: " .. table.concat(mobs, ", ")
@@ -607,7 +614,17 @@ local function CreateWindow()
   grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
   grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
   grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
-  grip:SetScript("OnMouseDown", function() window:StartSizing("BOTTOMRIGHT") end)
+  -- Antes de redimensionar se ancla por la esquina de arriba a la izquierda, que es la que se queda
+  -- quieta: anclada por el lado derecho (como sale la primera vez), WoW la hace crecer de golpe al
+  -- empezar a tirar.
+  grip:SetScript("OnMouseDown", function()
+    local left, top = window:GetLeft(), window:GetTop()
+    if left and top then
+      window:ClearAllPoints()
+      window:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
+    end
+    window:StartSizing("BOTTOMRIGHT")
+  end)
   grip:SetScript("OnMouseUp", function()
     window:StopMovingOrSizing()
     SaveGeometry()

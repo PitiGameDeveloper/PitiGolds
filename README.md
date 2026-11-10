@@ -85,8 +85,10 @@ título, cambia de tamaño con la esquina de abajo a la derecha y se cierra con 
 botón **Farmeos activos** del panel o `/pg activos`). Cada farmeo activo va en su recuadro, uno debajo
 de otro:
 - **Farmeos**: lo que llevas de sus objetos (por ejemplo, las pieles) con lo que vale cada uno, el total
-  y el oro por hora. Solo cuenta lo suyo: sus objetos y, si da monedas, el oro suelto y la basura gris.
-  Si el catálogo no dice qué da (o es uno que mediste tú), cuenta todo.
+  y el oro por hora. Si es de matar bichos (da monedas), cuenta todo lo que sueltan: monedas, grises,
+  verdes, otra tela... igual que la sesión y que el motor al medirlo. Si es de recolectar, solo sus
+  objetos, para no sumarle lo que recoges de paso. Si el catálogo no dice qué da (o es uno que mediste
+  tú), cuenta todo.
 - **Crafteos**: los materiales que tienes en las bolsas de los que hacen falta (5/8, en verde si ya
   llega) para las que absorbe el mercado en un día, y cuántas puedes fabricar ya.
 
@@ -98,13 +100,25 @@ farmeo en marcha queda apuntado con su id, así el motor mide tu oro por hora re
 hace falta `/pg farmeo`).
 
 **Al pulsar el nombre** se despliega el resto: lo esperado por hora, el precio y total de cada objeto, las
-monedas, la zona y los bichos; en los crafteos, el beneficio, lo que tienes en el banco, los pasos y
+monedas, la zona, cuántos sitios salen en el mapa y los bichos; en los crafteos, el beneficio, lo que tienes en el banco, los pasos y
 **-**/**+** para cambiar cuántas fabricar.
 
-**Flecha.** Lleva al sitio del primer farmeo activo que esté en marcha (o, si no hay ninguno, del
-primero), como TomTom: gira según hacia dónde miras y dice los metros. Si el catálogo solo da la zona,
-lleva hasta ella y avisa al entrar. Además pone el punto en el mapa del juego si el cliente lo permite.
-Se mueve arrastrándola; clic derecho la esconde y `/pg flecha` la vuelve a enseñar.
+**Mapa (tecla M).** En el mapa del mundo salen marcados los sitios exactos de tus farmeos activos:
+- **calaveras**: donde aparecen sus bichos, sacado de la base de datos de Questie para Forever (ver
+  «Dónde salen los bichos»);
+- **rombos**: las cosas del mapa del farmeo, como las almejas gigantes de las perlas o el champiñón
+  fantasma;
+- **triángulos verdes**: donde has matado tú bichos del farmeo. Se apuntan solos al lootear un bicho
+  del farmeo con el reloj en marcha y se guardan, así que también sirven en las zonas que Questie no
+  tiene (Clarofluvial). `/pg olvidar <farmeo>` los borra.
+
+En el mapa de la zona salen grandes; en el del continente, pequeños.
+
+**Flecha.** Lleva al bicho más cercano del primer farmeo activo que esté en marcha (o, si no hay
+ninguno, del primero): cualquiera de las marcas del mapa. Si no hay ninguna, al sitio del catálogo, y si
+este solo da la zona, hasta ella y avisa al entrar. Gira como la de TomTom según hacia dónde miras y dice
+los metros. Además pone el sitio del farmeo (el grupo de bichos más denso) en el mapa del juego si el
+cliente lo permite. Se mueve arrastrándola; clic derecho la esconde y `/pg flecha` la vuelve a enseñar.
 
 **Bichos.** Sobre la placa de cada bicho de tus farmeos sale una calavera (hacen falta las placas de
 enemigos, tecla **V**). No es una marca de banda: esas no se pueden poner desde un addon, así que la
@@ -118,7 +132,7 @@ dibuja el addon y solo la ves tú. Los bichos salen del catálogo (`bichos`) y d
 nombre (Esc > Macros). Ponlo en tu barra: cada vez que lo pulsas selecciona el bicho más cercano de tus
 farmeos activos. Es uno solo para todo: el addon le reescribe los `/target` al activar o acabar un
 farmeo, o al aprender un bicho. `/target` elige el más cercano cuyo nombre **empieza** por lo que le das,
-así que «Arpía» vale para todas las arpías; con nombres distintos los prueba uno detrás de otro, primero
+así que «Arpía» valdría para todas las arpías (el catálogo pone el nombre entero, «Arpía Alabruja»); con nombres distintos los prueba uno detrás de otro, primero
 los que tienes a la vista. Cada pulsación selecciona un bicho y nada más (no ataca ni hace nada por ti).
 En combate WoW no deja cambiar macros: si toca cambiarlo, se hace al salir del combate. `/pg objetivo`
 dice qué busca.
@@ -428,6 +442,23 @@ Al abrir un vendedor se apunta lo que vende (con quién lo viste, porque el prec
 descuentos de reputación o de Legacy) y se borra lo que ya no vende. El panel dice quién vende cada
 material y cada receta, y en qué zona.
 
+### Dónde salen los bichos
+
+`datos-juego` baja también, una vez por semana, la base de datos de PNJ y objetos de
+[QuestieDB](https://github.com/Questie/QuestieDB) para Forever (GPLv3; no hace falta instalar Questie):
+dónde aparece cada bicho y cada objeto del mapa (almejas, hierbas de misión), con su nombre en español.
+Para cada farmeo del catálogo con `punto`, el motor busca en esa zona los `bichos` y los `nodos` del
+catálogo (por el principio del nombre, en español o en inglés) y pasa sus sitios al addon:
+
+- si el `punto` trae x e y, solo los que estén cerca (a menos del 12 % del mapa);
+- si no, todos los de la zona, y el sitio del farmeo pasa a ser el grupo más denso;
+- no cuentan los raros ni los jefes, ni los de más de 3 niveles por debajo del farmeo (comparten nombre
+  con otros de la zona).
+
+`python -m motor metodos` avisa de los farmeos que se quedarían solo con la zona: sin bichos en el
+catálogo o con nombres que Questie no tiene. Las zonas nuevas de Forever (Clarofluvial) aún no salen en
+Questie: ahí el mapa se va llenando con los sitios donde matas tú.
+
 El informe añade:
 - **Comprar a vendedores y revender**: lo que un vendedor (visto por ti o de Merchant Map) vende por
   debajo de lo que pagan en la subasta, con lo que da como mucho al día. La columna «Dato» dice de
@@ -531,6 +562,7 @@ Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 | `/pg activos` | Muestra u oculta la ventana de farmeos activos (igual que el botón Farmeos activos) |
 | `/pg flecha` | Enseña o esconde la flecha hacia tu farmeo activo |
 | `/pg objetivo` | Dice qué bichos busca el macro «PG Objetivo» (y lo crea si lo has borrado) |
+| `/pg olvidar Gnolls Fangorroca` | Borra del mapa los sitios donde has matado bichos de ese farmeo activo |
 | `/pg farmeo Cobre en Durotar` | Pone nombre a lo que farmeas desde ahora (`/pg farmeo fin` lo quita; `/pg farmeo` a secas dice cuánto llevas en la última hora) |
 
 ## Primer día de WoW Forever: qué comprobar
@@ -546,8 +578,9 @@ El addon está escrito para la API del cliente moderno, pero no se ha podido pro
 5. Ejecuta `estado.cmd`. La línea **APIs nuevas encontradas** lista las funciones de Forever relacionadas con
    Legacy, Merchant's Favor, cajas, etc. Con eso se programa la lectura de los Legacy Points.
 6. Activa un farmeo con bichos y comprueba la flecha (que apunte bien al girar), la calavera sobre las
-   placas y el macro «PG Objetivo». Los nombres de los bichos del catálogo son el principio del nombre
-   en español: si alguno no coincide, el addon los aprende al lootear.
+   placas, el macro «PG Objetivo» y las marcas del mapa (tecla M, en la zona y en el continente). Los
+   nombres de los bichos del catálogo son los de Questie en español: si alguno no coincide, el addon
+   los aprende al lootear.
 
 ## Pruebas
 
