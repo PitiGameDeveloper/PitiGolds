@@ -63,7 +63,8 @@ end
 -- Lista de la compra -----------------------------------------------------------------
 -- Al pulsar Buscar se guarda lo que pide cada fabricación. En la subasta, al abrir uno de esos
 -- materiales, se pone sola la cantidad que falta para fabricar ns.craftCount veces. La pestaña
--- Cajones hace lo mismo con un cajón saqueado y su lote (shopping.what = "cajones").
+-- Cajones hace lo mismo con un cajón saqueado y su lote (shopping.what = "cajones"), y la de
+-- Libranzas con la libranza y el objeto de cada misión ("misiones").
 
 ns.craftCount = 1
 local shopping        -- { need = { [itemID] = cantidad por vez }, names = { [itemID] = nombre }, what = "fabricaciones" }
@@ -239,7 +240,7 @@ local function RunSearch(search)
 end
 
 -- Lo que pide cada vez (search.need) pasa a la lista de la compra y se busca en la subasta: ya
--- mismo si está abierta y, si no, al abrirla. what: «fabricaciones» o «cajones».
+-- mismo si está abierta y, si no, al abrirla. what: «fabricaciones», «cajones» o «misiones».
 function ns.ShopAndSearch(search, what)
   shopping = { need = search.need, names = search.nameOf, what = what or "fabricaciones" }
   if ns.UpdateCraftCountBox then ns.UpdateCraftCountBox() end
@@ -252,9 +253,15 @@ function ns.ShopAndSearch(search, what)
   end
 end
 
--- Qué se está comprando: «fabricaciones» o «cajones».
+-- Qué se está comprando: «fabricaciones», «cajones» o «misiones».
 function ns.ShoppingWhat()
   return shopping and shopping.what or "fabricaciones"
+end
+
+-- El texto junto a la casilla de cuántas veces.
+local COUNT_LABELS = { cajones = "Cajones x", misiones = "Veces x" }
+function ns.CraftCountLabel()
+  return COUNT_LABELS[ns.ShoppingWhat()] or "Fabricar x"
 end
 
 local lastSearchRecipe, lastSearchTime

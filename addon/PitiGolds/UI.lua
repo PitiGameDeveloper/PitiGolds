@@ -134,11 +134,11 @@ local function CreateAuctionBar()
   mats:SetScript("OnClick", function() ns.Scan.StartMaterials() end)
 
   -- Cuántas veces quieres fabricar la receta del botón Buscar (o cuántos cajones llenar, desde la
-  -- pestaña Cajones): al abrir uno de sus materiales se marca para comprar lo que pide
+  -- pestaña Cajones, o cuántas veces las misiones de Libranzas): al abrir uno de sus materiales se marca para comprar lo que pide
   -- multiplicado por esto (menos lo que ya tienes).
   local label = ahBar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   label:SetPoint("LEFT", mats, "RIGHT", 10, 0)
-  label:SetText(ns.ShoppingWhat and ns.ShoppingWhat() == "cajones" and "Cajones x" or "Fabricar x")
+  label:SetText(ns.CraftCountLabel())
   ns.craftCountLabel = label
   local box = CreateFrame("EditBox", nil, ahBar, "InputBoxTemplate")
   box:SetSize(40, 20)
@@ -162,7 +162,7 @@ end
 
 function ns.UpdateCraftCountBox()
   if ns.craftCountLabel and ns.ShoppingWhat then
-    ns.craftCountLabel:SetText(ns.ShoppingWhat() == "cajones" and "Cajones x" or "Fabricar x")
+    ns.craftCountLabel:SetText(ns.CraftCountLabel())
   end
   local box = ns.craftCountBox
   if box and tostring(ns.craftCount) ~= box:GetText() then box:SetText(tostring(ns.craftCount)) end

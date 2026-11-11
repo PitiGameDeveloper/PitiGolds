@@ -19,6 +19,7 @@ Tooltip.lua
 Gold.lua
 CraftInfo.lua
 Crates.lua
+Writs.lua
 Farming.lua
 Ledger.lua
 Session.lua

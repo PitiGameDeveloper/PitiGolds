@@ -11,7 +11,8 @@ local ADDON, ns = ...
 local C = {}
 ns.Crates = C
 
-local ROWS, ROW_HEIGHT = 20, 18
+local ROWS, ROW_HEIGHT = 22, 18
+local HEADER_Y = 12  -- los títulos de las columnas, arriba del todo
 local COLUMNS = {
   { title = "Cajón y lotes", width = 300 },
   { title = "Favor", width = 45 },
@@ -21,6 +22,10 @@ local COLUMNS = {
   { title = "Por favor", width = 90 },
 }
 local QUALITY_COLORS = { [1] = "ffffffff", [2] = "ff1eff00", [3] = "ff0070dd" }
+
+-- Las filas de cada cajón, con fondo propio para que se distingan de sus lotes.
+local BACKGROUNDS = { crate = { 0.40, 0.30, 0.05, 0.75 } }
+local LINE_KIND = function(line) return line.opt and "opt" or "crate" end
 
 local tab, panel, countText
 local rowFrames = {}
@@ -87,6 +92,12 @@ function C.Rows()
   return rows
 end
 
+-- «Cajón saqueado: hierbas de oficial» -> «Hierbas de oficial».
+local function ShortName(name)
+  local short = name:gsub("^Cajón saqueado: ", "")
+  return (short:gsub("^%l", string.upper))
+end
+
 local function FavorText(row)
   return row.favor .. (row.est and "?" or "")
 end
@@ -107,7 +118,7 @@ function C.Cells(line)
   if not opt then
     local color = QUALITY_COLORS[Quality(row.id) or 1] or QUALITY_COLORS[1]
     return {
-      "|c" .. color .. row.name:gsub("^Cajón saqueado: ", "") .. "|r",
+      "|c" .. color .. ShortName(row.name) .. "|r",
       FavorText(row),
       row.crate and ns.Money(row.crate) or "|cff999999sin precio|r",
       "",
@@ -161,6 +172,11 @@ function C.Buy(crateID, optID)
   ns.ShopAndSearch(search, "cajones")
 end
 
+-- El color de fondo de una línea (nil: el de filas alternas).
+function C.Background(line)
+  return BACKGROUNDS[LINE_KIND(line)]
+end
+
 -- La ventana ------------------------------------------------------------------------------
 
 local function ShowTooltip(frame)
@@ -179,6 +195,20 @@ local function ShowTooltip(frame)
   GameTooltip:Show()
 end
 
+-- El fondo de una fila: el de su línea (BACKGROUNDS) o, si no tiene, filas alternas.
+local function Paint(frame, line)
+  local stripe = frame.stripe
+  if not stripe then return end
+  local color = line and BACKGROUNDS[LINE_KIND(line)]
+  if color then
+    stripe:SetColorTexture(color[1], color[2], color[3], color[4])
+  elseif frame.odd then
+    stripe:SetColorTexture(1, 1, 1, 0.09)
+  else
+    stripe:SetColorTexture(0, 0, 0, 0.45)
+  end
+end
+
 function C.Refresh()
   if not panel then return end
   local lines = C.Lines()
@@ -187,6 +217,7 @@ function C.Refresh()
   for i, frame in ipairs(rowFrames) do
     local line = lines[i + offset]
     frame.line = line
+    Paint(frame, line)
     if line then
       local cells = C.Cells(line)
       for c, cell in ipairs(frame.cells) do cell:SetText(cells[c] or "") end
@@ -195,16 +226,10 @@ function C.Refresh()
       frame:Hide()
     end
   end
+  -- Solo hay texto si no hay nada que enseñar.
   if countText then
-    if #rows == 0 then
-      countText:SetText("El motor aún no me ha pasado los cajones: pasa por el PC (python -m motor leer) y haz /reload.")
-    else
-      local est = false
-      for _, r in ipairs(rows) do est = est or r.est end
-      countText:SetText(("%d cajones, del favor más barato al más caro (cajón + su lote más barato); debajo de"
-        .. " cada uno, sus lotes por lo que cuestan.%s Pulsa uno para buscarlo.")
-        :format(#rows, est and " ? = favor sin comprobar." or ""))
-    end
+    countText:SetText(#rows == 0
+      and "El motor aún no me ha pasado los cajones: pasa por el PC (python -m motor leer) y haz /reload." or "")
   end
 end
 
@@ -221,6 +246,8 @@ end
 
 function C.Show()
   if not panel then return end
+  -- Las dos pestañas nuestras ocupan el mismo sitio.
+  if ns.Writs and ns.Writs.Hide then ns.Writs.Hide() end
   panel:Show()
   SetTabSelected(true)
   C.Refresh()
@@ -262,17 +289,14 @@ local function CreatePanel(af)
     panel:SetBackdropColor(0.05, 0.05, 0.05, 1)
   end
 
-  local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  title:SetPoint("TOPLEFT", 12, -10)
-  title:SetText("Cajones saqueados: el favor de mercader más barato")
   countText = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  countText:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -4)
+  countText:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -40)
   countText:SetJustifyH("LEFT")
 
   local x = 12
   for _, col in ipairs(COLUMNS) do
     local h = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    h:SetPoint("TOPLEFT", panel, "TOPLEFT", x + 4, -48)
+    h:SetPoint("TOPLEFT", panel, "TOPLEFT", x + 4, -HEADER_Y)
     h:SetText(col.title)
     x = x + col.width
   end
@@ -280,13 +304,11 @@ local function CreatePanel(af)
   for i = 1, ROWS do
     local row = CreateFrame("Button", nil, panel)
     row:SetSize(x - 12, ROW_HEIGHT)
-    row:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -48 - ROW_HEIGHT * i)
+    row:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -HEADER_Y - ROW_HEIGHT * i)
     row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
-    local stripe = row:CreateTexture(nil, "BACKGROUND", nil, -1)
-    if stripe then
-      stripe:SetAllPoints()
-      if i % 2 == 1 then stripe:SetColorTexture(1, 1, 1, 0.09) else stripe:SetColorTexture(0, 0, 0, 0.45) end
-    end
+    row.stripe = row:CreateTexture(nil, "BACKGROUND", nil, -1)
+    if row.stripe then row.stripe:SetAllPoints() end
+    row.odd = i % 2 == 1
     row.cells = {}
     local cx = 0
     for c, col in ipairs(COLUMNS) do

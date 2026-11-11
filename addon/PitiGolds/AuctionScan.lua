@@ -290,6 +290,10 @@ local function BookText(book, min, qty, n)
   return ("%s,%d,%d|%s"):format(Money(min), qty, n, table.concat(parts, ";"))
 end
 
+-- El precio mínimo por unidad de cada objeto en la última lista de resultados: RecordItem lo usa
+-- para saber cómo vienen los precios de las subastas sueltas.
+local browseMin = {}
+
 -- Lista de resultados: el precio mínimo y la cantidad de cada objeto.
 local function RecordBrowse()
   if Scan.state ~= "idle" then return end
@@ -307,6 +311,7 @@ local function RecordBrowse()
     end
   end
   for itemID, a in pairs(found) do
+    browseMin[itemID] = a.min
     NoteSearch(itemID, Money(a.min) .. "," .. a.qty, false)
   end
 end
@@ -328,22 +333,43 @@ local function RecordCommodity(itemID)
 end
 
 -- Al abrir un objeto que se vende suelto: cada subasta con su precio por unidad.
+-- Ojo: en Forever una fila puede juntar varias subastas iguales («702 a 1 p»): quantity es cuántas
+-- hay y buyoutAmount lo que cuesta cada una, no la fila entera. Si fuera un montón, buyoutAmount sería
+-- el del montón. Como las filas no lo dicen, manda el mínimo por unidad de la lista de resultados:
+-- se toma la lectura cuyo mínimo se le acerca más. Sin esa lista y con filas de más de uno, no se
+-- apunta nada (mejor sin precio que con uno 700 veces más bajo).
 local function RecordItem(itemKey)
   local AH = C_AuctionHouse
   local itemID = type(itemKey) == "table" and itemKey.itemID
   if not (itemID and AH.GetNumItemSearchResults and AH.GetItemSearchResultInfo) then return end
-  local book, min, qty, n = {}, nil, 0, 0
+  local rows, several = {}, false
+  local minEach, minSplit
   for i = 1, AH.GetNumItemSearchResults(itemKey) or 0 do
     local r = AH.GetItemSearchResultInfo(itemKey, i)
     local count = r and r.quantity or 0
     if r and r.buyoutAmount and r.buyoutAmount > 0 and count > 0 then
-      local unit = math.floor(r.buyoutAmount / count)
-      book[unit] = (book[unit] or 0) + count
-      qty, n = qty + count, n + 1
-      if not min or unit < min then min = unit end
+      rows[#rows + 1] = { price = r.buyoutAmount, count = count }
+      several = several or count > 1
+      local split = math.floor(r.buyoutAmount / count)
+      if not minEach or r.buyoutAmount < minEach then minEach = r.buyoutAmount end
+      if not minSplit or split < minSplit then minSplit = split end
     end
   end
-  if min then NoteSearch(itemID, BookText(book, min, qty, n), true) end
+  if #rows == 0 then return end
+  local perAuction = true  -- buyoutAmount es lo que cuesta cada unidad de la fila
+  if several then
+    local anchor = browseMin[itemID]
+    if not anchor then return end
+    perAuction = math.abs(minEach - anchor) <= math.abs(minSplit - anchor)
+  end
+  local book, min, qty = {}, nil, 0
+  for _, row in ipairs(rows) do
+    local unit = perAuction and row.price or math.floor(row.price / row.count)
+    book[unit] = (book[unit] or 0) + row.count
+    qty = qty + row.count
+    if not min or unit < min then min = unit end
+  end
+  NoteSearch(itemID, BookText(book, min, qty, #rows), true)
 end
 
 ns.On("COMMODITY_SEARCH_RESULTS_UPDATED", function(_, itemID)
@@ -362,7 +388,7 @@ end)
 -- Al comprar se acaban las subastas más baratas y el precio sube. Se apunta en el momento: lo
 -- comprado se quita de la lista de precios que ya tenemos (las más baratas primero) y se vuelve
 -- a pedir al servidor la lista de ese objeto, que la deja exacta. El tooltip, la ventana de
--- profesión y la pestaña Cajones lo ven al instante, y el motor lo lee como el resto de búsquedas.
+-- profesión y las pestañas Cajones y Libranzas lo ven al instante, y el motor lo lee como el resto de búsquedas.
 
 -- Quita qty unidades, de la más barata a la más cara, de la lista entera del objeto.
 local function DeductBought(itemID, qty)

@@ -112,6 +112,10 @@ class PestanaCajones(unittest.TestCase):
         self.assertEqual(shape, [(1002, None), (1002, 2003), (1001, None), (1001, 2002), (1001, 2001),
                                  (1003, None), (1003, 2001)])
         cajon = list(crates_ns.Cells(lines[3]).values())
+        # Con mayúscula y fondo propio; los lotes, filas alternas.
+        self.assertEqual(cajon[0], "|cffffffffPolvos|r")
+        self.assertIsNotNone(crates_ns.Background(lines[3]))
+        self.assertIsNone(crates_ns.Background(lines[4]))
         self.assertEqual(cajon[1:], ["5", "1p 0c", "", "9p 0c", "|cff40ff401p 80c|r"])
         barato = list(crates_ns.Cells(lines[4]).values())
         self.assertEqual(barato, ["      |cff40ff404 × Esencia|r", "", "", "|cff40ff408p 0c|r",

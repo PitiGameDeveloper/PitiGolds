@@ -287,7 +287,7 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 | `motor/` | Programa en Python, sin IA, que lee lo que guarda el addon y lo pasa a `datos/pitigolds.db` (SQLite). |
 | `tests/` | Un WoW simulado para probar el addon fuera del juego. |
 | `asesor/` | El asesor de Claude Code: sus instrucciones (`CLAUDE.md`), sus guiones (`comandos/`) y `pg.py`, que lanza el motor desde ahí. |
-| `conocimiento/` | Métodos de tus guías (`metodos.json`), escritos con otras palabras; las notas del asesor (`revision.json`); rutas de recolección (`recoleccion.json`); qué pide cada cajón saqueado y el favor que da (`cajones.json`), y las fuentes que revisa el asesor (`fuentes.json`). |
+| `conocimiento/` | Métodos de tus guías (`metodos.json`), escritos con otras palabras; las notas del asesor (`revision.json`); rutas de recolección (`recoleccion.json`); qué pide cada cajón saqueado y el favor que da (`cajones.json`); las libranzas del artesano con su zona y los grupos de zonas pegadas (`libranzas.json`), y las fuentes que revisa el asesor (`fuentes.json`). |
 | `fuentes/` | Las guías tal cual (PDF, Word...). Solo en tu PC: no se suben a GitHub. |
 
 ## Uso diario
@@ -302,7 +302,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    - **Fabricar x**: cuántas veces quieres fabricar la receta del botón **Buscar** (empieza con el número
      que tengas junto a «Crear todo»). Al abrir uno de sus materiales para comprarlo se marca solo lo que
      falta: lo que pide la receta por ese número, menos lo que ya tienes en bolsas y banco. Si vienes de la
-     pestaña **Cajones** pone **Cajones x**: cuántos cajones vas a llenar.
+     pestaña **Cajones** pone **Cajones x**: cuántos cajones vas a llenar; si vienes de **Libranzas**,
+     **Veces x**.
 
    Abajo, junto a Comprar, Vender y Subastas, está la pestaña **Cajones**: los cajones saqueados, del favor
    de mercader más barato al más caro (también `/pg cajones` en el chat, los diez primeros). Cada cajón se
@@ -315,8 +316,24 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    de artesano no se sabe y se estima en 20 el blanco y 40 el verde (sale con un «?»). Fuera del juego,
    `python -m motor cajones` saca la misma lista.
 
+   Al lado está la pestaña **Libranzas**: las misiones de libranza del artesano, que se cogen con la
+   libranza y se entregan con el objeto que piden, los dos comprados en la subasta. Cada misión cuesta la
+   libranza más el objeto. Tiene dos órdenes, con los botones de arriba a la izquierda (se acuerda del último):
+   - **Por zonas**: los grupos de zonas pegadas (por ejemplo Arathi, Trabalomas y Alterac), del más barato
+     al más caro **de media por misión** (columna Media), para que una zona de 6 misiones no salga más
+     cara que una de 1 solo por tener más; dentro, sus zonas, también por la media, y en cada zona sus misiones: la
+     libranza (con el total de la misión) y debajo el objeto que se entrega. Las zonas sin grupo van solas.
+   - **Más baratas**: todas las misiones de la más barata a la más cara, con su zona encima; si varias
+     seguidas son de la misma zona, van juntas debajo de ella.
+
+   Un «≥» en una zona o un grupo quiere decir que a alguna misión le falta precio y el total real es mayor.
+   Al pulsar una misión se buscan su libranza y su objeto; al pulsar una zona o un grupo, los de todas sus
+   misiones. `/pg libranzas` saca las diez más baratas en el chat. Qué pide cada libranza, dónde se
+   entrega y qué zonas van juntas está en `conocimiento/libranzas.json` (de la guía de Wowhead, solo las
+   46 misiones que ya tienen zona).
+
    Además, todo lo que ves al buscar en la subasta (a mano, con **Buscar** o desde otro addon) se apunta al
-   momento: el tooltip, la ventana de profesión y la pestaña Cajones usan ese precio sin esperar al motor,
+   momento: el tooltip, la ventana de profesión y las pestañas Cajones y Libranzas usan ese precio sin esperar al motor,
    y el motor lo lee como un escaneo más («de tus búsquedas» en el informe). Lo mismo al **comprar**: lo
    que te llevas se quita de las subastas más baratas que se vieron, así que el precio sube en el momento
    (si compras los 20 cajones más baratos, la pestaña ya cuenta con los siguientes), y se vuelve a pedir
@@ -606,6 +623,7 @@ Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 | `/pg panel` | Muestra u oculta el panel |
 | `/pg sesion` | Abre la lista de lo farmeado en la sesión (igual que el botón Sesión); `/pg sesion reiniciar` empieza otra |
 | `/pg cajones` | Los diez cajones saqueados que dan el favor de mercader más barato (la lista entera, en la pestaña Cajones de la subasta) |
+| `/pg libranzas` | Las diez misiones de libranza más baratas, libranza más objeto (todas, por zonas, en la pestaña Libranzas de la subasta) |
 | `/pg metodos` | Abre la ventana de métodos (igual que el botón Mejor farmeo) |
 | `/pg activos` | Muestra u oculta la ventana de farmeos activos (igual que el botón Farmeos activos) |
 | `/pg flecha` | Enseña o esconde la flecha hacia tu farmeo activo |

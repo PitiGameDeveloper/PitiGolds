@@ -13,6 +13,8 @@ Lleva:
                 se acaba de ver en la subasta.
   crates        los cajones saqueados con el favor que dan y sus lotes (se llenan con uno, a elegir),
                 para la pestaña Cajones de la subasta (cajones.py). Sus precios van en prices.
+  writs         las libranzas del artesano con el objeto que piden, su zona y los grupos de zonas
+                pegadas, para la pestaña Libranzas de la subasta (libranzas.py).
   lastScan      hora del último escaneo de la subasta.
   methods       la ventana de métodos: el mejor farmeo y las pestañas de farmeos y crafteos
                 (panel.py).
@@ -26,6 +28,7 @@ from pathlib import Path
 
 from .analysis import Analysis, analyze
 from .cajones import crates_export
+from .libranzas import writs_export
 from .panel import Panel, build_panel, panel_export
 
 HEADER = "-- Este archivo lo escribe el motor de PitiGolds (python -m motor). No lo edites a mano."
@@ -125,6 +128,7 @@ def render_generated(ingested_up_to: int, analysis: Analysis, now: int | None = 
             lines.append(f'    [{c.recipe_id}] = "{recipe_parts(c, analysis.prices)}",')
     lines.append("  },")
     lines.append(f"  crates = {lua_value(crates_export(analysis.crates))},")
+    lines.append(f"  writs = {lua_value(writs_export(analysis.writs))},")
     if analysis.last_scan:
         lines.append(f"  lastScan = {int(analysis.last_scan)},")
     if panel is not None:

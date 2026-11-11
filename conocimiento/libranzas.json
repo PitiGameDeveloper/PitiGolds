@@ -1,0 +1,480 @@
+{
+  "_nota": "Libranzas del artesano: cada misión se coge con la libranza (se compra en la subasta) y se entrega con el objeto que pide. Zonas y PNJ de la guía de Wowhead «Craftsman's Writs» (2026-10-25). grupos: zonas pegadas que se hacen en el mismo viaje; las que no salen en ningún grupo van sueltas.",
+  "grupos": [
+    [
+      "Tierras Altas de Arathi",
+      "Laderas de Trabalomas",
+      "Montañas de Alterac"
+    ],
+    [
+      "Bosque del Ocaso",
+      "Vega de Tuercespina"
+    ],
+    [
+      "Vallefresno",
+      "Sierra Espolón"
+    ]
+  ],
+  "libranzas": [
+    {
+      "libranza": 264014,
+      "objeto": 6048,
+      "cantidad": 1,
+      "nombre": "Poción de protección de las Sombras",
+      "profesion": "Alquimia",
+      "zona": "Bosque del Ocaso",
+      "pnj": "Kzixx",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264023,
+      "objeto": 15869,
+      "cantidad": 1,
+      "nombre": "Llave esqueleto de plata",
+      "profesion": "Herrería",
+      "zona": "Bosque del Ocaso",
+      "pnj": "Battered Trunk",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264032,
+      "objeto": 4381,
+      "cantidad": 1,
+      "nombre": "Recombobulador menor",
+      "profesion": "Ingeniería",
+      "zona": "Bosque del Ocaso",
+      "pnj": "Kzixx",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264041,
+      "objeto": 2317,
+      "cantidad": 1,
+      "nombre": "Túnica de cuero oscuro",
+      "profesion": "Peletería",
+      "zona": "Bosque del Ocaso",
+      "pnj": "Kzixx",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264050,
+      "objeto": 4245,
+      "cantidad": 1,
+      "nombre": "Talega de seda pequeña",
+      "profesion": "Sastrería",
+      "zona": "Bosque del Ocaso",
+      "pnj": "Kzixx",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264060,
+      "objeto": 10592,
+      "cantidad": 1,
+      "nombre": "Jarabe Ojo de gato",
+      "profesion": "Alquimia",
+      "zona": "Darnassus",
+      "pnj": "Arch Druid Fandral Staghelm",
+      "nivel": "Experto"
+    },
+    {
+      "libranza": 264015,
+      "objeto": 5634,
+      "cantidad": 1,
+      "nombre": "Poción de acción libre",
+      "profesion": "Alquimia",
+      "zona": "Laderas de Trabalomas",
+      "pnj": "Webbed Mudsnout Gnoll",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264024,
+      "objeto": 3491,
+      "cantidad": 1,
+      "nombre": "Maza de bronce pesada",
+      "profesion": "Herrería",
+      "zona": "Laderas de Trabalomas",
+      "pnj": "Gorgrash",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264033,
+      "objeto": 6712,
+      "cantidad": 1,
+      "nombre": "Cerradura de prácticas",
+      "profesion": "Ingeniería",
+      "zona": "Laderas de Trabalomas",
+      "pnj": "Gorgrash",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264042,
+      "objeto": 7358,
+      "cantidad": 1,
+      "nombre": "Guantes de ratero",
+      "profesion": "Peletería",
+      "zona": "Laderas de Trabalomas",
+      "pnj": "Kris Legace",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264018,
+      "objeto": 8951,
+      "cantidad": 1,
+      "nombre": "Elixir de defensa",
+      "profesion": "Alquimia",
+      "zona": "Las Mil Agujas",
+      "pnj": "Rizzle Brassbolts",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264027,
+      "objeto": 3848,
+      "cantidad": 1,
+      "nombre": "Cuchillo de bronce grande",
+      "profesion": "Herrería",
+      "zona": "Las Mil Agujas",
+      "pnj": "\"Plucky\" Johnson",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264036,
+      "objeto": 4380,
+      "cantidad": 1,
+      "nombre": "Bomba de bronce grande",
+      "profesion": "Ingeniería",
+      "zona": "Las Mil Agujas",
+      "pnj": "Razzeric",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264045,
+      "objeto": 4254,
+      "cantidad": 1,
+      "nombre": "Guantes barbáricos",
+      "profesion": "Peletería",
+      "zona": "Las Mil Agujas",
+      "pnj": "Goblin Pit Boss",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264054,
+      "objeto": 6264,
+      "cantidad": 1,
+      "nombre": "Toga de adepto superior",
+      "profesion": "Sastrería",
+      "zona": "Las Mil Agujas",
+      "pnj": "Magus Tirth",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264019,
+      "objeto": 5996,
+      "cantidad": 1,
+      "nombre": "Jarabe de respiración acuática",
+      "profesion": "Alquimia",
+      "zona": "Los Humedales",
+      "pnj": "Kixxle",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264028,
+      "objeto": 3484,
+      "cantidad": 1,
+      "nombre": "Botas de hierro verde",
+      "profesion": "Herrería",
+      "zona": "Los Humedales",
+      "pnj": "Kixxle",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264037,
+      "objeto": 8069,
+      "cantidad": 1,
+      "nombre": "Proyectil artesanal sólido",
+      "profesion": "Ingeniería",
+      "zona": "Los Humedales",
+      "pnj": "Kixxle",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264046,
+      "objeto": 7284,
+      "cantidad": 1,
+      "nombre": "Guantes de cachorro rojo",
+      "profesion": "Peletería",
+      "zona": "Los Humedales",
+      "pnj": "Kixxle",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264055,
+      "objeto": 4321,
+      "cantidad": 1,
+      "nombre": "Zapatillas de seda de araña",
+      "profesion": "Sastrería",
+      "zona": "Los Humedales",
+      "pnj": "Kixxle",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264011,
+      "objeto": 3391,
+      "cantidad": 1,
+      "nombre": "Elixir de fuerza de ogro",
+      "profesion": "Alquimia",
+      "zona": "Montañas de Alterac",
+      "pnj": "Sos'mol",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264020,
+      "objeto": 5540,
+      "cantidad": 1,
+      "nombre": "Daga de perlas",
+      "profesion": "Herrería",
+      "zona": "Montañas de Alterac",
+      "pnj": "Alan Sneeks",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264029,
+      "objeto": 5507,
+      "cantidad": 1,
+      "nombre": "Catalejo ornamentado",
+      "profesion": "Ingeniería",
+      "zona": "Montañas de Alterac",
+      "pnj": "Alan Sneeks",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264038,
+      "objeto": 18662,
+      "cantidad": 1,
+      "nombre": "Bola de cuero pesado",
+      "profesion": "Peletería",
+      "zona": "Montañas de Alterac",
+      "pnj": "Sos'mol",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264051,
+      "objeto": 4317,
+      "cantidad": 1,
+      "nombre": "Pantalones Fénix",
+      "profesion": "Sastrería",
+      "zona": "Montañas de Alterac",
+      "pnj": "Bath'rah the Windwatcher",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264047,
+      "objeto": 5766,
+      "cantidad": 1,
+      "nombre": "Toga de zahorí inferior",
+      "profesion": "Sastrería",
+      "zona": "Montañas de Alterac",
+      "pnj": "Alan Sneeks",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264016,
+      "objeto": 3390,
+      "cantidad": 1,
+      "nombre": "Elixir de agilidad inferior",
+      "profesion": "Alquimia",
+      "zona": "Sierra Espolón",
+      "pnj": "Ziz Fizziks",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264025,
+      "objeto": 2865,
+      "cantidad": 1,
+      "nombre": "Leotardos de bronce férreos",
+      "profesion": "Herrería",
+      "zona": "Sierra Espolón",
+      "pnj": "Ziz Fizziks",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264034,
+      "objeto": 4373,
+      "cantidad": 1,
+      "nombre": "Gafas de las Sombras",
+      "profesion": "Ingeniería",
+      "zona": "Sierra Espolón",
+      "pnj": "Ziz Fizziks",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264043,
+      "objeto": 7371,
+      "cantidad": 1,
+      "nombre": "Carcaj pesado",
+      "profesion": "Peletería",
+      "zona": "Sierra Espolón",
+      "pnj": "Ziz Fizziks",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264052,
+      "objeto": 4313,
+      "cantidad": 1,
+      "nombre": "Botas de lana roja",
+      "profesion": "Sastrería",
+      "zona": "Sierra Espolón",
+      "pnj": "Ziz Fizziks",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264012,
+      "objeto": 3383,
+      "cantidad": 1,
+      "nombre": "Elixir de sabiduría",
+      "profesion": "Alquimia",
+      "zona": "Tierras Altas de Arathi",
+      "pnj": "Muggol Breezebeard",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264021,
+      "objeto": 11128,
+      "cantidad": 1,
+      "nombre": "Vara de oro",
+      "profesion": "Herrería",
+      "zona": "Tierras Altas de Arathi",
+      "pnj": "Muggol Breezebeard",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264030,
+      "objeto": 4384,
+      "cantidad": 1,
+      "nombre": "Oveja explosiva",
+      "profesion": "Ingeniería",
+      "zona": "Tierras Altas de Arathi",
+      "pnj": "Alyce",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264039,
+      "objeto": 5958,
+      "cantidad": 1,
+      "nombre": "Pantalones de cuero refinado",
+      "profesion": "Peletería",
+      "zona": "Tierras Altas de Arathi",
+      "pnj": "Alyce",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264048,
+      "objeto": 6263,
+      "cantidad": 1,
+      "nombre": "Mono azul",
+      "profesion": "Sastrería",
+      "zona": "Tierras Altas de Arathi",
+      "pnj": "Alyce",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264013,
+      "objeto": 3385,
+      "cantidad": 1,
+      "nombre": "Poción de maná inferior",
+      "profesion": "Alquimia",
+      "zona": "Vallefresno",
+      "pnj": "Ash'alari",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264022,
+      "objeto": 5541,
+      "cantidad": 1,
+      "nombre": "Martillo iridiscente",
+      "profesion": "Herrería",
+      "zona": "Vallefresno",
+      "pnj": "Cowardly Peon",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264031,
+      "objeto": 4383,
+      "cantidad": 1,
+      "nombre": "Rifle de vista lunar",
+      "profesion": "Ingeniería",
+      "zona": "Vallefresno",
+      "pnj": "Grembly",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264040,
+      "objeto": 7349,
+      "cantidad": 1,
+      "nombre": "Guantes de herborista",
+      "profesion": "Peletería",
+      "zona": "Vallefresno",
+      "pnj": "Murache",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264049,
+      "objeto": 7048,
+      "cantidad": 1,
+      "nombre": "Caperuza de seda azur",
+      "profesion": "Sastrería",
+      "zona": "Vallefresno",
+      "pnj": "Cowardly Peon",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264017,
+      "objeto": 3388,
+      "cantidad": 1,
+      "nombre": "Elixir de sangre de trol inferior",
+      "profesion": "Alquimia",
+      "zona": "Vega de Tuercespina",
+      "pnj": "Short John Mithril",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264026,
+      "objeto": 3485,
+      "cantidad": 1,
+      "nombre": "Guanteletes de hierro verde",
+      "profesion": "Herrería",
+      "zona": "Vega de Tuercespina",
+      "pnj": "\"Sea Wolf\" MacKinley",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264035,
+      "objeto": 7506,
+      "cantidad": 1,
+      "nombre": "Mando universal gnómico",
+      "profesion": "Ingeniería",
+      "zona": "Vega de Tuercespina",
+      "pnj": "Scooty",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264044,
+      "objeto": 4252,
+      "cantidad": 1,
+      "nombre": "Hombreras de cuero oscuro",
+      "profesion": "Peletería",
+      "zona": "Vega de Tuercespina",
+      "pnj": "Narkk",
+      "nivel": "Oficial"
+    },
+    {
+      "libranza": 264053,
+      "objeto": 10048,
+      "cantidad": 1,
+      "nombre": "Falda escocesa de colores",
+      "profesion": "Sastrería",
+      "zona": "Vega de Tuercespina",
+      "pnj": "Hekshi",
+      "nivel": "Oficial"
+    }
+  ]
+}

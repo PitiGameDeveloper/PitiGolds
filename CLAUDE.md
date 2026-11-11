@@ -12,7 +12,7 @@ Todo va en español: textos del juego, código, comentarios, mensajes del motor 
 - `motor/`: lee esas SavedVariables (`ingest.py`) a `datos/pitigolds.db` y calcula precios, crafteos,
   farmeos, métodos y el informe. Se usa con `python -m motor <comando>` (`--help` para la lista).
 - `conocimiento/`: lo que se mantiene a mano: catálogo de métodos, notas de revisión, rutas de
-  recolección, cajones saqueados y fuentes. Lo valida el motor (`python -m motor metodos`).
+  recolección, cajones saqueados, libranzas y fuentes. Lo valida el motor (`python -m motor metodos`).
 - `asesor/`: el asesor de oro. Tiene su propio `CLAUDE.md` y sus comandos.
 - `datos/`: salida generada (base de datos, informe, panel, guías, tablas descargadas). No va a git.
 - `fuentes/`: guías compradas por Piti. Privadas: no se copian a ningún sitio ni van a git.

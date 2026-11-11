@@ -26,6 +26,7 @@ from pathlib import Path
 from . import db as dbmod
 from .analysis import analyze
 from .cajones import crate_problems
+from .libranzas import writ_problems
 from .catalogo import CATALOG_PATH, catalog_problems, load_catalog
 from .config import Config, load_config
 from .gamedata import update_game_data
@@ -175,7 +176,7 @@ def cmd_metodos(config: Config) -> int:
         problems = catalog_problems(known_lines=lines or None)
         if not problems:
             ids = {e.id for e in load_catalog()}
-            problems = review_problems(method_ids=ids) + route_problems() + crate_problems(conn)
+            problems = review_problems(method_ids=ids) + route_problems() + crate_problems(conn) + writ_problems(conn)
         if problems:
             print("Hay que arreglar el conocimiento (conocimiento/):")
             for p in problems:
