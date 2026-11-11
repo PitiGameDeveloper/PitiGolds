@@ -45,6 +45,20 @@ local filterBar, countText, rowsCache
 local tabButtons, headerButtons, rowFrames, filterButtons = {}, {}, {}, {}
 local state = { tab = "farms", offset = 0, selected = nil, sort = nil, desc = false }
 
+-- Cómo dejaste cada pestaña (orden, scroll y método elegido) y cuál estaba abierta. Se guarda en
+-- el personaje, para que al cerrar y abrir (o tras un /reload) siga donde estabas.
+local function SavedView()
+  local c = ns.Char()
+  if type(c.methodsView) ~= "table" then c.methodsView = {} end
+  return c.methodsView
+end
+
+local function SaveView()
+  local saved = SavedView()
+  saved.tab = state.tab
+  saved[state.tab] = { sort = state.sort, desc = state.desc or nil, offset = state.offset, selected = state.selected }
+end
+
 local function Data()
   local gen = PitiGoldsGenerated
   return type(gen) == "table" and type(gen.methods) == "table" and gen.methods or nil
@@ -270,10 +284,56 @@ end
 
 -- Filas y orden -----------------------------------------------------------------------------
 
--- Profesiones que este personaje ha ocultado. Solo se apuntan las ocultas: sin registro, se ven todas.
+-- Las dos profesiones principales que ha aprendido el personaje: por nombre y por línea.
+local function OwnProfessions()
+  local names, lines, any = {}, {}, false
+  if not (GetProfessions and GetProfessionInfo) then return nil end
+  local p1, p2 = GetProfessions()
+  for _, index in pairs({ p1, p2 }) do
+    local name, _, _, _, _, _, skillLine = GetProfessionInfo(index)
+    if name then
+      names[name], any = true, true
+      if skillLine then lines[skillLine] = true end
+    end
+  end
+  return any and { names = names, lines = lines } or nil
+end
+
+-- Mientras no toques el filtro, se ven solo las recetas de tus profesiones (si alguna tiene).
+local function DefaultHidden()
+  local own = OwnProfessions()
+  local data = Data()
+  if not own or not data then return nil end
+  local mine, all = {}, {}
+  for _, row in ipairs(data.crafts or {}) do
+    local name = row.prof or "?"
+    all[name] = true
+    if own.names[name] or (row.line and own.lines[row.line]) then mine[name] = true end
+  end
+  if next(mine) == nil then return nil end
+  local hidden = {}
+  for name in pairs(all) do
+    if not mine[name] then hidden[name] = true end
+  end
+  return hidden
+end
+
+-- Profesiones que este personaje ha ocultado. Solo se apuntan las ocultas; si nunca has tocado
+-- el filtro, las que no son tuyas.
 local function HiddenProfessions()
   local c = ns.Char()
   c.craftFilter = c.craftFilter or {}
+  if not c.craftFilterChosen and next(c.craftFilter) == nil then
+    return DefaultHidden() or c.craftFilter
+  end
+  return c.craftFilter
+end
+
+-- Al tocar el filtro se queda lo que se veía y desde ahí manda lo que elijas.
+local function ChosenFilter()
+  local c = ns.Char()
+  c.craftFilter = HiddenProfessions()
+  c.craftFilterChosen = true
   return c.craftFilter
 end
 
@@ -325,13 +385,13 @@ local function FilterChanged()
 end
 
 function M.ToggleProfession(name)
-  local hidden = HiddenProfessions()
+  local hidden = ChosenFilter()
   hidden[name] = (not hidden[name]) or nil
   FilterChanged()
 end
 
 function M.ShowAllProfessions(show)
-  local hidden = HiddenProfessions()
+  local hidden = ChosenFilter()
   for _, name in ipairs(M.Professions()) do hidden[name] = (not show) or nil end
   FilterChanged()
 end
@@ -510,12 +570,17 @@ function M.Refresh()
     end
   end
   ShowDetail()
+  SaveView()
 end
 
 function M.SetTab(tab)
-  state.tab, state.offset, state.selected, state.sort, state.desc = tab, 0, nil, nil, false
+  local view = SavedView()[tab]
+  if type(view) ~= "table" then view = {} end
+  state.tab = tab
+  state.offset = tonumber(view.offset) or 0
+  state.selected, state.sort, state.desc = view.selected, view.sort, view.desc and true or false
   rowsCache = nil
-  if tab == "farms" then
+  if tab == "farms" and state.selected == nil then
     local data = Data()
     state.selected = data and data.verdict and data.verdict.best or nil
   end
@@ -664,6 +729,16 @@ local function CreateWindow()
     row:SetSize(WIDTH - 24, ROW_HEIGHT)
     row:SetPoint("TOPLEFT", 0, -ROW_HEIGHT * i)
     row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+    -- Una fila con fondo claro y la siguiente con fondo oscuro, para no perderse al leerlas.
+    row.stripe = row:CreateTexture(nil, "BACKGROUND", nil, -1)
+    if row.stripe then
+      row.stripe:SetAllPoints()
+      if i % 2 == 1 then
+        row.stripe:SetColorTexture(1, 1, 1, 0.09)
+      else
+        row.stripe:SetColorTexture(0, 0, 0, 0.45)
+      end
+    end
     row.selected = row:CreateTexture(nil, "BACKGROUND")
     if row.selected then
       row.selected:SetAllPoints()
@@ -727,22 +802,24 @@ local function CreateWindow()
   end)
 end
 
+-- Sin pestaña, la que tenías abierta la última vez.
 function M.Open(tab)
   if not window then CreateWindow() end
   window:Show()
-  M.SetTab(tab or state.tab)
+  local last = SavedView().tab
+  M.SetTab(tab or ((last == "farms" or last == "crafts") and last) or "farms")
 end
 
 function M.Toggle()
   if window and window:IsShown() then
     window:Hide()
   else
-    M.Open("farms")
+    M.Open()
   end
 end
 
 ns.Command("metodos", "abre la ventana de métodos: el mejor farmeo y los crafteos", function()
-  M.Open("farms")
+  M.Open()
 end)
 
 ns.On("NEW_RECIPE_LEARNED", function()

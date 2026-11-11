@@ -273,6 +273,8 @@ class FiltroDeProfesiones(unittest.TestCase):
         self.mock = mock = lua.globals().Mock
         mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
         lua.execute(self.CRAFTS)
+        # Sin profesiones aprendidas: se ven todas. Las del personaje van en su propia prueba.
+        lua.execute("Mock.professions = {}")
         mock.Fire("ADDON_LOADED", "PitiGolds")
         mock.Fire("PLAYER_LOGIN")
         self.methods = mock.ns.Methods
@@ -312,6 +314,42 @@ class FiltroDeProfesiones(unittest.TestCase):
         self.lua.execute('Mock.ns.charKey = "Brujo-Dio"')
         self.methods.Open("crafts")
         self.assertEqual(self.methods.RowCount(), 3)
+
+    def test_por_defecto_solo_las_profesiones_del_personaje(self):
+        self.lua.execute('''Mock.professions = { [1] = { name = "Herrería", skillLine = 164 },
+                                             [2] = { name = "Costura", skillLine = 197 } }
+                            Mock.ns.Char().craftFilter = nil''')
+        self.methods.Open("crafts")
+        self.assertEqual(self.methods.RowCount(), 3)
+        # Al tocar el filtro se parte de lo que se veía y queda guardado.
+        self.assertTrue(self.mock.ClickButton("Herrería"))
+        self.assertEqual(self.methods.RowCount(), 2)
+        self.assertTrue(self.char().craftFilter["Encantamiento"])
+        self.assertTrue(self.char().craftFilterChosen)
+        self.assertTrue(self.mock.ClickButton("Todas"))
+        self.assertEqual(self.methods.RowCount(), 4)
+
+    def test_al_cerrar_y_abrir_sigue_el_orden_y_el_scroll(self):
+        self.lua.execute('''local crafts = PitiGoldsGenerated.methods.crafts
+          for i = 5, 30 do crafts[i] = { recipe = i, name = "Receta " .. i, prof = "Costura", profit = i, reagents = {} } end
+          Mock.ns.Methods.Update()
+          for _, f in ipairs(Mock.frames) do
+            if f.key == "profit" and f.scripts.OnClick then f.scripts.OnClick(f) end
+          end''')
+        self.methods.Select(2)
+        self.lua.execute('''for _, f in ipairs(Mock.frames) do
+            if f.scripts and f.scripts.OnMouseWheel and f.key then f.scripts.OnMouseWheel(f, -1) break end
+          end''')
+        view = self.char().methodsView.crafts
+        self.assertEqual((view.sort, view.offset, view.selected), ("profit", 3, 30))
+        self.lua.execute("PitiGoldsMethods:Hide()")
+        self.methods.Open("farms")
+        self.methods.Open()  # sin pestaña: la última que tenías
+        view = self.char().methodsView
+        self.assertEqual(view.tab, "farms")
+        self.methods.Open("crafts")
+        self.assertEqual((view.crafts.sort, view.crafts.offset, view.crafts.selected), ("profit", 3, 30))
+        self.assertNotIn("Pulsa un método", self.methods.DetailText())  # sigue elegida la receta 30
 
     def test_las_recetas_sin_precio_van_al_final_al_ordenar(self):
         self.lua.execute('''for i, row in ipairs(PitiGoldsGenerated.methods.crafts) do row.details = { "D" .. i } end

@@ -72,8 +72,13 @@ el motivo al pulsarlas. Las recetas que sabes se apuntan al abrir la ventana de 
 por personaje; hasta entonces no salen como tuyas en lo que calcula el motor.
 
 Arriba hay un **botón por profesión** para enseñarla u ocultarla (las ocultas se ven apagadas), y **Todas**
-y **Ninguna** para no ir de una en una. Cada personaje recuerda lo que dejó oculto; sin registro, se ven
-todas. `datos/panel.md` y el asesor siguen viendo solo la lista corta de lo que merece la pena mirar.
+y **Ninguna** para no ir de una en una. Mientras no toques el filtro, salen solo las recetas de las dos
+profesiones que ha aprendido el personaje (si no tiene ninguna con recetas, todas). Cada personaje recuerda
+lo que dejó oculto. `datos/panel.md` y el asesor siguen viendo solo la lista corta de lo que merece la pena mirar.
+
+La ventana se abre en la pestaña que tenías, y cada pestaña recuerda cómo la dejaste (por qué columna
+ordenabas, hasta dónde habías bajado y qué método tenías elegido), también después de un `/reload`. Las
+filas van alternando fondo claro y oscuro para leerlas mejor.
 
 La zona de cada vendedor se apunta al abrir su ventana. `datos/panel.md` tiene lo mismo que la ventana,
 para leerlo en el PC.
