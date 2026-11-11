@@ -2,7 +2,7 @@
 -- fabricarla (materiales al mejor precio, de subasta o de vendedor) y cuánto se gana vendiendo
 -- lo fabricado, ya sin la comisión de la subasta. Las cuentas las hace el motor (recipes en
 -- Generated.lua), con los mismos precios que el informe. Al lado, el botón Buscar busca en la
--- subasta los materiales de la receta (si está cerrada, al abrirla).
+-- subasta lo que se fabrica y sus materiales (si está cerrada, al abrirla).
 local ADDON, ns = ...
 
 local AH_CUT = 0.05
@@ -170,12 +170,13 @@ local function ProfessionCraftCount()
   return value and value > 1 and value or nil
 end
 
--- Botón Buscar: busca en la subasta los materiales de la receta -------------------------
+-- Botón Buscar: busca en la subasta lo que se fabrica y sus materiales -------------------
 
 local BASIC_REAGENT = 1 -- Enum.CraftingReagentType.Basic
 local pendingSearch    -- la búsqueda pedida con la subasta cerrada: se lanza al abrirla
 
--- Los materiales obligatorios de la receta: { name, items = { itemID... }, names = { ... } }.
+-- Lo que se busca: lo fabricado y los materiales obligatorios de la receta
+-- ({ items = { itemID... }, names = { ... } }); need y nameOf, solo los materiales.
 local function ReagentSearch(recipeID)
   local T = C_TradeSkillUI
   if not (T and T.GetRecipeSchematic) then return nil end
@@ -196,6 +197,12 @@ local function ReagentSearch(recipeID)
     end
   end
   if #search.items == 0 then return nil end
+  -- Lo que se fabrica, el primero, para ver también su precio. No entra en la lista de la compra.
+  local out = s.outputItemID
+  if out and not search.need[out] then
+    table.insert(search.items, 1, out)
+    table.insert(search.names, 1, ns.ItemNameByID(out) or ("objeto " .. out))
+  end
   return search
 end
 

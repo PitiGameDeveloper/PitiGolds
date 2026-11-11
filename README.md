@@ -328,7 +328,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    y **Ganancia:** (lo que se cobra vendiendo lo fabricado, ya sin comisión, menos ese coste; en verde o
    en rojo). Son las mismas cuentas del informe, así que se ponen al día con cada `/reload`; si acabas de
    ver en la subasta alguno de sus materiales o lo fabricado, se recalculan al momento con ese precio
-   (lo dice debajo, en gris). Al lado, el botón **Buscar** busca en la subasta los materiales de la receta;
+   (lo dice debajo, en gris). Al lado, el botón **Buscar** busca en la subasta lo que se fabrica y los
+   materiales de la receta, para ver el precio de todo;
    si está cerrada, lo hace al abrirla. Si tienes Auctionator, el recuadro se pone debajo del suyo.
 
 **`estado.cmd`** da el resumen general: oro, profesiones, valor del inventario y divisas de Forever.

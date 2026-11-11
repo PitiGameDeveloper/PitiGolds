@@ -648,11 +648,11 @@ class AddonMasMotor(unittest.TestCase):
             # Buscar con la subasta cerrada: se queda preparado y se lanza al abrirla.
             mock.Fire("AUCTION_HOUSE_CLOSED")
             self.assertTrue(mock.ClickButton("Buscar"))
-            self.assertIn("abre la subasta y buscaré Barra de cobre, Flujo débil.", "\n".join(mock.chat.values()))
+            self.assertIn("abre la subasta y buscaré Hacha de cobre, Barra de cobre, Flujo débil.", "\n".join(mock.chat.values()))
             self.assertEqual(len(mock.itemKeySearches), 0)
             mock.Fire("AUCTION_HOUSE_SHOW")
             mock.Advance(1)
-            self.assertEqual(list(mock.itemKeySearches[1].values()), [2840, 2880])
+            self.assertEqual(list(mock.itemKeySearches[1].values()), [2845, 2840, 2880])
             self.assertTrue(mock.ClickButton("Buscar"))  # con la subasta abierta, al momento
             self.assertEqual(len(mock.itemKeySearches), 2)
             mock.Fire("AUCTION_HOUSE_CLOSED")
