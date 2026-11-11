@@ -1,0 +1,703 @@
+{
+  "_nota": "Cajones saqueados: qué pide cada uno (uno de los lotes, a elegir) y el favor de mercader que da. Lotes sacados de foreverdiff.com y zockify.com (cliente 1.60.1); los que trae el cliente (SpellReagents) mandan: los textiles de oficial piden 40 de lana, no 20. Favor medido por Ceedsy en la beta; el de artesano es una estimación siguiendo la serie (20 el blanco, 40 el verde).",
+  "cajones": [
+    {
+      "cajon": 248685,
+      "nombre": "Cajón saqueado: curiosidades de aprendiz",
+      "favor": 5,
+      "opciones": [
+        {
+          "objeto": 10940,
+          "cantidad": 20,
+          "nombre": "Polvo extraño"
+        },
+        {
+          "objeto": 10939,
+          "cantidad": 4,
+          "nombre": "Esencia mágica superior"
+        },
+        {
+          "objeto": 10978,
+          "cantidad": 6,
+          "nombre": "Fragmento de luz trémula pequeño"
+        },
+        {
+          "objeto": 11084,
+          "cantidad": 2,
+          "nombre": "Fragmento con luz trémula grande"
+        }
+      ]
+    },
+    {
+      "cajon": 248702,
+      "nombre": "Cajón saqueado: tejidos de aprendiz",
+      "favor": 10,
+      "opciones": [
+        {
+          "objeto": 4231,
+          "cantidad": 2,
+          "nombre": "Pellejo ligero curado"
+        },
+        {
+          "objeto": 2996,
+          "cantidad": 20,
+          "nombre": "Madeja de paño de lino"
+        }
+      ]
+    },
+    {
+      "cajon": 248682,
+      "nombre": "Cajón saqueado: hierbas de aprendiz",
+      "favor": 5,
+      "opciones": [
+        {
+          "objeto": 2447,
+          "cantidad": 20,
+          "nombre": "Flor de paz"
+        },
+        {
+          "objeto": 765,
+          "cantidad": 20,
+          "nombre": "Hojaplata"
+        },
+        {
+          "objeto": 2449,
+          "cantidad": 10,
+          "nombre": "Raíz de tierra"
+        },
+        {
+          "objeto": 785,
+          "cantidad": 10,
+          "nombre": "Marregal"
+        },
+        {
+          "objeto": 2450,
+          "cantidad": 10,
+          "nombre": "Brezospina"
+        }
+      ]
+    },
+    {
+      "cajon": 248703,
+      "nombre": "Cajón saqueado: lingotes de aprendiz",
+      "favor": 10,
+      "opciones": [
+        {
+          "objeto": 2840,
+          "cantidad": 20,
+          "nombre": "Lingote de cobre"
+        },
+        {
+          "objeto": 3576,
+          "cantidad": 20,
+          "nombre": "Lingote de estaño"
+        },
+        {
+          "objeto": 2841,
+          "cantidad": 10,
+          "nombre": "Lingote de bronce"
+        }
+      ]
+    },
+    {
+      "cajon": 248683,
+      "nombre": "Cajón saqueado: menas de aprendiz",
+      "favor": 5,
+      "opciones": [
+        {
+          "objeto": 2770,
+          "cantidad": 20,
+          "nombre": "Mineral de cobre"
+        },
+        {
+          "objeto": 2771,
+          "cantidad": 20,
+          "nombre": "Mineral de estaño"
+        }
+      ]
+    },
+    {
+      "cajon": 248704,
+      "nombre": "Cajón saqueado: piezas de aprendiz",
+      "favor": 10,
+      "opciones": [
+        {
+          "objeto": 4359,
+          "cantidad": 16,
+          "nombre": "Un puñado de tornillos de cobre"
+        },
+        {
+          "objeto": 4361,
+          "cantidad": 16,
+          "nombre": "Tubo de cobre"
+        },
+        {
+          "objeto": 4363,
+          "cantidad": 4,
+          "nombre": "Modulador de cobre"
+        }
+      ]
+    },
+    {
+      "cajon": 248684,
+      "nombre": "Cajón saqueado: telas de aprendiz",
+      "favor": 5,
+      "opciones": [
+        {
+          "objeto": 2589,
+          "cantidad": 40,
+          "nombre": "Paño de lino"
+        },
+        {
+          "objeto": 2318,
+          "cantidad": 20,
+          "nombre": "Cuero ligero"
+        }
+      ]
+    },
+    {
+      "cajon": 248689,
+      "nombre": "Cajón saqueado: curiosidades de oficial",
+      "favor": 10,
+      "opciones": [
+        {
+          "objeto": 11083,
+          "cantidad": 20,
+          "nombre": "Polvo de alma"
+        },
+        {
+          "objeto": 11082,
+          "cantidad": 4,
+          "nombre": "Esencia astral superior"
+        },
+        {
+          "objeto": 11138,
+          "cantidad": 6,
+          "nombre": "Fragmento resplandeciente pequeño"
+        },
+        {
+          "objeto": 11139,
+          "cantidad": 2,
+          "nombre": "Fragmento resplandeciente grande"
+        }
+      ]
+    },
+    {
+      "cajon": 248705,
+      "nombre": "Cajón saqueado: tejidos de oficial",
+      "favor": 20,
+      "opciones": [
+        {
+          "objeto": 2997,
+          "cantidad": 6,
+          "nombre": "Madeja de paño de lana"
+        },
+        {
+          "objeto": 4305,
+          "cantidad": 10,
+          "nombre": "Madeja de paño de seda"
+        },
+        {
+          "objeto": 4233,
+          "cantidad": 2,
+          "nombre": "Pellejo medio curado"
+        }
+      ]
+    },
+    {
+      "cajon": 248686,
+      "nombre": "Cajón saqueado: hierbas de oficial",
+      "favor": 10,
+      "opciones": [
+        {
+          "objeto": 3820,
+          "cantidad": 10,
+          "nombre": "Alga estranguladora"
+        },
+        {
+          "objeto": 2453,
+          "cantidad": 10,
+          "nombre": "Hierba cardenal"
+        },
+        {
+          "objeto": 3355,
+          "cantidad": 10,
+          "nombre": "Acérita salvaje"
+        },
+        {
+          "objeto": 3369,
+          "cantidad": 10,
+          "nombre": "Musgo de tumba"
+        },
+        {
+          "objeto": 3356,
+          "cantidad": 10,
+          "nombre": "Sangrerregia"
+        }
+      ]
+    },
+    {
+      "cajon": 248706,
+      "nombre": "Cajón saqueado: lingotes de oficial",
+      "favor": 20,
+      "opciones": [
+        {
+          "objeto": 2842,
+          "cantidad": 10,
+          "nombre": "Lingote de plata"
+        },
+        {
+          "objeto": 3575,
+          "cantidad": 20,
+          "nombre": "Lingote de hierro"
+        }
+      ]
+    },
+    {
+      "cajon": 248687,
+      "nombre": "Cajón saqueado: menas de oficial",
+      "favor": 10,
+      "opciones": [
+        {
+          "objeto": 2775,
+          "cantidad": 10,
+          "nombre": "Mineral de plata"
+        },
+        {
+          "objeto": 2772,
+          "cantidad": 20,
+          "nombre": "Hierro"
+        }
+      ]
+    },
+    {
+      "cajon": 248707,
+      "nombre": "Cajón saqueado: piezas de oficial",
+      "favor": 20,
+      "opciones": [
+        {
+          "objeto": 4371,
+          "cantidad": 8,
+          "nombre": "Tubo de bronce"
+        },
+        {
+          "objeto": 4375,
+          "cantidad": 7,
+          "nombre": "Cacharros zumbones de bronce"
+        },
+        {
+          "objeto": 4382,
+          "cantidad": 4,
+          "nombre": "Marco de bronce"
+        },
+        {
+          "objeto": 10558,
+          "cantidad": 45,
+          "nombre": "Núcleo de energía de oro"
+        }
+      ]
+    },
+    {
+      "cajon": 248688,
+      "nombre": "Cajón saqueado: textiles de oficial",
+      "favor": 10,
+      "opciones": [
+        {
+          "objeto": 2592,
+          "cantidad": 40,
+          "nombre": "Paño de lana"
+        },
+        {
+          "objeto": 4306,
+          "cantidad": 40,
+          "nombre": "Paño de seda"
+        },
+        {
+          "objeto": 2319,
+          "cantidad": 20,
+          "nombre": "Cuero medio"
+        }
+      ]
+    },
+    {
+      "cajon": 248690,
+      "nombre": "Cajón saqueado: hierbas de experto terrenales",
+      "favor": 15,
+      "opciones": [
+        {
+          "objeto": 3357,
+          "cantidad": 20,
+          "nombre": "Vidarraíz"
+        },
+        {
+          "objeto": 3818,
+          "cantidad": 10,
+          "nombre": "Pálida"
+        },
+        {
+          "objeto": 3821,
+          "cantidad": 10,
+          "nombre": "Espina de oro"
+        },
+        {
+          "objeto": 3358,
+          "cantidad": 10,
+          "nombre": "Mostacho de Khadgar"
+        }
+      ]
+    },
+    {
+      "cajon": 248691,
+      "nombre": "Cajón saqueado: hierbas de experto en flor",
+      "favor": 15,
+      "opciones": [
+        {
+          "objeto": 3819,
+          "cantidad": 10,
+          "nombre": "Invernalia"
+        },
+        {
+          "objeto": 4625,
+          "cantidad": 10,
+          "nombre": "Flor de Fuego"
+        },
+        {
+          "objeto": 8831,
+          "cantidad": 20,
+          "nombre": "Loto morado"
+        },
+        {
+          "objeto": 8836,
+          "cantidad": 10,
+          "nombre": "Lágrimas de Arthas"
+        }
+      ]
+    },
+    {
+      "cajon": 248694,
+      "nombre": "Cajón saqueado: curiosidades de experto",
+      "favor": 15,
+      "opciones": [
+        {
+          "objeto": 11137,
+          "cantidad": 20,
+          "nombre": "Polvo de visión"
+        },
+        {
+          "objeto": 11135,
+          "cantidad": 4,
+          "nombre": "Esencia mística superior"
+        },
+        {
+          "objeto": 11177,
+          "cantidad": 6,
+          "nombre": "Fragmento radiante pequeño"
+        },
+        {
+          "objeto": 11178,
+          "cantidad": 2,
+          "nombre": "Fragmento radiante grande"
+        }
+      ]
+    },
+    {
+      "cajon": 248708,
+      "nombre": "Cajón saqueado: tejidos de experto",
+      "favor": 30,
+      "opciones": [
+        {
+          "objeto": 4339,
+          "cantidad": 8,
+          "nombre": "Madeja de tejido mágico"
+        },
+        {
+          "objeto": 4236,
+          "cantidad": 2,
+          "nombre": "Pellejo pesado curado"
+        }
+      ]
+    },
+    {
+      "cajon": 248709,
+      "nombre": "Cajón saqueado: lingotes de experto",
+      "favor": 30,
+      "opciones": [
+        {
+          "objeto": 3860,
+          "cantidad": 20,
+          "nombre": "Lingote de mitril"
+        },
+        {
+          "objeto": 3859,
+          "cantidad": 15,
+          "nombre": "Lingote de acero"
+        },
+        {
+          "objeto": 3577,
+          "cantidad": 10,
+          "nombre": "Lingote de oro"
+        }
+      ]
+    },
+    {
+      "cajon": 248692,
+      "nombre": "Cajón saqueado: menas de experto",
+      "favor": 15,
+      "opciones": [
+        {
+          "objeto": 2776,
+          "cantidad": 10,
+          "nombre": "Mineral de oro"
+        },
+        {
+          "objeto": 3858,
+          "cantidad": 20,
+          "nombre": "Mineral de mitril"
+        }
+      ]
+    },
+    {
+      "cajon": 248710,
+      "nombre": "Cajón saqueado: piezas de experto",
+      "favor": 30,
+      "opciones": [
+        {
+          "objeto": 4387,
+          "cantidad": 8,
+          "nombre": "Tornapunta de hierro"
+        },
+        {
+          "objeto": 10559,
+          "cantidad": 5,
+          "nombre": "Tubo de mitril"
+        },
+        {
+          "objeto": 10560,
+          "cantidad": 12,
+          "nombre": "Disparador inestable"
+        },
+        {
+          "objeto": 10561,
+          "cantidad": 5,
+          "nombre": "Envoltura de mitril"
+        }
+      ]
+    },
+    {
+      "cajon": 248693,
+      "nombre": "Cajón saqueado: textiles de experto",
+      "favor": 15,
+      "opciones": [
+        {
+          "objeto": 4338,
+          "cantidad": 40,
+          "nombre": "Tela de paño mágico"
+        },
+        {
+          "objeto": 4234,
+          "cantidad": 20,
+          "nombre": "Cuero pesado"
+        }
+      ]
+    },
+    {
+      "cajon": 248699,
+      "nombre": "Cajón saqueado: curiosidades de artesano",
+      "favor": 20,
+      "favor_estimado": true,
+      "opciones": [
+        {
+          "objeto": 11176,
+          "cantidad": 20,
+          "nombre": "Polvo onírico"
+        },
+        {
+          "objeto": 11175,
+          "cantidad": 4,
+          "nombre": "Esencia abisal superior"
+        },
+        {
+          "objeto": 14343,
+          "cantidad": 6,
+          "nombre": "Fragmento luminoso pequeño"
+        },
+        {
+          "objeto": 14344,
+          "cantidad": 2,
+          "nombre": "Fragmento luminoso grande"
+        }
+      ]
+    },
+    {
+      "cajon": 248711,
+      "nombre": "Cajón saqueado: tejidos de artesano",
+      "favor": 40,
+      "favor_estimado": true,
+      "opciones": [
+        {
+          "objeto": 14048,
+          "cantidad": 8,
+          "nombre": "Madeja de paño rúnico"
+        },
+        {
+          "objeto": 8172,
+          "cantidad": 2,
+          "nombre": "Pellejo grueso curado"
+        }
+      ]
+    },
+    {
+      "cajon": 248712,
+      "nombre": "Cajón saqueado: lingotes de artesano",
+      "favor": 40,
+      "favor_estimado": true,
+      "opciones": [
+        {
+          "objeto": 11371,
+          "cantidad": 2,
+          "nombre": "Lingote Hierro Negro"
+        },
+        {
+          "objeto": 6037,
+          "cantidad": 10,
+          "nombre": "Lingote de veraplata"
+        },
+        {
+          "objeto": 12359,
+          "cantidad": 20,
+          "nombre": "Lingote de torio"
+        }
+      ]
+    },
+    {
+      "cajon": 248697,
+      "nombre": "Cajón saqueado: menas de artesano",
+      "favor": 20,
+      "favor_estimado": true,
+      "opciones": [
+        {
+          "objeto": 7911,
+          "cantidad": 10,
+          "nombre": "Veraplata"
+        },
+        {
+          "objeto": 10620,
+          "cantidad": 20,
+          "nombre": "Torio"
+        },
+        {
+          "objeto": 11370,
+          "cantidad": 20,
+          "nombre": "Hierro Negro"
+        }
+      ]
+    },
+    {
+      "cajon": 248713,
+      "nombre": "Cajón saqueado: piezas de artesano",
+      "favor": 40,
+      "favor_estimado": true,
+      "opciones": [
+        {
+          "objeto": 15994,
+          "cantidad": 5,
+          "nombre": "Trastos wow de torio"
+        },
+        {
+          "objeto": 18631,
+          "cantidad": 5,
+          "nombre": "Transformador de veraplata"
+        },
+        {
+          "objeto": 16000,
+          "cantidad": 2,
+          "nombre": "Tubo de torio"
+        }
+      ]
+    },
+    {
+      "cajon": 248698,
+      "nombre": "Cajón saqueado: textiles de artesano",
+      "favor": 20,
+      "favor_estimado": true,
+      "opciones": [
+        {
+          "objeto": 14047,
+          "cantidad": 40,
+          "nombre": "Paño rúnico"
+        },
+        {
+          "objeto": 4304,
+          "cantidad": 20,
+          "nombre": "Cuero grueso"
+        },
+        {
+          "objeto": 8170,
+          "cantidad": 20,
+          "nombre": "Cuero basto"
+        }
+      ]
+    },
+    {
+      "cajon": 248695,
+      "nombre": "Cajón saqueado: hierbas de artesano terrenales",
+      "favor": 20,
+      "favor_estimado": true,
+      "opciones": [
+        {
+          "objeto": 13464,
+          "cantidad": 10,
+          "nombre": "Sansam dorado"
+        },
+        {
+          "objeto": 8838,
+          "cantidad": 20,
+          "nombre": "Solea"
+        },
+        {
+          "objeto": 8839,
+          "cantidad": 10,
+          "nombre": "Carolina"
+        },
+        {
+          "objeto": 8845,
+          "cantidad": 10,
+          "nombre": "Champiñón fantasma"
+        },
+        {
+          "objeto": 8846,
+          "cantidad": 10,
+          "nombre": "Gromsanguina"
+        }
+      ]
+    },
+    {
+      "cajon": 248696,
+      "nombre": "Cajón saqueado: hierbas de artesano en flor",
+      "favor": 20,
+      "favor_estimado": true,
+      "opciones": [
+        {
+          "objeto": 13463,
+          "cantidad": 20,
+          "nombre": "Hojasueño"
+        },
+        {
+          "objeto": 13465,
+          "cantidad": 20,
+          "nombre": "Salviargenta de montaña"
+        },
+        {
+          "objeto": 13466,
+          "cantidad": 20,
+          "nombre": "Flor de peste"
+        },
+        {
+          "objeto": 13467,
+          "cantidad": 20,
+          "nombre": "Setelo"
+        }
+      ]
+    }
+  ]
+}

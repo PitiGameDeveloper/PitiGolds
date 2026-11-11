@@ -21,6 +21,7 @@ Ejecútalo desde esta carpeta (si no existe `../.venv`, usa `python` a secas):
 | `informe` | Rehace `../datos/informe.md` |
 | `metodos` | Comprueba el conocimiento y rehace la ventana de métodos del addon y `../datos/panel.md` |
 | `guia <profesión> [--desde N] [--hasta N]` | Guía de subida con su coste |
+| `cajones` | Qué cajón saqueado sale más barato llenar por punto de favor de mercader (cajón + su lote más barato) |
 | `chollos [--todos]` / `chollo <id> nadie\|vende "detalle"` | Posibles chollos de vendedor |
 | `fuentes [--dias N]` / `fuentes --hecho [N ...]` | Novedades de las fuentes sin revisar |
 | `ajustes [--horas-semana N] [--semanas N] [--legado-subida N] [--minimo-hora N]` | Ajustes (horas de juego, talento de Legacy, oro/h mínimo) |

@@ -287,7 +287,7 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 | `motor/` | Programa en Python, sin IA, que lee lo que guarda el addon y lo pasa a `datos/pitigolds.db` (SQLite). |
 | `tests/` | Un WoW simulado para probar el addon fuera del juego. |
 | `asesor/` | El asesor de Claude Code: sus instrucciones (`CLAUDE.md`), sus guiones (`comandos/`) y `pg.py`, que lanza el motor desde ahí. |
-| `conocimiento/` | Métodos de tus guías (`metodos.json`), escritos con otras palabras; las notas del asesor (`revision.json`); rutas de recolección (`recoleccion.json`), y las fuentes que revisa el asesor (`fuentes.json`). |
+| `conocimiento/` | Métodos de tus guías (`metodos.json`), escritos con otras palabras; las notas del asesor (`revision.json`); rutas de recolección (`recoleccion.json`); qué pide cada cajón saqueado y el favor que da (`cajones.json`), y las fuentes que revisa el asesor (`fuentes.json`). |
 | `fuentes/` | Las guías tal cual (PDF, Word...). Solo en tu PC: no se suben a GitHub. |
 
 ## Uso diario
@@ -301,11 +301,26 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores. El servidor solo lo permite **cada 15 minutos**.
    - **Fabricar x**: cuántas veces quieres fabricar la receta del botón **Buscar** (empieza con el número
      que tengas junto a «Crear todo»). Al abrir uno de sus materiales para comprarlo se marca solo lo que
-     falta: lo que pide la receta por ese número, menos lo que ya tienes en bolsas y banco.
+     falta: lo que pide la receta por ese número, menos lo que ya tienes en bolsas y banco. Si vienes de la
+     pestaña **Cajones** pone **Cajones x**: cuántos cajones vas a llenar.
+
+   Abajo, junto a Comprar, Vender y Subastas, está la pestaña **Cajones**: los cajones saqueados, del favor
+   de mercader más barato al más caro (también `/pg cajones` en el chat, los diez primeros). Cada cajón se
+   llena con **uno** de sus lotes (20 polvos extraños, o 4 esencias mágicas superiores...): cuenta el más
+   barato según la cantidad que pide, le suma el cajón y lo divide entre el favor. Solo cuenta precios de
+   la subasta, no de vendedores. Debajo de cada cajón salen todos sus lotes, del más barato al más caro
+   (precio por la cantidad que pide), con lo que cuesta cada uno, el total con el cajón y el coste por
+   favor; el más barato, en verde. Al pulsar un lote se buscan en la subasta el cajón y ese lote (al
+   pulsar el cajón, el lote más barato), y al abrirlos se marca la cantidad, como con **Buscar**. Qué pide cada cajón y cuánto favor da está en `conocimiento/cajones.json`: el favor de los
+   de artesano no se sabe y se estima en 20 el blanco y 40 el verde (sale con un «?»). Fuera del juego,
+   `python -m motor cajones` saca la misma lista.
 
    Además, todo lo que ves al buscar en la subasta (a mano, con **Buscar** o desde otro addon) se apunta al
-   momento: el tooltip y la ventana de profesión usan ese precio sin esperar al motor, y el motor lo lee
-   como un escaneo más («de tus búsquedas» en el informe).
+   momento: el tooltip, la ventana de profesión y la pestaña Cajones usan ese precio sin esperar al motor,
+   y el motor lo lee como un escaneo más («de tus búsquedas» en el informe). Lo mismo al **comprar**: lo
+   que te llevas se quita de las subastas más baratas que se vieron, así que el precio sube en el momento
+   (si compras los 20 cajones más baratos, la pestaña ya cuenta con los siguientes), y se vuelve a pedir
+   al servidor la lista de ese objeto para dejarla exacta.
 4. No hace falta exportar nada: el addon apunta solo lo que pasa (al entrar con cada personaje, al lootear,
    al escanear...) y WoW lo guarda en disco al cambiar de personaje, al salir del juego o con `/reload`.
    `vigilar.cmd` lo lee en un par de segundos, y el addon lo enseña al entrar con el siguiente personaje o
@@ -590,6 +605,7 @@ Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 | `/pg log` | Últimas líneas del registro, con los errores si los hay |
 | `/pg panel` | Muestra u oculta el panel |
 | `/pg sesion` | Abre la lista de lo farmeado en la sesión (igual que el botón Sesión); `/pg sesion reiniciar` empieza otra |
+| `/pg cajones` | Los diez cajones saqueados que dan el favor de mercader más barato (la lista entera, en la pestaña Cajones de la subasta) |
 | `/pg metodos` | Abre la ventana de métodos (igual que el botón Mejor farmeo) |
 | `/pg activos` | Muestra u oculta la ventana de farmeos activos (igual que el botón Farmeos activos) |
 | `/pg flecha` | Enseña o esconde la flecha hacia tu farmeo activo |

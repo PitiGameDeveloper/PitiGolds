@@ -350,10 +350,90 @@ ns.On("COMMODITY_SEARCH_RESULTS_UPDATED", function(_, itemID)
   if Scan.state ~= "idle" or not itemID then return end
   ns.Debounce("ahcommodity" .. itemID, 0.3, function() RecordCommodity(itemID) end)
 end)
+local lastItemKey -- el último objeto suelto abierto: el que compras con PlaceBid
+
 ns.On("ITEM_SEARCH_RESULTS_UPDATED", function(_, itemKey)
   if Scan.state ~= "idle" or type(itemKey) ~= "table" or not itemKey.itemID then return end
+  lastItemKey = itemKey
   ns.Debounce("ahitem" .. itemKey.itemID, 0.3, function() RecordItem(itemKey) end)
 end)
+
+-- Lo que compras --------------------------------------------------------------------------
+-- Al comprar se acaban las subastas más baratas y el precio sube. Se apunta en el momento: lo
+-- comprado se quita de la lista de precios que ya tenemos (las más baratas primero) y se vuelve
+-- a pedir al servidor la lista de ese objeto, que la deja exacta. El tooltip, la ventana de
+-- profesión y la pestaña Cajones lo ven al instante, y el motor lo lee como el resto de búsquedas.
+
+-- Quita qty unidades, de la más barata a la más cara, de la lista entera del objeto.
+local function DeductBought(itemID, qty)
+  local text = search and searchExact[itemID] and search.items[itemID]
+  if type(text) ~= "string" or not qty or qty <= 0 then return end
+  local head, levels = text:match("^([^|]*)|(.*)$")
+  local n = head and tonumber(head:match("^[^,]*,[^,]*,(%d+)"))
+  if not levels then return end
+  local book, min, total, left = {}, nil, 0, qty
+  for price, count in levels:gmatch("(%d+):(%d+)") do
+    price, count = tonumber(price), tonumber(count)
+    local take = math.min(count, left)
+    left = left - take
+    count = count - take
+    if count > 0 then
+      book[price] = (book[price] or 0) + count
+      total = total + count
+      if not min or price < min then min = price end
+    end
+  end
+  -- Si te lo has llevado todo no sabemos el precio siguiente: lo dirá la lista nueva.
+  if not min then return end
+  NoteSearch(itemID, BookText(book, min, total, math.max(1, n or 1)), true)
+end
+
+-- Pide otra vez al servidor la lista de un objeto (llega por *_SEARCH_RESULTS_UPDATED).
+local function Requery(itemKey)
+  local AH = C_AuctionHouse
+  if not (ns.ahOpen and itemKey and AH.SendSearchQuery) then return end
+  local sorts = { { sortOrder = Enum.AuctionHouseSortOrder.Price, reverseSort = false } }
+  SendWhenReady(function()
+    if ns.ahOpen and Scan.state == "idle" then pcall(AH.SendSearchQuery, itemKey, sorts, false) end
+  end)
+end
+
+local function KeyFor(itemID)
+  local AH = C_AuctionHouse
+  return AH.MakeItemKey and AH.MakeItemKey(itemID) or { itemID = itemID }
+end
+
+local buying -- la compra de un material que se está confirmando: { itemID, qty }
+
+local function Guard(name, fn)
+  return function(...)
+    local ok, err = pcall(fn, ...)
+    if not ok then ns.ReportError(name, err) end
+  end
+end
+
+if C_AuctionHouse and C_AuctionHouse.ConfirmCommoditiesPurchase then
+  hooksecurefunc(C_AuctionHouse, "ConfirmCommoditiesPurchase", Guard("precio tras comprar", function(itemID, quantity)
+    buying = { itemID = itemID, qty = quantity }
+  end))
+end
+
+ns.On("COMMODITY_PURCHASE_SUCCEEDED", Guard("precio tras comprar", function()
+  local b = buying
+  buying = nil
+  if not (b and b.itemID) then return end
+  DeductBought(b.itemID, b.qty)
+  Requery(KeyFor(b.itemID))
+end))
+ns.On("COMMODITY_PURCHASE_FAILED", function() buying = nil end)
+
+-- Objetos sueltos: al comprar uno, la lista se vuelve a pedir en cuanto el servidor lo ha quitado.
+if C_AuctionHouse and C_AuctionHouse.PlaceBid then
+  hooksecurefunc(C_AuctionHouse, "PlaceBid", Guard("precio tras comprar", function()
+    local key = lastItemKey
+    if key then C_Timer.After(1.5, function() Requery(key) end) end
+  end))
+end
 
 local function OnBrowseEvent()
   if Scan.state == "browse" then

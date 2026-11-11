@@ -18,6 +18,7 @@ Disenchant.lua
 Tooltip.lua
 Gold.lua
 CraftInfo.lua
+Crates.lua
 Farming.lua
 Ledger.lua
 Session.lua

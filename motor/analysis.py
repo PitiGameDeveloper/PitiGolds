@@ -6,6 +6,7 @@ import sqlite3
 from collections import defaultdict
 from dataclasses import dataclass, field
 
+from .cajones import Crate, CrateCost, crate_item_ids, evaluate_crates, load_crates
 from .business import Business, compute_business, craft_capacity
 from .catalogo import CatalogEntry, CatalogError, GuideMethod, evaluate_catalog, load_catalog, resolve_items
 from .crafting import CraftResult, evaluate_recipes, recipe_item_ids
@@ -34,6 +35,8 @@ class Analysis:
     guide_unknown_items: list[str] = field(default_factory=list)   # objetos de las guías sin reconocer
     guide_resolved: dict[str, int] = field(default_factory=dict)   # nombre en las guías -> objeto
     catalog_error: str | None = None   # el catálogo de métodos no se ha podido leer
+    crates: list[Crate] = field(default_factory=list)            # cajones saqueados (cajones.json)
+    crate_costs: list[CrateCost] = field(default_factory=list)   # de más barato a más caro por favor
     last_scan: int | None = None
 
     def best_known_craft(self) -> dict[int, CraftResult]:
@@ -90,8 +93,12 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
     owned = owned_items(conn)
     ledger_ids = {r[0] for r in conn.execute("SELECT DISTINCT item_id FROM ledger WHERE item_id IS NOT NULL")}
     vendor_ids = {r[0] for r in conn.execute("SELECT item_id FROM vendor_items")}
+    try:
+        crates = load_crates()
+    except (ValueError, KeyError, TypeError):  # un cajones.json roto no debe dejarte sin informe
+        crates = []
     ids = (set(owned) | recipe_item_ids(conn) | farm_item_ids(conn) | ledger_ids | vendor_ids
-           | sold_item_ids(conn) | set(resolved.values()) | DISENCHANT_MATERIALS)
+           | sold_item_ids(conn) | set(resolved.values()) | DISENCHANT_MATERIALS | crate_item_ids(crates))
     prices = load_prices(conn, ids)
 
     series, fulls = load_series(conn, ids)
@@ -118,6 +125,8 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
     result.farm_summary = summarize(result.farms)
     result.vendor_flips = vendor_flips(conn, prices, signals)
     result.vendor_candidates = vendor_candidates(conn, prices, crafts, result.farms)
+    result.crates = crates
+    result.crate_costs = evaluate_crates(crates, prices)
     result.guide_methods = evaluate_catalog(conn, catalog, resolved, prices, signals, crafts, result.farm_summary)
     result.guide_unknown_items = unknown
     result.guide_resolved = resolved

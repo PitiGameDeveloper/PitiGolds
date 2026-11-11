@@ -10,6 +10,7 @@
     python -m motor ajustes --horas-semana 10 --semanas 4 --legado-subida 0   para comparar métodos
     python -m motor guia herreria [--desde 50] [--hasta 150]  guía de subida con su coste
     python -m motor metodos    los métodos de tus guías (conocimiento/metodos.json) con tus precios
+    python -m motor cajones    qué cajón saqueado sale más barato llenar por punto de favor
     python -m motor fuentes [--dias 7] [--hecho]   novedades de tus fuentes sin revisar
 """
 
@@ -24,6 +25,7 @@ from pathlib import Path
 
 from . import db as dbmod
 from .analysis import analyze
+from .cajones import crate_problems
 from .catalogo import CATALOG_PATH, catalog_problems, load_catalog
 from .config import Config, load_config
 from .gamedata import update_game_data
@@ -173,7 +175,7 @@ def cmd_metodos(config: Config) -> int:
         problems = catalog_problems(known_lines=lines or None)
         if not problems:
             ids = {e.id for e in load_catalog()}
-            problems = review_problems(method_ids=ids) + route_problems()
+            problems = review_problems(method_ids=ids) + route_problems() + crate_problems(conn)
         if problems:
             print("Hay que arreglar el conocimiento (conocimiento/):")
             for p in problems:
@@ -204,6 +206,46 @@ def cmd_metodos(config: Config) -> int:
     print(f"Todos, con tus precios: {config.db_path.parent / 'metodos.md'}")
     print(f"La ventana de métodos del addon (tras un /reload): {config.db_path.parent / 'panel.md'}")
     print(f"Mejor farmeo: {panel.verdict.title}.")
+    return 0
+
+
+def cmd_cajones(config: Config) -> int:
+    conn = dbmod.connect(config.db_path)
+    try:
+        problems = crate_problems(conn)
+        if problems:
+            print("Hay que arreglar conocimiento/cajones.json:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        costs = analyze(conn).crate_costs
+    finally:
+        conn.close()
+    if not costs:
+        print("No hay cajones en conocimiento/cajones.json.")
+        return 1
+    print("Cajones saqueados, del favor más barato al más caro (cajón + el lote más barato para llenarlo):")
+    for r in costs:
+        c = r.crate
+        favor = f"{c.favor}{'?' if c.estimated else ''} de favor"
+        if r.per_favor is None:
+            missing = "del cajón" if r.crate_price is None else "de los lotes"
+            print(f"  {c.name} ({favor}): sin precio {missing}")
+        else:
+            print(f"  {format_money(round(r.per_favor))}/favor  {c.name} ({favor}): cajón {format_money(r.crate_price)}")
+        # Debajo, sus lotes por lo que cuestan; el primero es el que cuenta arriba.
+        for o, cost in r.options:
+            lot = f"{o.quantity} × {o.name or o.item_id}"
+            if cost is None:
+                print(f"      {lot}: sin precio")
+            elif r.crate_price is None:
+                print(f"      {lot}: {format_money(cost)}")
+            else:
+                total = r.crate_price + cost
+                print(f"      {lot}: {format_money(cost)}, total {format_money(total)}"
+                      f" ({format_money(round(total / c.favor))}/favor)")
+    if any(r.crate.estimated for r in costs):
+        print("? = favor sin comprobar (el de artesano se estima en 20 el blanco y 40 el verde).")
     return 0
 
 
@@ -419,6 +461,7 @@ def main(argv: list[str] | None = None) -> int:
     guide.add_argument("--desde", type=int)
     guide.add_argument("--hasta", type=int)
     sub.add_parser("metodos", help="comprueba el conocimiento y rehace la ventana de métodos (datos/panel.md)")
+    sub.add_parser("cajones", help="qué cajón saqueado sale más barato llenar por punto de favor")
     sources = sub.add_parser("fuentes", help="novedades de tus fuentes que aún no has revisado")
     sources.add_argument("--dias", type=float, default=DEFAULT_DAYS)
     sources.add_argument("--hecho", nargs="*", type=int, metavar="N",
@@ -433,6 +476,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_ajustes(config, args.horas_semana, args.semanas, args.legado_subida, args.minimo_hora)
     if args.cmd == "metodos":
         return cmd_metodos(config)
+    if args.cmd == "cajones":
+        return cmd_cajones(config)
     if args.cmd == "fuentes":
         return cmd_fuentes(config, args.dias, args.hecho, args.texto)
     if args.cmd == "guia":

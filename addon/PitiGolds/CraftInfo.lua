@@ -62,10 +62,11 @@ end
 
 -- Lista de la compra -----------------------------------------------------------------
 -- Al pulsar Buscar se guarda lo que pide cada fabricación. En la subasta, al abrir uno de esos
--- materiales, se pone sola la cantidad que falta para fabricar ns.craftCount veces.
+-- materiales, se pone sola la cantidad que falta para fabricar ns.craftCount veces. La pestaña
+-- Cajones hace lo mismo con un cajón saqueado y su lote (shopping.what = "cajones").
 
 ns.craftCount = 1
-local shopping        -- { need = { [itemID] = cantidad por fabricación }, names = { [itemID] = nombre } }
+local shopping        -- { need = { [itemID] = cantidad por vez }, names = { [itemID] = nombre }, what = "fabricaciones" }
 local commodityItemID -- el material abierto en la ventana de compra por unidades
 
 local function Owned(itemID)
@@ -119,14 +120,14 @@ local function ApplyShopping(announce)
   local name = shopping.names[itemID] or ns.ItemNameByID(itemID) or ("objeto " .. itemID)
   if quantity <= 0 then
     if announce then
-      ns.Print(("ya tienes %d %s: bastan para %d fabricaciones."):format(owned, name, ns.craftCount))
+      ns.Print(("ya tienes %d %s: bastan para %d %s."):format(owned, name, ns.craftCount, shopping.what))
     end
     return
   end
   local ok, done = pcall(SetBuyQuantity, quantity)
   if announce or not (ok and done) then
-    ns.Print(("%s: %s %d para %d fabricaciones%s."):format(name,
-      (ok and done) and "marcados" or "compra", quantity, ns.craftCount,
+    ns.Print(("%s: %s %d para %d %s%s."):format(name,
+      (ok and done) and "marcados" or "compra", quantity, ns.craftCount, shopping.what,
       owned > 0 and (" (ya tienes " .. owned .. ")") or ""))
   end
 end
@@ -207,6 +208,7 @@ local function ReagentSearch(recipeID)
 end
 
 local function RunSearch(search)
+  if #search.items == 0 then return end
   local AH = C_AuctionHouse
   if not AH then return end
   if ns.Scan and ns.Scan.state ~= "idle" then
@@ -236,6 +238,25 @@ local function RunSearch(search)
   ns.Print("buscando en la subasta: " .. table.concat(search.names, ", ") .. ".")
 end
 
+-- Lo que pide cada vez (search.need) pasa a la lista de la compra y se busca en la subasta: ya
+-- mismo si está abierta y, si no, al abrirla. what: «fabricaciones» o «cajones».
+function ns.ShopAndSearch(search, what)
+  shopping = { need = search.need, names = search.nameOf, what = what or "fabricaciones" }
+  if ns.UpdateCraftCountBox then ns.UpdateCraftCountBox() end
+  if ns.ahOpen then
+    pendingSearch = nil
+    RunSearch(search)
+  else
+    pendingSearch = search
+    ns.Print("abre la subasta y buscaré " .. table.concat(search.names, ", ") .. ".")
+  end
+end
+
+-- Qué se está comprando: «fabricaciones» o «cajones».
+function ns.ShoppingWhat()
+  return shopping and shopping.what or "fabricaciones"
+end
+
 local lastSearchRecipe, lastSearchTime
 
 function ns.SearchRecipeReagents(recipeID)
@@ -248,16 +269,9 @@ function ns.SearchRecipeReagents(recipeID)
     ns.Print("esta receta no tiene materiales que buscar en la subasta.")
     return
   end
-  shopping = { need = search.need, names = search.nameOf }
   local fromProfession = ProfessionCraftCount()
   if fromProfession then ns.SetCraftCount(fromProfession) end
-  if ns.ahOpen then
-    pendingSearch = nil
-    RunSearch(search)
-  else
-    pendingSearch = search
-    ns.Print("abre la subasta y buscaré " .. table.concat(search.names, ", ") .. ".")
-  end
+  ns.ShopAndSearch(search, "fabricaciones")
 end
 
 local function RunPending()
