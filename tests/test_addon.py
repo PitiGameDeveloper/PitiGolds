@@ -95,12 +95,12 @@ class TooltipVentaYSubasta(unittest.TestCase):
 
     def test_por_unidad_y_por_el_monton(self):
         tooltip = self.mock.Tooltip(2840, 5, 50)
-        self.assertIn("Venta: = 10c  |cffccccccx5:|r 50c", tooltip)
-        self.assertIn("[verde] Subasta: = 3p 0c  |cffccccccx5:|r 15p 0c", tooltip)
+        self.assertIn("Venta: = 50c |cffcccccc(10c)|r", tooltip)
+        self.assertIn("[verde] Subasta: = 15p 0c |cffcccccc(3p 0c)|r", tooltip)
 
     def test_el_monton_sale_del_precio_del_juego(self):
         tooltip = self.mock.Tooltip(2840, None, 70)
-        self.assertIn("|cffccccccx7:|r 21p 0c", tooltip)
+        self.assertIn("21p 0c |cffcccccc(3p 0c)|r", tooltip)
 
     def test_verde_al_vendedor_si_la_subasta_deja_menos(self):
         # 1p 40c menos el 5 % de comisión no llega al 1p 50c del vendedor.
@@ -108,7 +108,7 @@ class TooltipVentaYSubasta(unittest.TestCase):
         self.assertEqual(tooltip.split("\n"), ["[verde] Venta: = 1p 50c", "Subasta: = 1p 40c"])
 
     def test_sin_precio_de_venta_solo_subasta(self):
-        self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c\n" + TIENES)
+        self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 9p 0c |cffcccccc(3p 0c)|r\n" + TIENES)
 
     def test_muestra_las_ventas_diarias_si_el_motor_las_tiene(self):
         self.lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,,,4.5", [818] = "140,140,s," } }')
@@ -123,8 +123,8 @@ class TooltipVentaYSubasta(unittest.TestCase):
     def test_pasar_el_raton_otra_vez_no_repite_ni_pierde_lineas(self):
         for _ in range(3):
             self.assertEqual(self.mock.Tooltip(2840, 1, 10).split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c", TIENES])
-            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c\n" + TIENES)
-            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 3p 0c  |cffccccccx3:|r 9p 0c\n" + TIENES)
+            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 9p 0c |cffcccccc(3p 0c)|r\n" + TIENES)
+            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 9p 0c |cffcccccc(3p 0c)|r\n" + TIENES)
 
 
 class IconosDeMoneda(unittest.TestCase):

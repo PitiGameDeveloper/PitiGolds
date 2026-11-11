@@ -321,8 +321,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    Al pasar el ratón por el oro de las bolsas sale el **oro de la cuenta**: el total, el de cada personaje y
    el del banco de banda.
 
-   Los precios van por unidad y, si es un montón, con el total al lado (`3p 0c  x5: 15p 0c`). En verde sale
-   lo que más deja por unidad: el vendedor o la subasta, a la que se le quita su 5 % de comisión.
+   Los precios van por lo que tienes en el montón y, entre paréntesis, por unidad (`15p 0c (3p 0c)` si
+   tienes 5). En verde sale lo que más deja por unidad: el vendedor o la subasta, a la que se le quita su 5 % de comisión.
 7. En la ventana de cada profesión, debajo de los materiales de la receta elegida, salen **Fabricar:**
    (lo que cuestan los materiales de una fabricación, cada uno al mejor precio entre subasta y vendedor)
    y **Ganancia:** (lo que se cobra vendiendo lo fabricado, ya sin comisión, menos ese coste; en verde o

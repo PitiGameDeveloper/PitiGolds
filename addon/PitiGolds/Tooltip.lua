@@ -81,11 +81,12 @@ local function StackCount(tooltip, itemID, sellTotal)
   return 1
 end
 
-local function PriceText(unit, count)
+-- Lo que vale el montón que tienes (no uno lleno) y, entre paréntesis, la unidad.
+local function PriceText(unit, count, total)
   if count > 1 then
-    return ns.Money(unit) .. "  |cffccccccx" .. count .. ":|r " .. ns.Money(unit * count)
+    return ns.Money(total or unit * count) .. " |cffcccccc(" .. ns.Money(unit) .. ")|r"
   end
-  return ns.Money(unit)
+  return ns.Money(total or unit)
 end
 
 -- Cuántos tienes: este personaje en bolsas y banco, el banco de banda y tus otros personajes
@@ -176,8 +177,7 @@ local function AddLines(tooltip, itemID, sellTotal)
   local sellWins = market and sellUnit and not auctionWins
 
   if sellTotal then
-    local right = count > 1 and (ns.Money(sellUnit) .. "  |cffccccccx" .. count .. ":|r " .. ns.Money(sellTotal))
-      or ns.Money(sellTotal)
+    local right = PriceText(sellUnit, count, sellTotal)
     if sellWins then
       tooltip:AddDoubleLine("Venta:", right, BEST_R, BEST_G, BEST_B, 1, 1, 1)
     else
