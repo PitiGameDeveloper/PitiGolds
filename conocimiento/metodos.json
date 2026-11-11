@@ -8,8 +8,8 @@
       "profesiones": [{"id": 393, "nivel": 1}],
       "objetos": ["Light Leather", "Light Hide", "Medium Leather", "Medium Hide", "Heavy Leather", "Ruined Leather Scraps"],
       "por_hora": [{"objeto": "Light Leather", "cantidad": 20}, {"objeto": "Light Hide", "cantidad": 1}, {"objeto": "Medium Leather", "cantidad": 8}, {"objeto": "Medium Hide", "cantidad": 0.5}, {"objeto": "Ruined Leather Scraps", "cantidad": 6}], "oro_hora": 1.5,
-      "notas": "Al principio nadie compra cuero: véndelo al vendedor. Da para pagar los hechizos del instructor. No te pares a desollar lo que matan otros. Kaychak lo da como lo más seguro para empezar en los megaservidores: no hace falta la subasta, porque el vendedor paga 3 plata la pila de 20 de cuero ligero, 10 la de medio y 30 la de pesado. Si en la subasta se paga bastante más, véndelo allí: con las materias primas casi nadie se dedica a quitarte las ventas como con los crafteos. Se puede dejar Desollar más adelante. Restos de cuero estropeado: con Peletería, 3 hacen 1 cuero ligero, y en Forever hay 100 recetas que piden cuero ligero (según un short, 59 son nuevas: https://www.youtube.com/shorts/dC-7XW0fz6U), así que al principio se venderá bien. Pero al vendedor 3 restos pagan 21 cobre y 1 cuero ligero 15: conviértelos solo si en la subasta el cuero ligero se paga a más de unos 25 cobre. Estimado por hora: unos 40 bichos desollados mientras subes y unos 6 restos.",
-      "fuente": "Guía de Studen v1.1; Kaychak, YouTube (2026-10-31); Wow Forever Moments & Guides, YouTube (2026-10-23)", "fecha": "2026-10-31",
+      "notas": "Al principio nadie compra cuero: véndelo al vendedor. Da para pagar los hechizos del instructor. No te pares a desollar lo que matan otros. Kaychak lo da como lo más seguro para empezar en los megaservidores: no hace falta la subasta, porque el vendedor paga 3 plata la pila de 20 de cuero ligero, 10 la de medio y 30 la de pesado. Si en la subasta se paga bastante más, véndelo allí: con las materias primas casi nadie se dedica a quitarte las ventas como con los crafteos. Se puede dejar Desollar más adelante. Restos de cuero estropeado: con Peletería, 3 hacen 1 cuero ligero, y en Forever hay 100 recetas que piden cuero ligero (según un short, 59 son nuevas: https://www.youtube.com/shorts/dC-7XW0fz6U), así que al principio se venderá bien. Pero al vendedor 3 restos pagan 21 cobre y 1 cuero ligero 15: conviértelos solo si en la subasta el cuero ligero se paga a más de unos 25 cobre. Estimado por hora: unos 40 bichos desollados mientras subes y unos 6 restos. Kadrath, en cambio, recuerda que puedes desollar los cadáveres que otros dejan sin desollar: si te pilla de camino, es cuero gratis. Lo que no compensa es desviarse a buscarlos («farmea en el camino, no en lugar del camino»).",
+      "fuente": "Guía de Studen v1.1; Kaychak, YouTube (2026-10-31); Wow Forever Moments & Guides, YouTube (2026-10-23); Kadrath, YouTube (2026-11-11)", "fecha": "2026-11-11",
       "enlace": "https://www.youtube.com/watch?v=ryub9vdTKq0"
     },
     {
@@ -122,6 +122,18 @@
       "punto": {"mapa": 1424}, "bichos": ["Gnoll Fangorroca", "Chamán Fangorroca"],
       "notas": "Muy densos y con cofres en la zona. Estimado por hora: unos 120 gnolls y algún cofre.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+    },
+    {
+      "id": "alterac-tortugas",
+      "nombre": "Tortugas Quijaforte en la orilla del lago",
+      "tipo": "farmeo", "nivel": 30, "nivel_minimo": 28, "zona": "Montañas de Alterac, toda la orilla del agua al noreste de Dalaran",
+      "mejor_con": [393],
+      "objetos": ["Turtle Meat", "Speckled Shell Fragment", "Thick-shelled Clam", "Iridescent Pearl", "Medium Leather", "Heavy Leather"],
+      "por_hora": [{"objeto": "Turtle Meat", "cantidad": 40}, {"objeto": "Speckled Shell Fragment", "cantidad": 15}, {"objeto": "Thick-shelled Clam", "cantidad": 6}, {"objeto": "Medium Leather", "cantidad": 30}, {"objeto": "Heavy Leather", "cantidad": 10}], "oro_hora": 2,
+      "punto": {"mapa": 1416, "x": 30, "y": 35}, "bichos": ["Quijaforte"],
+      "notas": "Las Quijaforte (nivel 30-31) siguen toda la orilla al noreste de Dalaran y bajan por el río hacia Trabalomas. Son bestias: no sueltan monedas, pero sí basura gris de unas 9 platas, fragmentos de concha moteada (gris, el vendedor paga 9 platas), carne de tortuga, almejas de concha espesa (pueden llevar perlas) y, con Desollar, cuero medio y pesado. El vídeo dice que la carne de tortuga se vende a 7-8 platas: el vendedor paga 87 cobre, así que será en la subasta (la piden los cocineros para la sopa de tortuga reconfortante). Unos 200 de experiencia por bicho: se sube nivel mientras farmeas. En el agua flotan cajas que se pescan (en una le salió un pecho verde para la subasta) y hay bancos de peces por la costa. Poca competencia cuando lo grabó. Dice que sacó unos 20-30 oros en «un par de horas», pieza verde incluida. Estimado por hora: unos 90 tortugas, carne en casi la mitad, un fragmento cada 6 y una almeja cada 15.",
+      "fuente": "Short de YouTube (transcripción que pasó Piti)", "fecha": "2026-11-11",
+      "enlace": "https://www.youtube.com/shorts/3AFJDwtVpHs"
     },
     {
       "id": "mil-agujas-arpias",
@@ -759,9 +771,9 @@
       "nombre": "Cajones saqueados: guardarlos y venderlos en la subasta",
       "tipo": "inversion",
       "objetos": ["Waylaid Crate", "Waylaid Crate: Apprentice Fabrics", "Waylaid Crate: Apprentice Ingots", "Waylaid Crate: Apprentice Parts", "Waylaid Crate: Journeyman Fabrics", "Waylaid Crate: Journeyman Ingots", "Waylaid Crate: Journeyman Parts", "Waylaid Crate: Apprentice Curiosities", "Waylaid Crate: Journeyman Ore"],
-      "notas": "Los cajones saqueados caen de bichos de todo el mundo. El «Cajón saqueado» genérico se abre con «Leer etiqueta» y se convierte en uno de un tipo (hierbas, menas, telas, curiosidades, tejidos, lingotes o piezas) y de un rango (aprendiz, oficial, experto o artesano). Se llena con los materiales que pide y se entrega a cambio de Favor de Mercader, la divisa de las recetas nuevas de Forever (Ceedsy los entrega en El Cruce). Lo que midió en la beta: aprendiz 5 de favor el blanco y 10 el verde; oficial 10 y 20; experto unos 15 y 30; artesano sin comprobar. Los verdes son los de tejidos, lingotes y piezas. Al entregarlo te devuelven además unos 50 cobre por punto de favor. Lleno queda ligado, así que lo que se vende son los vacíos; el vendedor no paga nada por ellos. En la beta costaban 10-20 platas, pero según los comentarios subieron a 55-80 platas después del vídeo, y los verdes de oficial a unos oros. Al salir, todo el mundo querrá favor para sus recetas. Consejo de Ceedsy: guarda en el banco los verdes que te caigan, sobre todo los de tejidos de aprendiz (se llenan con madejas de lino, que cuestan casi nada), y no los vendas los primeros días. Los precios de la beta no valen: el motor sigue los de tu servidor con tus escaneos y te dice cuándo están caros.",
-      "fuente": "Ceedsy, YouTube (2026-10-07), y sus comentarios",
-      "fecha": "2026-11-01",
+      "notas": "Los cajones saqueados caen de bichos de todo el mundo. El «Cajón saqueado» genérico se abre con «Leer etiqueta» y se convierte en uno de un tipo (hierbas, menas, telas, curiosidades, tejidos, lingotes o piezas) y de un rango (aprendiz, oficial, experto o artesano). Se llena con los materiales que pide y se entrega a cambio de Favor de Mercader, la divisa de las recetas nuevas de Forever (Ceedsy los entrega en El Cruce). Lo que midió en la beta: aprendiz 5 de favor el blanco y 10 el verde; oficial 10 y 20; experto unos 15 y 30; artesano sin comprobar. Los verdes son los de tejidos, lingotes y piezas. Al entregarlo te devuelven además unos 50 cobre por punto de favor. Lleno queda ligado, así que lo que se vende son los vacíos; el vendedor no paga nada por ellos. En la beta costaban 10-20 platas, pero según los comentarios subieron a 55-80 platas después del vídeo, y los verdes de oficial a unos oros. Al salir, todo el mundo querrá favor para sus recetas. Consejo de Ceedsy: guarda en el banco los verdes que te caigan, sobre todo los de tejidos de aprendiz (se llenan con madejas de lino, que cuestan casi nada), y no los vendas los primeros días. Los precios de la beta no valen: el motor sigue los de tu servidor con tus escaneos y te dice cuándo están caros. Kadrath añade: los de la Alianza se entregan en Montañas Crestagrana y los de la Horda en Los Baldíos; el favor es por personaje y no se puede pasar. Pon los materiales en la subasta en pilas del tamaño exacto que piden los cajones (el de telas de aprendiz pide 40 de lino o 20 de cuero ligero; el de menas, 20 de cobre o 20 de estaño): es venderle el cajón resuelto y sale antes que una pila de 7. El primer cajón que llenas da además una etiqueta de envío de 50 de favor, y las primeras recetas cuestan 30. Las órdenes de artesano que dan reputación también se venden.",
+      "fuente": "Ceedsy, YouTube (2026-10-07), y sus comentarios; Kadrath, YouTube (2026-11-11)",
+      "fecha": "2026-11-11",
       "enlace": "https://www.youtube.com/watch?v=LikGsgzETOY"
     },
     {
@@ -774,6 +786,41 @@
       "fuente": "Warcraft Forever Gold, YouTube (2026-10-26) y sus comentarios",
       "fecha": "2026-11-01",
       "enlace": "https://www.youtube.com/watch?v=bSdYj5HyqfQ"
+    },
+    {
+      "id": "bolsas-componentes",
+      "nombre": "Bolsas de componentes para la casilla nueva",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 197, "nivel": 5}],
+      "objetos": ["Linen Reagent Bag", "Woolen Reagent Bag", "Light Leather Reagent Bag", "Bolt of Linen Cloth"],
+      "notas": "Novedad de Forever: todos los personajes tienen una casilla de bolsa solo para materiales de profesión, y al principio está vacía. La de lino (6 casillas, Costura 5 según el vídeo) lleva 6 madejas de lino y 6 hilos burdos, y el patrón cuesta un par de platas en el proveedor de Costura. Kadrath propone convertir en estas bolsas el lino que te sobre en vez de venderlo en bruto, usar una y poner el resto en la subasta. Según los datos del juego también hay de lana (3 madejas, hilo refinado y tinte cerúleo), de cuero ligero con Peletería (8 cueros ligeros, 1 pellejo ligero curado y 3 hilos burdos) y otras de seda, tejido mágico, paño rúnico y tela lunar. Mucha gente leerá lo mismo: mira antes cuántas hay en la subasta y a cuánto. El vendedor paga 2 platas por la de lino, menos que lo que cuestan las 6 madejas.",
+      "fuente": "Kadrath, YouTube (transcripción que pasó Piti); datos del juego",
+      "fecha": "2026-11-11",
+      "enlace": "https://www.youtube.com/watch?v=alGZP_4Pw20"
+    },
+    {
+      "id": "pociones-primeros-auxilios",
+      "nombre": "Pociones de sanación con Primeros auxilios",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 129, "nivel": 1}],
+      "mejor_con": [182],
+      "objetos": ["Minor Healing Potion", "Lesser Healing Potion", "Healing Potion", "Peacebloom", "Briarthorn", "Bruiseweed"],
+      "notas": "En Forever las pociones de sanación pasaron de Alquimia a Primeros auxilios, que es secundaria y la puede llevar cualquiera. Según los datos del juego: menor = vial vacío, especias suaves y flor de paz; inferior = vial vacío, 2 especias suaves y brezospina; normal = vial con plomo, especias picantes y hierba cardenal. Los viales y las especias son de vendedor, así que el coste es casi solo la hierba: con Botánica, cada hierba se convierte en una poción. Los alquimistas siguen teniendo las «descoloridas», que piden además un ojo de múrloc. Kadrath espera que las compren sobre todo guerreros y pícaros, que no se curan solos, y propone que, si juegas uno de ellos, te las guardes. Mira si sale más vender la hierba o la poción.",
+      "fuente": "Kadrath, YouTube (transcripción que pasó Piti); datos del juego",
+      "fecha": "2026-11-11",
+      "enlace": "https://www.youtube.com/watch?v=alGZP_4Pw20"
+    },
+    {
+      "id": "comida-experiencia",
+      "nombre": "Comida barata por el +5 % de experiencia",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 185, "nivel": 1}],
+      "objetos": ["Charred Wolf Meat", "Roasted Boar Meat", "Spiced Wolf Meat", "Brilliant Smallfish"],
+      "notas": "Según Kadrath, en Forever casi toda la comida cocinada da, además de lo suyo, un 5 % más de experiencia por bicho durante 15 minutos (no en misiones), y la más barata da lo mismo que la buena. Así que la carne y el pescado que antes nadie quería tienen demanda: quien sube querrá comer cada 15 minutos. Cocina y Primeros auxilios son secundarias, así que caben las dos sin perder las principales. Mucha comida de nivel bajo la hará cualquiera: pon pilas y mira a cuánto la venden los demás.",
+      "pendiente": "¿Es verdad que cualquier comida cocinada da el +5 % de experiencia y que dura 15 minutos? Compruébalo en el juego con una carne de lobo chamuscada y mira cuánto se vende la comida de nivel bajo.",
+      "fuente": "Kadrath, YouTube (transcripción que pasó Piti)",
+      "fecha": "2026-11-11",
+      "enlace": "https://www.youtube.com/watch?v=alGZP_4Pw20"
     },
     {
       "id": "tinte-ceruleo",
@@ -885,6 +932,18 @@
       "objetos": ["Pattern: Runecloth Bag"],
       "notas": "Existencias limitadas. Si lo compras siempre tú al principio, se gana muchísimo.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+    },
+    {
+      "id": "mercado-negro-goblin",
+      "nombre": "Materiales escasos del mercado negro goblin (precio máximo)",
+      "tipo": "vendedor", "nivel": 40, "zona": "Riverglades, Puerto Powder Fuse (en barco desde Puerto Bonvapor, Tanaris)",
+      "vendedor": "Mr. Craft",
+      "objetos": ["Pristine Leather", "Frilled Lichen", "Pyrite", "Black Lotus", "Arcane Crystal"],
+      "notas": "Según Kadrath, en la beta Mr. Craft vendía sin límite y a precio fijo cuero prístino, liquen con volantes y pirita a 5 oros, otros materiales escasos de más nivel a 20 y el loto negro y el cristal arcano a 50. Blizzard confirmó que algunos materiales tendrán así un precio tope y que el del loto negro es 50 oros. Eso marca el precio máximo de la subasta: si eres recolector, vende un poco por debajo; si compras, no pagues más que el goblin. Con el talento de Legacy Regateo (-10 % en vendedores, no en instructores ni reparaciones) el loto sale a 45. En el mismo pueblo, Madame Swindle lleva la subasta del mercado negro (pujas contra PNJ: mascotas y tabardos raros desde 100 oros, piezas del primer conjunto de mazmorra desde 400, el caballo del barón desde 3000) y se vende el Don del galope (+10 % de velocidad montado durante 15 días reales, 150 oros). Todo eso es oro que sale del juego, no un negocio. Merchant Map aún no tiene a este vendedor, así que el motor no conoce sus precios.",
+      "pendiente": "¿Qué vende Mr. Craft en Forever y a cuánto? Apúntalo en el juego (el addon guarda lo que ve en los vendedores) y quita esta pregunta.",
+      "fuente": "Kadrath, YouTube (transcripción que pasó Piti)",
+      "fecha": "2026-11-11",
+      "enlace": "https://www.youtube.com/watch?v=alGZP_4Pw20"
     },
     {
       "id": "estudio-dedicado",
