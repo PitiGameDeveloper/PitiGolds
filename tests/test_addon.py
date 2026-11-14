@@ -959,6 +959,19 @@ class SesionSinComprasNiConjuros(unittest.TestCase):
         self.mock.Advance(1)
         self.assertEqual(self.session()[0], {2770: 1})
 
+    def test_cambiarse_de_equipo_no_es_botin(self):
+        self.mock.equipped[16] = 2489              # lleva una espada puesta desde que entró
+        self.mock.Fire("PLAYER_LOGIN")
+        self.mock.Advance(10)
+        self.mock.Loot(0, 8, 2770, 1)
+        self.mock.Advance(1)
+        self.mock.Loot(0, 9, 2490, 1)              # lootea otra espada: eso sí es botín
+        self.mock.Advance(1)
+        for _ in range(3):                         # y se las cambia una y otra vez
+            self.mock.Equip(0, 9, 16)
+            self.mock.Advance(1)
+        self.assertEqual(self.session()[0], {2770: 1, 2490: 1})
+
 
 ACTIVE_METHODS = """
 PitiGoldsDB = nil

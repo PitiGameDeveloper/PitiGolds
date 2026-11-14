@@ -435,7 +435,20 @@ Mock.bags = {}
 C_Container = {
   GetContainerNumSlots = function(bag) return Mock.bags[bag] and Mock.bags[bag].numSlots or 0 end,
   GetContainerItemInfo = function(bag, slot) return Mock.bags[bag] and Mock.bags[bag][slot] end,
+  ContainerIDToInventoryID = function(bag) return 19 + bag end,
 }
+-- Equipo: Mock.equipped[ranura] = itemID (1-19 ropa y armas, 20-23 bolsas).
+Mock.equipped = {}
+function GetInventoryItemID(unit, slot) return unit == "player" and Mock.equipped[slot] or nil end
+-- Simula ponerse lo que hay en (bag, slot) en la ranura de equipo: lo que llevaba pasa a la bolsa.
+function Mock.Equip(bag, slot, invSlot)
+  local info = Mock.bags[bag][slot]
+  local old = Mock.equipped[invSlot]
+  Mock.equipped[invSlot] = info.itemID
+  Mock.bags[bag][slot] = old and { itemID = old, stackCount = 1, hyperlink = "[" .. (Mock.itemNames[old] or "?") .. "]" } or nil
+  Mock.Fire("PLAYER_EQUIPMENT_CHANGED", invSlot)
+  Mock.Fire("BAG_UPDATE_DELAYED")
+end
 Mock.warbandMoney = 0
 C_Bank = { FetchDepositedMoney = function() return Mock.warbandMoney end }
 

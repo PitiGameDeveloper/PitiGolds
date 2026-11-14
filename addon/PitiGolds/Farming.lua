@@ -34,14 +34,31 @@ local function InGrace()
   return GetTime() < graceUntil
 end
 
+-- Lo que llevas encima: bolsas y también lo equipado (ropa, armas y las propias bolsas). Si solo
+-- se miraran las bolsas, al cambiarte de equipo lo que te quitas parecería botín nuevo.
+local LAST_GEAR_SLOT = 19   -- de la cabeza (1) al tabardo (19)
+
 local function CountCarried()
   local counts = {}
+  local function add(itemID, n)
+    if itemID then counts[itemID] = (counts[itemID] or 0) + (n or 1) end
+  end
   local lastCarried = NUM_TOTAL_EQUIPPED_BAG_SLOTS or ((NUM_BAG_SLOTS or 4) + 1)
   for bag = 0, lastCarried do
     for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
       local info = C_Container.GetContainerItemInfo(bag, slot)
-      if info and info.itemID then
-        counts[info.itemID] = (counts[info.itemID] or 0) + (info.stackCount or 1)
+      if info then add(info.itemID, info.stackCount) end
+    end
+  end
+  if GetInventoryItemID then
+    for slot = 1, LAST_GEAR_SLOT do
+      add(GetInventoryItemID("player", slot))
+    end
+    local toInventory = C_Container.ContainerIDToInventoryID
+    if toInventory then
+      for bag = 1, lastCarried do
+        local ok, invSlot = pcall(toInventory, bag)
+        if ok and invSlot then add(GetInventoryItemID("player", invSlot)) end
       end
     end
   end
