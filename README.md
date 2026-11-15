@@ -298,7 +298,7 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    arrastrándolo.
 3. En la casa de subastas aparecen dos botones encima de la ventana:
    - **PG: Materiales**: recorre materiales, consumibles, recetas y gemas. Guarda el precio mínimo y la cantidad total de cada objeto. Se puede repetir cuando quieras.
-   - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores. El servidor solo lo permite **cada 15 minutos**.
+   - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores.
    - **Fabricar x**: cuántas veces quieres fabricar la receta del botón **Buscar** (empieza con el número
      que tengas junto a «Crear todo»). Al abrir uno de sus materiales para comprarlo se marca solo lo que
      falta: lo que pide la receta por ese número, menos lo que ya tienes en bolsas y banco. Si vienes de la

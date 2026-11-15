@@ -476,8 +476,6 @@ class AddonEnPartidaSimulada(unittest.TestCase):
         mock.Advance(60)
         mock.ClickButton("PG: Completo")
         mock.Advance(30)
-        mock.Slash("completo")  # dentro de los 15 minutos: debe negarse
-        mock.Advance(1)
 
         cls.mock = mock
         cls.db = lua.globals().PitiGoldsDB
@@ -558,7 +556,6 @@ class AddonEnPartidaSimulada(unittest.TestCase):
         self.assertEqual(full["items"][2845], "5000,1,1,1|5000:1")
         self.assertEqual(full["items"][19019], "75000000000,1,1,1|75000000000:1")
         self.assertIsNone(full["items"][2592])  # solo puja, sin precio de compra
-        self.assertIn("solo se puede hacer cada 15 minutos", self.chat())
 
     def test_subastas_propias(self):
         listed = self.char.inventory.auctions.list

@@ -1,13 +1,11 @@
 -- Escáner de la casa de subastas.
 --   Completo: toda la subasta, una por una (C_AuctionHouse.ReplicateItems).
---             El servidor solo lo permite cada 15 minutos.
 --   Materiales: recorre las categorías de profesiones y consumibles y guarda el
 --             precio mínimo y la cantidad total de cada objeto, incluidos los
 --             que se venden por unidades (commodities).
 -- También apunta las subastas que tiene puestas el personaje.
 local ADDON, ns = ...
 
-local REPLICATE_COOLDOWN = 15 * 60
 local BOOK_LEVELS = 10           -- niveles de precio que se guardan por objeto
 local BROWSE_STALL_SECONDS = 20  -- sin respuesta durante este tiempo se pasa a la siguiente categoría
 
@@ -115,16 +113,9 @@ end
 
 function Scan.StartFull()
   if not CanStart() then return end
-  local remaining = (PitiGoldsDB.lastReplicate or 0) + REPLICATE_COOLDOWN - time()
-  if remaining > 0 then
-    ns.Print(("el escaneo completo solo se puede hacer cada 15 minutos. Faltan %d:%02d.")
-      :format(math.floor(remaining / 60), remaining % 60))
-    return
-  end
   Scan.state = "full_wait"
   Scan.token = Scan.token + 1
   Scan.startedAt = time()
-  PitiGoldsDB.lastReplicate = time()
   C_AuctionHouse.ReplicateItems()
   ns.Print("escaneo completo pedido al servidor; tarda un poco, no cierres la subasta.")
   if ns.RefreshUI then ns.RefreshUI() end
@@ -563,5 +554,5 @@ ns.On("PLAYER_INTERACTION_MANAGER_FRAME_HIDE", function(_, kind)
   if IsAuctionInteraction(kind) then OnAuctionHouseClosed() end
 end)
 
-ns.Command("completo", "escaneo completo de la subasta (cada 15 min)", function() Scan.StartFull() end)
+ns.Command("completo", "escaneo completo de la subasta", function() Scan.StartFull() end)
 ns.Command("materiales", "escaneo de materiales y consumibles", function() Scan.StartMaterials() end)
