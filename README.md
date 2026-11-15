@@ -420,8 +420,9 @@ señales de una semana entera.
 
 El addon apunta solo lo que ganas mientras juegas: objetos que entran en las bolsas y oro, en tramos
 de 5 minutos por zona. No cuenta lo que entra con el correo, la subasta, el banco, un vendedor, un
-intercambio o la ventana de una profesión abiertos, ni en los 2 segundos siguientes a cerrarlos (lo
-comprado o cobrado a veces llega tarde), ni lo que crean los hechizos de clase (fragmentos de alma,
+intercambio, la ventana de una profesión o la de entregar una misión abiertos, ni en los 2 segundos
+siguientes a cerrarlos o a entregar la misión (lo comprado, cobrado o recibido a veces llega tarde):
+el oro y los objetos de recompensa de las misiones no cuentan como farmeados. Tampoco lo que crean los hechizos de clase (fragmentos de alma,
 piedras de salud y de alma, comida, agua y gemas conjuradas). Puedes poner nombre a lo que haces con
 `/pg farmeo <nombre>`, o pulsando **Farmear este** en la ventana de métodos.
 

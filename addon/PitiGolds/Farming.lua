@@ -1,8 +1,9 @@
 -- Registro de farmeos: apunta lo que ganas (objetos que entran en las bolsas y oro) en
 -- tramos de 5 minutos por zona, para que el motor calcule tu oro por hora real en cada
 -- sitio y actividad. Mientras hay farmeos activos en marcha, el tramo lleva su id. No cuenta lo que entra con el correo, la subasta, el banco, un
--- vendedor, un intercambio o la ventana de una profesión abiertos (ni en los segundos siguientes a
--- cerrarlos), ni lo que crean los hechizos de clase: eso no es lo farmeado.
+-- vendedor, un intercambio, la ventana de una profesión o la de entregar una misión abiertos (ni en
+-- los segundos siguientes a cerrarlos o a entregar la misión), ni lo que crean los hechizos de
+-- clase: eso no es lo farmeado.
 local ADDON, ns = ...
 
 local BUCKET_SECONDS = 300
@@ -163,6 +164,8 @@ local WINDOWS = {
   { "MERCHANT_SHOW", "MERCHANT_CLOSED", "vendedor" },
   { "TRADE_SHOW", "TRADE_CLOSED", "intercambio" },
   { "TRADE_SKILL_SHOW", "TRADE_SKILL_CLOSE", "profesion" },
+  -- La ventana de entregar una misión: su oro y sus objetos de recompensa no son lo farmeado.
+  { "QUEST_COMPLETE", "QUEST_FINISHED", "mision" },
 }
 for _, w in ipairs(WINDOWS) do
   local reason = w[3]
@@ -199,6 +202,16 @@ ns.On("BAG_UPDATE_DELAYED", function()
   ns.Debounce("farm", 0.5, OnBagsChanged)
 end)
 ns.On("PLAYER_MONEY", OnMoneyChanged)
+
+-- Al entregar una misión la recompensa puede llegar ya cerrada su ventana (o sin ventana, si se
+-- entrega sola): lo que entra en los segundos siguientes tampoco cuenta.
+ns.On("QUEST_TURNED_IN", function()
+  if not Paused() then
+    OnBagsChanged()
+    OnMoneyChanged()
+  end
+  graceUntil = GetTime() + RESUME_GRACE
+end)
 
 -- Limpieza: fuera lo que el motor ya ha guardado y, si aun así hay demasiado, lo más viejo.
 local function Prune()

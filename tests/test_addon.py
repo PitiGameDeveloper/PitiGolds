@@ -949,6 +949,22 @@ class SesionSinComprasNiConjuros(unittest.TestCase):
         self.mock.Advance(1)
         self.assertEqual(self.session(), ({2770: 2}, 50))
 
+    def test_la_recompensa_de_una_mision_no_cuenta(self):
+        self.mock.Fire("QUEST_COMPLETE")
+        self.mock.Advance(1)
+        self.mock.Fire("QUEST_TURNED_IN", 100, 0, 500)
+        self.mock.Fire("QUEST_FINISHED")
+        self.mock.AddMoney(500)          # el oro de la misión llega ya cerrada la ventana
+        self.mock.Loot(0, 5, 1708, 1)    # y el objeto de recompensa
+        self.mock.Advance(3)
+        self.mock.Fire("QUEST_TURNED_IN", 101, 0, 200)   # una que se entrega sin ventana
+        self.mock.AddMoney(200)
+        self.mock.Advance(3)
+        self.mock.Loot(0, 6, 2770, 2)    # pasado el margen, lo looteado sí cuenta
+        self.mock.AddMoney(50)
+        self.mock.Advance(1)
+        self.assertEqual(self.session(), ({2770: 2}, 50))
+
     def test_lo_que_crea_el_brujo_no_es_botin(self):
         self.mock.Loot(0, 5, 6265, 3)    # Fragmento de alma
         self.mock.Loot(0, 6, 5511, 1)    # Piedra de salud inferior
