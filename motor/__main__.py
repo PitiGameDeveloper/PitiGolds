@@ -1,6 +1,7 @@
 """Uso:
     python -m motor leer       lee los datos del addon una vez
     python -m motor vigilar    los lee cada vez que WoW los guarda (/reload o salir)
+    python -m motor arranque [--quitar]   vigilar arranca solo y sin ventana con Windows
     python -m motor estado     resumen de personajes, oro, profesiones y subasta
     python -m motor informe    qué craftear, qué aprender y qué vender
     python -m motor datos-juego  descarga las recetas y objetos del juego (wago.tools), qué vende
@@ -352,7 +353,45 @@ def check_game_data(config: Config) -> bool:
         conn.close()
 
 
-def cmd_vigilar(config: Config, interval: float) -> int:
+LOG_MAX_BYTES = 1_000_000
+
+
+def _only_one(config: Config):
+    """Bloqueo para que solo vigile una copia (la oculta de Windows o la de vigilar.cmd).
+    Devuelve el archivo bloqueado (hay que mantenerlo abierto) o None si ya hay otra."""
+    import msvcrt
+    config.db_path.parent.mkdir(parents=True, exist_ok=True)
+    handle = open(config.db_path.parent / "vigilar.lock", "a+")
+    try:
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+    except OSError:
+        handle.close()
+        return None
+    return handle
+
+
+def _to_log(config: Config) -> Path:
+    """Sin ventana (pythonw) no hay consola: lo que diría vigilar va a datos/vigilar.log."""
+    log = config.db_path.parent / "vigilar.log"
+    if log.exists() and log.stat().st_size > LOG_MAX_BYTES:
+        log.replace(log.with_suffix(".log.1"))
+    stream = open(log, "a", encoding="utf-8", buffering=1)
+    sys.stdout = sys.stderr = stream
+    print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] Arranco sin ventana.")
+    return log
+
+
+def cmd_vigilar(config: Config, interval: float, hidden: bool = False) -> int:
+    if sys.platform == "win32":
+        lock = _only_one(config)
+        if lock is None:
+            if not hidden:
+                print("Ya hay un vigilar en marcha (seguramente el que arranca solo con Windows).")
+                print(f"No hace falta este. Lo que va haciendo está en {config.db_path.parent / 'vigilar.log'}.")
+            return 0
+    if hidden:
+        _to_log(config)
     print("Vigilando los datos del addon. Cada /reload o salida del juego se leerá solo. Ctrl+C para parar.")
     print("Una vez al día se comprueba también si hay datos nuevos del juego.")
     if not config.saved_variables():
@@ -365,12 +404,15 @@ def cmd_vigilar(config: Config, interval: float) -> int:
             try:
                 check_game_data(config)
                 next_game_check = time.time() + GAME_DATA_CHECK_SECONDS
-            except (OSError, ValueError) as exc:  # sin conexión o wago.tools caído
+            except Exception as exc:  # sin conexión o wago.tools caído: la vigilancia sigue
                 print(f"No he podido comprobar los datos del juego; lo reintento en una hora ({exc}).")
                 next_game_check = time.time() + GAME_DATA_RETRY_SECONDS
         changed = False
         for _, path in config.saved_variables():
-            mtime = path.stat().st_mtime
+            try:
+                mtime = path.stat().st_mtime
+            except OSError:  # WoW lo está reescribiendo
+                continue
             if seen.get(str(path)) != mtime:
                 seen[str(path)] = mtime
                 changed = True
@@ -381,6 +423,52 @@ def cmd_vigilar(config: Config, interval: float) -> int:
             except Exception as exc:  # un archivo a medio escribir no debe parar la vigilancia
                 print(f"Error al leer los datos: {exc}")
         time.sleep(interval)
+
+
+STARTUP_NAME = "PitiGolds vigilar.lnk"
+
+
+def _startup_link() -> Path:
+    import os
+    return Path(os.environ["APPDATA"]) / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup" / STARTUP_NAME
+
+
+def cmd_arranque(remove: bool) -> int:
+    """Pone (o quita) vigilar en el inicio de Windows, sin ventana, y lo arranca ya."""
+    import subprocess
+    if sys.platform != "win32":
+        print("Solo funciona en Windows.")
+        return 1
+    link = _startup_link()
+    if remove:
+        if link.exists():
+            link.unlink()
+            print("Quitado del inicio de Windows. El que esté en marcha sigue hasta que apagues o cierres sesión.")
+        else:
+            print("No estaba en el inicio de Windows.")
+        return 0
+    root = Path(__file__).resolve().parent.parent
+    pythonw = Path(sys.executable).with_name("pythonw.exe")
+    if not pythonw.exists():
+        print(f"No encuentro {pythonw}.")
+        return 1
+    quote = lambda s: "'" + str(s).replace("'", "''") + "'"
+    script = (
+        "$s = (New-Object -ComObject WScript.Shell).CreateShortcut(" + quote(link) + ");"
+        f"$s.TargetPath = {quote(pythonw)};"
+        "$s.Arguments = '-m motor vigilar --oculto';"
+        f"$s.WorkingDirectory = {quote(root)};"
+        "$s.Description = 'PitiGolds: lee los datos del addon cada vez que WoW los guarda';"
+        "$s.Save()"
+    )
+    subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script], check=True)
+    print("Listo: vigilar arranca solo, sin ventana, cada vez que enciendes Windows.")
+    subprocess.Popen([str(pythonw), "-m", "motor", "vigilar", "--oculto"], cwd=root,
+                     creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP,
+                     close_fds=True)
+    print("Y ya está en marcha. Lo que va haciendo se apunta en datos\\vigilar.log.")
+    print("Para quitarlo: python -m motor arranque --quitar")
+    return 0
 
 
 def cmd_estado(config: Config) -> int:
@@ -440,6 +528,9 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("leer", help="lee los datos del addon y los guarda en la base de datos")
     watch = sub.add_parser("vigilar", help="lee los datos cada vez que WoW los guarde")
     watch.add_argument("--intervalo", type=float, default=2.0, help="segundos entre comprobaciones")
+    watch.add_argument("--oculto", action="store_true", help="sin ventana: escribe en datos/vigilar.log")
+    startup = sub.add_parser("arranque", help="vigilar arranca solo y sin ventana al encender Windows")
+    startup.add_argument("--quitar", action="store_true", help="deja de arrancarlo con Windows")
     sub.add_parser("estado", help="resumen de personajes, oro, profesiones y subasta")
     sub.add_parser("informe", help="qué craftear, qué recetas aprender y qué vender")
     game = sub.add_parser("datos-juego", help="descarga las recetas y objetos del juego de wago.tools")
@@ -470,6 +561,8 @@ def main(argv: list[str] | None = None) -> int:
     sources.add_argument("--texto", metavar="ARCHIVO", help="saca el texto de un .docx de fuentes/")
     args = parser.parse_args(argv)
 
+    if args.cmd == "arranque":
+        return cmd_arranque(args.quitar)
     config = load_config()
     if args.cmd == "leer":
         return cmd_leer(config)
@@ -493,7 +586,7 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_datos_juego(config, args.forzar)
     if args.cmd == "vigilar":
         try:
-            return cmd_vigilar(config, args.intervalo)
+            return cmd_vigilar(config, args.intervalo, args.oculto)
         except KeyboardInterrupt:
             return 0
     return cmd_estado(config)

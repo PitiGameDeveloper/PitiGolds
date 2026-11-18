@@ -22,6 +22,8 @@ dir /AL /B "%ADDONS%" 2>nul | findstr /X /I PitiGolds >nul && (
 )
 
 "%PY%" -m motor datos-juego
+rem Vigilar arranca solo y sin ventana con Windows (se quita con: python -m motor arranque --quitar).
+"%PY%" -m motor arranque
 
 if exist "%ADDONS%\PitiGolds\PitiGolds.toc" (
   if not exist "%ADDONS%\PitiGolds\Generated.lua" "%PY%" -m motor leer

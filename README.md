@@ -292,7 +292,11 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 
 ## Uso diario
 
-1. Haz doble clic en **`vigilar.cmd`** y deja esa ventana abierta mientras juegas.
+1. No hace falta abrir nada: el motor vigila solo, sin ventana, desde que enciendes Windows. Lo
+   deja puesto `instalar.cmd` (o `python -m motor arranque`; se quita con `--quitar`). Lo que va
+   haciendo se apunta en `datos\vigilar.log`. Si no lo tienes puesto, haz doble clic en
+   **`vigilar.cmd`** y deja esa ventana abierta mientras juegas. Si ya hay uno en marcha, la ventana
+   lo dice y no arranca otro.
 2. En el juego verás un panel pequeño, **PitiGolds**, con lo que llevas ganado en la sesión y los botones
    **Mejor farmeo**, **Sesión** y **Farmeos activos**. Se pone al día en cuanto looteas. Puedes moverlo
    arrastrándolo.
@@ -340,7 +344,7 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    al servidor la lista de ese objeto para dejarla exacta.
 4. No hace falta exportar nada: el addon apunta solo lo que pasa (al entrar con cada personaje, al lootear,
    al escanear...) y WoW lo guarda en disco al cambiar de personaje, al salir del juego o con `/reload`.
-   `vigilar.cmd` lo lee en un par de segundos, y el addon lo enseña al entrar con el siguiente personaje o
+   el motor lo lee en un par de segundos, y el addon lo enseña al entrar con el siguiente personaje o
    tras otro `/reload`.
 5. Haz doble clic en **`informe.cmd`** para ver qué hacer: crafteos rentables, recetas que te convendría
    aprender y qué vender. Queda guardado también en `datos/informe.md`.
@@ -371,7 +375,7 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 
 **`estado.cmd`** da el resumen general: oro, profesiones, valor del inventario y divisas de Forever.
 
-Si `vigilar.cmd` no está abierto, no pasa nada: el addon guarda hasta 5 escaneos pendientes. A partir de ahí borra
+Si el motor no está vigilando, no pasa nada: el addon guarda hasta 5 escaneos pendientes. A partir de ahí borra
 los más antiguos, y esos precios se pierden del histórico.
 
 ## Qué recoge y cuándo
@@ -551,7 +555,7 @@ datos, aunque en el Classic original sí la tenía.
 .venv\Scripts\python -m motor datos-juego
 ```
 
-No hace falta acordarse: `vigilar.cmd` lo comprueba al arrancar y después una vez al día, e
+No hace falta acordarse: el motor (vigilar) lo comprueba al arrancar y después una vez al día, e
 `informe.cmd` cada vez que lo abres. Solo se descarga algo cuando:
 - hay una versión nueva del juego (se usa la que tienes instalada), o
 - la última descarga tiene más de 7 días: a veces aparecen filas que antes estaban cifradas sin que
@@ -673,7 +677,7 @@ Para ponerlo en el juego (la primera vez, tras reinstalar WoW o al clonar el rep
 
 **Después de cada actualización de WowUp hay que repetir el paso 4.** WowUp reemplaza la carpeta entera y
 `Generated.lua` no viene en el zip, porque es tuyo y lo escribe el motor. Mientras falte, el addon sigue
-apuntando datos, pero no tiene precios ni métodos. Con `vigilar.cmd` abierto basta con dos `/reload`: el
+apuntando datos, pero no tiene precios ni métodos. Con el motor vigilando basta con dos `/reload`: el
 primero guarda los datos y hace que el motor lo escriba, y el segundo lo carga. Tus datos no se pierden:
 las SavedVariables están en `WTF`, fuera de la carpeta del addon.
 
@@ -706,4 +710,4 @@ Por defecto se usa `C:\Program Files (x86)\World of Warcraft\_forever_`. Para ca
 ```
 
 El motor, `instalar.cmd` y `probar-addon.cmd` usan esa ruta. Si está mal, el addon sigue apuntando datos en el
-juego, pero el motor no los ve y la ventana de métodos sale vacía; `vigilar.cmd` lo avisa al arrancar.
+juego, pero el motor no los ve y la ventana de métodos sale vacía; vigilar lo avisa al arrancar (en `datos\vigilar.log` si va sin ventana).
