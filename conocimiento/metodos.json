@@ -43,6 +43,76 @@
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
+      "id": "skyborne-bandidos",
+      "nombre": "Bandidos de las Tierras Altas (Skyborne)",
+      "tipo": "farmeo", "nivel": 6, "zona": "Zona de inicio Skyborne",
+      "objetos": ["Linen Cloth"],
+      "por_hora": [{"objeto": "Linen Cloth", "cantidad": 45}], "oro_hora": 0.4,
+      "notas": "Para Skyborne recién creados. Los bandidos reaparecen a lo loco: plata suelta, alguna verde (BoE) y tela. Estimado por hora: unos 150 bichos, tela en uno de cada tres. Al acabar aquí, sigue con los Al'Aketh (método skyborne-alaketh).",
+      "pendiente": "Questie aún no tiene la zona Skyborne. ¿En qué zona y coordenadas están los bandidos de las Tierras Altas, y cómo se llaman en español en el juego? La guía solo lo marca en un mapa (V1.2, pág. 31).",
+      "fuente": "Guía de Studen v1.2", "fecha": "2026-11-16"
+    },
+    {
+      "id": "skyborne-alaketh",
+      "nombre": "Humanoides Al'Aketh (Skyborne)",
+      "tipo": "farmeo", "nivel": 9, "zona": "Zona de inicio Skyborne",
+      "objetos": ["Linen Cloth"],
+      "por_hora": [{"objeto": "Linen Cloth", "cantidad": 50}], "oro_hora": 0.5,
+      "notas": "El paso siguiente a los bandidos de las Tierras Altas: muchos humanoides Al'Aketh que reaparecen muy rápido. Oro suelto y tela. Estimado por hora: unos 150 bichos.",
+      "pendiente": "Questie aún no tiene la zona Skyborne. ¿Dónde están los Al'Aketh (zona y coordenadas) y cómo se llaman en español en el juego? La guía solo lo marca en un mapa (V1.2, pág. 32).",
+      "fuente": "Guía de Studen v1.2", "fecha": "2026-11-16"
+    },
+    {
+      "id": "teldrassil-furbolgs",
+      "nombre": "Cueva de los furbolgs Tuercepinos",
+      "tipo": "farmeo", "nivel": 7, "zona": "Teldrassil",
+      "objetos": ["Linen Cloth"],
+      "por_hora": [{"objeto": "Linen Cloth", "cantidad": 55}], "oro_hora": 0.5,
+      "punto": {"mapa": 1438, "x": 44, "y": 60}, "bichos": ["Defensor Tuercepinos", "Chamán Tuercepinos", "Augurio Tuercepinos", "Guerrero Tuercepinos"],
+      "notas": "Según Studen, lo mejor para un elfo de la noche que empieza: la cueva está llena de furbolgs y, como hay muchas misiones dentro, reaparecen sin parar. Tela y muchos grises. Estimado por hora: unos 170 bichos. Creo que es el Túmulo de Ban'ethil; si en el juego la cueva está en otro sitio, avísame.",
+      "fuente": "Guía de Studen v1.2", "fecha": "2026-11-16"
+    },
+    {
+      "id": "teldrassil-arpias",
+      "nombre": "Arpías Sangrepluma del Claro del Oráculo",
+      "tipo": "farmeo", "nivel": 8, "zona": "Teldrassil",
+      "objetos": ["Linen Cloth"],
+      "por_hora": [{"objeto": "Linen Cloth", "cantidad": 45}], "oro_hora": 0.5,
+      "punto": {"mapa": 1438}, "bichos": ["Arpía Sangrepluma", "Pícaro Sangrepluma", "Hechicera Sangrepluma", "Furia Sangrepluma", "Bruja del viento Sangrepluma"],
+      "notas": "Todo el Claro del Oráculo está lleno de arpías que reaparecen rápido: tela y verdes (BoE) antes de irte de Teldrassil. Estimado por hora: unos 140 arpías.",
+      "fuente": "Guía de Studen v1.2", "fecha": "2026-11-16"
+    },
+    {
+      "id": "costaoscura-faccion-oscura",
+      "nombre": "Torre de la Facción Oscura",
+      "tipo": "farmeo", "nivel": 16, "zona": "Costa Oscura",
+      "objetos": ["Linen Cloth", "Wool Cloth"],
+      "por_hora": [{"objeto": "Linen Cloth", "cantidad": 20}, {"objeto": "Wool Cloth", "cantidad": 25}], "oro_hora": 1.5,
+      "punto": {"mapa": 1439, "x": 55, "y": 26}, "bichos": ["Fanático de la Facción Oscura"],
+      "notas": "Una torre llena de humanoides de la Facción Oscura: oro suelto, verdes (BoE) y tela de lino y de lana. Creo que es la Torre de Althalaxx. Estimado por hora: unos 120 bichos.",
+      "fuente": "Guía de Studen v1.2", "fecha": "2026-11-16"
+    },
+    {
+      "id": "costaoscura-crepusculares",
+      "nombre": "Crepusculares de Costa Oscura",
+      "tipo": "farmeo", "nivel": 16, "zona": "Costa Oscura",
+      "objetos": ["Linen Cloth", "Wool Cloth"],
+      "por_hora": [{"objeto": "Linen Cloth", "cantidad": 20}, {"objeto": "Wool Cloth", "cantidad": 25}], "oro_hora": 1.5,
+      "punto": {"mapa": 1439}, "bichos": ["Discípulo Crepuscular", "Matón Crepuscular"],
+      "notas": "Humanoides del Martillo Crepuscular que reaparecen rápido: oro suelto, verdes (BoE) y tela de lino y de lana. Estimado por hora: unos 120 bichos.",
+      "fuente": "Guía de Studen v1.2", "fecha": "2026-11-16"
+    },
+    {
+      "id": "paramos-cueva",
+      "nombre": "Cueva de humanoides de Páramos de Poniente (Alianza)",
+      "tipo": "farmeo", "nivel": 14, "zona": "Páramos de Poniente",
+      "objetos": ["Linen Cloth", "Wool Cloth"],
+      "por_hora": [{"objeto": "Linen Cloth", "cantidad": 35}, {"objeto": "Wool Cloth", "cantidad": 20}], "oro_hora": 1.2,
+      "punto": {"mapa": 1436, "x": 30, "y": 47}, "bichos": ["Despojador Defias", "Saqueador Defias", "Bastardo Zarparrío", "Minero Zarparrío", "Herborista Zarparrío"],
+      "notas": "La cantera de la Costa del Oro: gnolls Zarparrío y Defias que reaparecen a lo loco. Mucha tela, plata suelta y verdes (BoE). Es de la Alianza. Estimado por hora: unos 150 bichos.",
+      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
+    },
+    {
       "id": "baldios-ventura",
       "nombre": "Goblins de Ventura y Cía.",
       "tipo": "farmeo", "nivel": 14, "zona": "Los Baldíos",
@@ -146,6 +216,18 @@
       "fuente": "Guía de Studen v1.1; posiciones de Wowhead (Classic) y Goldgoblin", "fecha": "2026-11-08"
     },
     {
+      "id": "llanuras-centelleantes-tortugas",
+      "nombre": "Tortugas de las Llanuras Centelleantes",
+      "tipo": "farmeo", "nivel": 32, "nivel_minimo": 30, "zona": "Las Mil Agujas (Llanuras Centelleantes)",
+      "mejor_con": [393],
+      "objetos": ["Speckled Shell Fragment", "Medium Leather", "Heavy Leather"],
+      "por_hora": [{"objeto": "Speckled Shell Fragment", "cantidad": 40}, {"objeto": "Medium Leather", "cantidad": 30}, {"objeto": "Heavy Leather", "cantidad": 15}], "oro_hora": 1,
+      "punto": {"mapa": 1441}, "bichos": ["Tortuga caparallante", "Cavapozos caparallante", "Sacudidor caparallante"],
+      "notas": "Pensado para pagar la montura de 40 sin pisar la subasta: las tortugas sueltan el fragmento de concha moteada (gris, el vendedor paga 9 platas) en uno de cada tres bichos, más algún gris. Con Desollar, además, cuero; también puedes desollar los buitres y carroñeros de los Llanos de Sal que dejan otros jugadores. El vídeo lo saca de Icy Veins y da 10-13 o/h para un nivel 30-40 contando 150 bichos por hora (dice él mismo que es mucho); el oro_hora de aquí es más prudente. Las tortugas van de nivel 30-31 (caparallante) a 34-35 (sacudidor). Estimado por hora: unas 120 tortugas.",
+      "fuente": "Vídeo de la montura de 40, YouTube (2026-11-15)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=rQuvT137PLo"
+    },
+    {
       "id": "ocaso-ogros",
       "nombre": "Cueva de ogros con cofres y vetas",
       "tipo": "farmeo", "nivel": 28, "zona": "Bosque del Ocaso",
@@ -157,15 +239,26 @@
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
+      "id": "ocaso-lobos-zorros",
+      "nombre": "Lobos y zorros del Bosque del Ocaso",
+      "tipo": "farmeo", "nivel": 24, "zona": "Bosque del Ocaso",
+      "mejor_con": [393],
+      "objetos": ["Medium Leather", "Heavy Leather"],
+      "por_hora": [{"objeto": "Medium Leather", "cantidad": 35}, {"objeto": "Heavy Leather", "cantidad": 5}], "oro_hora": 3,
+      "punto": {"mapa": 1431},
+      "notas": "Un sitio lleno de lobos y zorros que se desuellan y sueltan muchos grises que el vendedor paga bien. La guía no dice cómo se llaman ni el sitio exacto (solo lo marca en un mapa, V1.5, pág. 48). Questie no tiene zorros en el Bosque del Ocaso, así que serán bichos nuevos de Forever: el addon apunta dónde los matas. Estimado por hora: unos 130 bichos; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
+    },
+    {
       "id": "tuercespina-bestias",
       "nombre": "Bestias del norte de Tuercespina",
       "tipo": "farmeo", "nivel": 30, "zona": "Vega de Tuercespina",
       "mejor_con": [393],
-      "objetos": ["Bristly Whisker", "Medium Leather", "Heavy Leather"],
+      "objetos": ["Bristly Whisker", "Long Soft Tail", "Medium Leather", "Heavy Leather"],
       "por_hora": [{"objeto": "Bristly Whisker", "cantidad": 45}, {"objeto": "Medium Leather", "cantidad": 30}, {"objeto": "Heavy Leather", "cantidad": 20}], "oro_hora": 1.5,
       "punto": {"mapa": 1434, "x": 35, "y": 15}, "bichos": ["Tigre joven de Tuercespina", "Tigre de Tuercespina", "Pantera joven", "Pantera", "Raptor joven de Tuercespina", "Raptor de Tuercespina", "Raptor colazote", "Gorila Velo de Bruma"],
-      "notas": "Todas se desuellan y sueltan grises que paga bien el vendedor. Se combina con las misiones de Nesingwary. Estimado por hora: unos 130 bichos; el cuero, solo con Desollar.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+      "notas": "Todas se desuellan y sueltan grises que paga bien el vendedor; las panteras, además, la cola blanda larga (8 platas al vendedor). Se combina con las misiones de Nesingwary. Hotfix del 13-11-2026: más tigres, raptores y panteras, porque antes se tardaba hasta 45 minutos en encontrar 10 tigres para las misiones (según un vídeo del 15-11, https://www.youtube.com/watch?v=rQuvT137PLo). Estimado por hora: unos 130 bichos; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.1; vídeo de la montura de 40 (2026-11-15)", "fecha": "2026-11-18"
     },
     {
       "id": "tuercespina-basiliscos",
@@ -205,9 +298,43 @@
       "objetos": ["Burning Charm", "Elemental Fire"],
       "por_hora": [{"objeto": "Burning Charm", "cantidad": 32}, {"objeto": "Elemental Fire", "cantidad": 10}], "oro_hora": 3.5,
       "punto": {"mapa": 1417, "x": 25, "y": 30}, "bichos": ["Exiliado ardiente"],
-      "notas": "Bichos de nivel 38-39 que sueltan talismán ardiente (40 %) y elemental de fuego (12 %, de lo mejor que hay), según MetaBot con datos de Classic. CJ Mann dice que los guerreros compran el talismán para la misión del hacha de Torbellino: es un mercado pequeño, así que pon pocos cada vez; si no salen, el vendedor paga 1 plata 78. Lo que aguanta el farmeo es el elemental: 4 plata al vendedor y más cuando lleguen las bandas (ver «Materiales de pociones de protección»). Las coordenadas son aproximadas. Estimado por hora: unos 80 exiliados, porque el sitio es pequeño y lo comparten otros jugadores.",
-      "fuente": "CJ Mann, YouTube (2026-11-03); MetaBot; Warcraft Wiki; Wowhead", "fecha": "2026-11-04",
+      "notas": "Bichos de nivel 38-39 que sueltan talismán ardiente (40 %) y elemental de fuego (12 %, de lo mejor que hay), según MetaBot con datos de Classic. CJ Mann dice que los guerreros compran el talismán para la misión del hacha de Torbellino: es un mercado pequeño, así que pon pocos cada vez; si no salen, el vendedor paga 1 plata 78. Lo que aguanta el farmeo es el elemental: 4 plata al vendedor y más cuando lleguen las bandas (ver «Materiales de pociones de protección»). Las coordenadas son aproximadas. Otro vídeo (top 5 para la montura de 40, https://www.youtube.com/watch?v=LStkmcnFTCg) lo pone entre lo mejor: si pasas por Arathi, mira si los de fuego están libres y límpialos, que suelen caer 1-2 elementales de fuego por vuelta; los otros dos círculos están en «Exiliados de agua y aire». Estimado por hora: unos 80 exiliados, porque el sitio es pequeño y lo comparten otros jugadores.",
+      "fuente": "CJ Mann, YouTube (2026-11-03); MetaBot; Warcraft Wiki; Wowhead; YouTube, top 5 para la montura de 40", "fecha": "2026-11-18",
       "enlace": "https://www.youtube.com/watch?v=gzfLo4vBsGo"
+    },
+    {
+      "id": "arathi-exiliados-agua-aire",
+      "nombre": "Exiliados de agua y aire (talismanes del hacha de Torbellino)",
+      "tipo": "farmeo", "nivel": 38, "zona": "Tierras Altas de Arathi, círculos del este y del centro",
+      "objetos": ["Cresting Charm", "Thundering Charm", "Elemental Water", "Elemental Air"],
+      "por_hora": [{"objeto": "Cresting Charm", "cantidad": 25}, {"objeto": "Thundering Charm", "cantidad": 25}, {"objeto": "Elemental Water", "cantidad": 5}, {"objeto": "Elemental Air", "cantidad": 5}], "oro_hora": 3,
+      "punto": {"mapa": 1417}, "bichos": ["Éxilu coronador", "Exiliado tronador"],
+      "notas": "Los otros dos círculos de elementales de Arathi: los de agua (Cresting Exile, hacia 66,29) y los de aire (Thundering Exile, hacia 52,50), de nivel 38-39. Sueltan el talismán de su círculo y su elemental. Los guerreros necesitan 8 talismanes de cada tipo para el hacha de Torbellino y, al principio del servidor, muchos la sacan pronto comprando los talismanes en la subasta: se venden bien ahora, pero es un mercado pequeño, así que pon pocos cada vez. Se rota entre los tres círculos (el de fuego es «Exiliados ardientes»). «Éxilu coronador» es como sale el de agua en Questie; si en el juego se llama distinto, avísame. Estimado por hora: unos 80 exiliados entre los dos círculos.",
+      "fuente": "YouTube, top 5 para la montura de 40 (transcripción que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=LStkmcnFTCg"
+    },
+    {
+      "id": "arathi-kobolds",
+      "nombre": "Kóbolds Mostacho Seco y su mina",
+      "tipo": "farmeo", "nivel": 37, "nivel_minimo": 35, "zona": "Tierras Altas de Arathi, cañón de Mostacho Seco (junto a Sentencia)",
+      "mejor_con": [186],
+      "objetos": ["Lesser Bloodstone Ore", "Cresting Charm", "Linen Cloth", "Silk Cloth"],
+      "por_hora": [{"objeto": "Lesser Bloodstone Ore", "cantidad": 15}, {"objeto": "Silk Cloth", "cantidad": 15}], "oro_hora": 3,
+      "punto": {"mapa": 1417, "x": 80, "y": 38}, "bichos": ["Kóbold Mostacho Seco", "Cavador Mostacho Seco", "Perito Mostacho Seco"],
+      "notas": "Cuevas de kóbolds con buen botín y mucho mineral. Con Minería, la mena de sangrita inferior sube la profesión y se vende bien en la subasta neutral (Bahía del Botín), porque la Alianza y la Horda la entregan en una misión. Según el vídeo, estos kóbolds también sueltan el talismán de cresta del hacha de Torbellino (sin comprobar). Cuidado: lanzan novas y descargas de Escarcha. Vendedor en Sentencia (Horda). Estimado por hora: unos 100 kóbolds; el mineral, solo con Minería.",
+      "fuente": "YouTube, top 5 para la montura de 40 (transcripción que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=LStkmcnFTCg"
+    },
+    {
+      "id": "arathi-goshek",
+      "nombre": "Granja de Go'Shek (Alianza)",
+      "tipo": "farmeo", "nivel": 35, "nivel_minimo": 33, "zona": "Tierras Altas de Arathi, granja de Go'Shek",
+      "objetos": ["Silk Cloth", "Wool Cloth"],
+      "por_hora": [{"objeto": "Silk Cloth", "cantidad": 25}, {"objeto": "Wool Cloth", "cantidad": 15}], "oro_hora": 3.5,
+      "punto": {"mapa": 1417, "x": 61, "y": 57}, "bichos": ["Peón Sentencia", "Bruto Sentencia"],
+      "notas": "Para la Alianza: la granja está llena de peones orcos que reaparecen rápido, con oro suelto y tela. Los magos la farmeaban mucho en Classic; hoy menos, pero sigue habiendo gente. Estimado por hora: unos 130 bichos.",
+      "fuente": "YouTube, top 5 para la montura de 40 (transcripción que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=LStkmcnFTCg"
     },
     {
       "id": "inhospitas-elementales",
@@ -216,8 +343,8 @@
       "objetos": ["Elemental Earth", "Solid Stone", "Deeprock Salt"],
       "por_hora": [{"objeto": "Elemental Earth", "cantidad": 15}], "oro_hora": 5,
       "punto": {"mapa": 1418}, "bichos": ["Elemental de piedra"],
-      "notas": "Oro de vendedor con los grises que sueltan (pieza de piedra dentada y similares), más piedra sólida, sal de roca, elemental de tierra y alguna verde, azul o épica. Studen lo ha medido en Forever: unos 10 o/h contando todo, con mago de Escarcha y casi sin competencia; el oro_hora de aquí es solo lo de vendedor, más prudente. Hay cuatro sitios según el nivel y la gente que haya: elementales de piedra inferiores (37-39) en el norte de la zona, elementales de piedra (39-40) más al norte o al sur, elementales de piedra mayores (42-44) en la esquina suroeste y enfurecidos (42-43) en el sur. «Elemental de piedra» los selecciona a todos. La sal de roca es la que pide el Salero (ver ese método). Estimado por hora: unos 110 elementales.",
-      "fuente": "Guía de Studen v1.1; Studen, YouTube", "fecha": "2026-11-11",
+      "notas": "Oro de vendedor con los grises que sueltan (pieza de piedra dentada y similares), más piedra sólida, sal de roca, elemental de tierra y alguna verde, azul o épica. Studen lo ha medido en Forever: unos 10 o/h contando todo, con mago de Escarcha y casi sin competencia; el oro_hora de aquí es solo lo de vendedor, más prudente. Hay cuatro sitios según el nivel y la gente que haya: elementales de piedra inferiores (37-39) en el norte de la zona, elementales de piedra (39-40) más al norte o al sur, elementales de piedra mayores (42-44) en la esquina suroeste y enfurecidos (42-43) en el sur. «Elemental de piedra» los selecciona a todos. La sal de roca es la que pide el Salero (ver ese método). Hotfix del 13-11-2026: hay más elementales de piedra inferiores; un vídeo del 15-11 (https://www.youtube.com/watch?v=rQuvT137PLo) lo pone entre lo mejor en oro de vendedor puro, con el único problema de la gente. Otro vídeo (top 5 para la montura de 40, https://www.youtube.com/watch?v=LStkmcnFTCg) añade: vendedores en Kargath (Horda) y en los campamentos goblin del centro (Alianza); los ogros Rotapolvo del suroeste también son buen farmeo; el elemental de tierra sale barato al principio pero sube mucho cuando la gente hace bandas (piedras de afilar, pociones de protección contra la Naturaleza), así que vale la pena guardarlo; y la zona está llena de hierro, mitril y algo de oro en las cuevas. Estimado por hora: unos 110 elementales.",
+      "fuente": "Guía de Studen v1.1; Studen, YouTube; vídeo de la montura de 40 (2026-11-15); YouTube, top 5 para la montura de 40", "fecha": "2026-11-18",
       "enlace": "https://www.youtube.com/watch?v=KH2HykcO6aI"
     },
     {
@@ -230,6 +357,64 @@
       "punto": {"mapa": 2548},
       "notas": "Zona nueva. Los «Wildplains Patriarch» reaparecen rápido, se desuellan y sueltan grises que paga muy bien el vendedor (7-8 platas cada uno). Están al sureste de Rog'mar, entre la posada y las rocas del sur. Estimado por hora: unos 150 bichos; el cuero, solo con Desollar.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-11-09"
+    },
+    {
+      "id": "clarofluvial-lobos",
+      "nombre": "Lobos de Clarofluvial",
+      "tipo": "farmeo", "nivel": 37, "zona": "Clarofluvial",
+      "mejor_con": [393],
+      "objetos": ["Soft Bushy Tail", "Thick Furry Mane", "Red Wolf Meat", "Heavy Leather"],
+      "por_hora": [{"objeto": "Soft Bushy Tail", "cantidad": 40}, {"objeto": "Thick Furry Mane", "cantidad": 30}, {"objeto": "Red Wolf Meat", "cantidad": 40}, {"objeto": "Heavy Leather", "cantidad": 50}], "oro_hora": 2.5,
+      "punto": {"mapa": 2548}, "bichos": ["Coyote de las llanuras"],
+      "notas": "El segundo sitio de Clarofluvial de la guía, distinto del de los patriarcas: los coyotes de la cueva de la misión del lobo con nombre, junto a Wheeler's Grange, y los grupos de al lado de la entrada (hacia Farholde Keep). Por las misiones reaparecen al momento: cuanto más rápido matas, más rápido salen, así que no hay que esperar. Lo que más da son los grises de vendedor (cola tupida suave a 7 platas 45, melena espesa; en la subasta solo compensan en la Feria de la Luna Negra) y algún verde; la carne de lobo roja se vende en la subasta y el cuero, solo con Desollar. Studen lo recomienda para juntar el oro de la montura antes del 40. Questie aún no tiene Clarofluvial: el addon apunta dónde los matas. Estimado por hora: unos 180 coyotes.",
+      "fuente": "Guía de Studen v1.5; Studen, YouTube (2026-11-18)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=YN6IjrUk-tg"
+    },
+    {
+      "id": "pantano-jaguares",
+      "nombre": "Jaguares del pantano",
+      "tipo": "farmeo", "nivel": 36, "nivel_minimo": 35, "zona": "Pantano de las Penas",
+      "mejor_con": [393],
+      "objetos": ["Long Soft Tail", "Heavy Leather"],
+      "por_hora": [{"objeto": "Long Soft Tail", "cantidad": 90}, {"objeto": "Heavy Leather", "cantidad": 50}], "oro_hora": 0.5,
+      "punto": {"mapa": 1435}, "bichos": ["Jaguar del pantano"],
+      "notas": "Casi todos sueltan una cola larga y suave, que el vendedor paga a más de 8 platas: es oro de vendedor puro, sin depender de la subasta. Con Desollar, además, cuero. Estimado por hora: unos 100 jaguares; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.2", "fecha": "2026-11-16"
+    },
+    {
+      "id": "pantano-fauna",
+      "nombre": "Fauna del Pantano de las Penas con Botánica",
+      "tipo": "farmeo", "nivel": 38, "nivel_minimo": 36, "zona": "Pantano de las Penas",
+      "mejor_con": [182, 393],
+      "objetos": ["Long Soft Tail", "Heavy Leather", "Small Flame Sac", "Goldthorn", "Liferoot", "Kingsblood", "Blindweed"],
+      "por_hora": [{"objeto": "Long Soft Tail", "cantidad": 40}, {"objeto": "Heavy Leather", "cantidad": 30}, {"objeto": "Small Flame Sac", "cantidad": 2}, {"objeto": "Goldthorn", "cantidad": 10}, {"objeto": "Liferoot", "cantidad": 8}, {"objeto": "Kingsblood", "cantidad": 8}, {"objeto": "Blindweed", "cantidad": 10}], "oro_hora": 2,
+      "punto": {"mapa": 1435}, "bichos": ["Jaguar del pantano", "Girapenas", "Crocolisto Denteserra", "Tarántula Golpemortal", "Cría adolescente", "Cría dormida", "Caminalodo", "Viejo caminalodo"],
+      "notas": "Todo el pantano a la vez: jaguares, cocodrilos y arañas con buen botín (las arañas, además, seda) mientras recoges hierbas. Según el vídeo, con Botánica se sube de 180 a 300 casi solo aquí: espina de oro por los bordes, raíz de vida en el centro, sangrerregia y, al final, carolina, que sirve para pociones de protección contra las Sombras. Dos desvíos: las crías del oeste (pocas, pero mueren rápido y sueltan glándula de llamas pequeña, la del chili de aliento de dragón) y los caminalodos del noroeste, que casi no tienen armadura, sueltan hierbas y tienen muchas hierbas alrededor. Con Desollar, todo se desuella. Vendedores en Rocal (Horda; venden pociones de curación superiores). Cuidado: las tarántulas Golpemortal tienen un golpe que ejecuta, y la Alianza tiene guardias de Rocal patrullando. Solo los jaguares: «Jaguares del pantano». Estimado por hora: unos 100 bichos; las hierbas y el cuero, solo con su profesión.",
+      "fuente": "YouTube, top 5 para la montura de 40 (transcripción que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=LStkmcnFTCg"
+    },
+    {
+      "id": "alterac-ogros",
+      "nombre": "Cuevas de los ogros Aplastacresta",
+      "tipo": "farmeo", "nivel": 37, "nivel_minimo": 34, "zona": "Montañas de Alterac, junto al Bastión Aplastacresta",
+      "mejor_con": [186],
+      "objetos": ["Silk Cloth", "Iron Ore", "Mithril Ore", "Gold Ore", "Truesilver Ore"],
+      "por_hora": [{"objeto": "Silk Cloth", "cantidad": 20}, {"objeto": "Iron Ore", "cantidad": 15}, {"objeto": "Mithril Ore", "cantidad": 15}, {"objeto": "Gold Ore", "cantidad": 1}, {"objeto": "Truesilver Ore", "cantidad": 1}], "oro_hora": 3.5,
+      "punto": {"mapa": 1416}, "bichos": ["Ogro Aplastacresta", "Tosco Aplastacresta", "Destructor Aplastacresta", "Asaltador Aplastacresta"],
+      "notas": "Junto al bastión de élites de los ogros hay ogros normales y dos cuevas, una al norte y otra al sur, con muchísimas vetas entre ellas: hierro, mitril, veraplata y oro, de modo que se puede subir Minería casi hasta el torio. Los ogros tienen buen botín y hay raros que sueltan azules (BoE); también hay un yeti raro algo al oeste. Hay un vendedor gnomo en una jaula para vaciar las bolsas. Si te cansas, al norte están las tortugas del lago (ver «Tortugas Quijaforte en la orilla del lago») y raíz de vida por la orilla. Questie da varios campamentos de ogros: el mapa los enseña. Estimado por hora: unos 110 ogros; el mineral, solo con Minería.",
+      "fuente": "YouTube, top 5 para la montura de 40 (transcripción que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=LStkmcnFTCg"
+    },
+    {
+      "id": "revolcafango-niebla-negra",
+      "nombre": "Arañas de la Caverna Niebla Negra",
+      "tipo": "farmeo", "nivel": 38, "nivel_minimo": 35, "zona": "Marjal Revolcafango, Caverna Niebla Negra",
+      "objetos": ["Thick Spider's Silk", "Shadow Silk"],
+      "por_hora": [{"objeto": "Thick Spider's Silk", "cantidad": 12}, {"objeto": "Shadow Silk", "cantidad": 4}], "oro_hora": 4,
+      "punto": {"mapa": 1445, "x": 32, "y": 22}, "bichos": ["Araña Niebla Negra", "Ermitaña Niebla Negra", "Rondadora Niebla Negra", "Virasedal Niebla Negra", "Viuda Niebla Negra"],
+      "notas": "Muchísimas arañas, con poca armadura y poca vida, que mueren en grupo. Sueltan grises que se apilan y paga bien el vendedor (mandíbulas y puntas de pata de araña) y seda gruesa de araña y seda de las Sombras, que piden la costura (el conjunto de tejido de sombra, el cinturón de araña) y sirven para subir profesiones. Hay muchas fuera de la cueva; si se acaban, entra. Dentro aparece una rara que suelta un objeto BoE. Vendedor en el poblado Horda de al lado (Aldea Brackenwall). Estimado por hora: unas 150 arañas.",
+      "fuente": "YouTube, top 5 para la montura de 40 (transcripción que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=LStkmcnFTCg"
     },
     {
       "id": "cableado-fundido",
@@ -267,12 +452,14 @@
     {
       "id": "tanaris-tortugas",
       "nombre": "Tortugas de la playa",
-      "tipo": "farmeo", "nivel": 42, "zona": "Tanaris",
-      "objetos": ["Speckled Shell Fragment", "Big-mouth Clam"],
-      "por_hora": [{"objeto": "Speckled Shell Fragment", "cantidad": 55}], "oro_hora": 1,
-      "punto": {"mapa": 1446}, "bichos": ["Planoleador"],
-      "notas": "Oro de vendedor; el autor lo combina con la pesca de cajas de la misma costa. Sueltan además almejas de boca grande, cuya carne piden los cocineros para pasar a artesano (ver «Huevos gigantes y carne de almeja»). Estimado por hora: unas 110 tortugas.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+      "tipo": "farmeo", "nivel": 46, "nivel_minimo": 42, "zona": "Tanaris, costa sureste (Southbreak Shore)",
+      "mejor_con": [393, 356],
+      "objetos": ["Speckled Shell Fragment", "Big-mouth Clam", "Black Pearl", "Golden Pearl", "Iridescent Pearl", "Zesty Clam Meat", "Turtle Meat", "Turtle Scale", "Thick Leather", "Rugged Leather"],
+      "por_hora": [{"objeto": "Black Pearl", "cantidad": 3.5}, {"objeto": "Golden Pearl", "cantidad": 0.7}, {"objeto": "Iridescent Pearl", "cantidad": 1.5}, {"objeto": "Zesty Clam Meat", "cantidad": 25}, {"objeto": "Turtle Meat", "cantidad": 15}, {"objeto": "Turtle Scale", "cantidad": 30}, {"objeto": "Thick Leather", "cantidad": 20}, {"objeto": "Rugged Leather", "cantidad": 15}], "oro_hora": 7.5,
+      "punto": {"mapa": 1446, "x": 66, "y": 60}, "bichos": ["Planoleador"],
+      "notas": "Los Planoleadores (nivel 48-50) son bestias: no sueltan monedas, pero sí mucha basura gris, sobre todo fragmentos de concha moteada (pilas de 5, el vendedor paga 9 platas cada uno). En el vídeo, un tercio de lo ganado fue basura: unos 10 oros de grises en 1 h 20. Sueltan además carne de tortuga (la piden misiones y se vende en la subasta) y almejas de boca grande: en 53 minutos sacó unas 30, y al abrirlas, en toda la sesión, 5 perlas negras, 1 de oro y 2 iridiscentes, además de carne de almeja sabrosa (se vende mal, ~50 cobre; los cocineros la usan para pasar a artesano, ver «Huevos gigantes y carne de almeja»). La perla de oro la paga el vendedor a 1 oro y en la subasta iba de 2,7 a 5 oros; dice que si la ves por debajo de 2 oros vale la pena guardarla, porque subirá cuando salga el encantamiento de +30 de poder con hechizos para armas. Con Desollar: escama de tortuga, cuero grueso y algo de cuero basto (una pila en algo más de una hora). Las perlas y la carne de almeja ya cuentan las almejas abiertas (por eso no van en por hora). Pesca: por toda la costa flotan restos de naufragio que dan bolsas grandes, tela rúnica y verdes; dice que habría sacado 10-20 oros más pescándolos. Cuidado con los gigantes de la zona: te ven desde más lejos que las tortugas; si te persigue uno, huye. Sacó unos 55 oros en 1 h 20 con Desollar y Minería, unos 25 000 de experiencia por hora, sin nadie más en la zona; sin profesiones calcula unos 20 oros por hora. Hay otro grupo de tortugas más escondido, más al sur (hacia 52,90). Vende las cosas por la mañana: por la noche la subasta se llena y bajan los precios. Estimado por hora: unas 110 tortugas, un fragmento cada 2 y una almeja cada 3.",
+      "fuente": "Guía de Studen v1.1; YouTube (transcripción que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=PNahv3ESiGQ"
     },
     {
       "id": "tanaris-errantes",
@@ -283,6 +470,16 @@
       "punto": {"mapa": 1446}, "bichos": ["Ladrón Deambulador", "Bandido Deambulador", "Mago oscuro Deambulador", "Pícaro Deambulador", "Asesino Deambulador"],
       "notas": "La bolsa de agua es para una misión repetible que usa mucha gente para subir alters. Estimado por hora: unos 110 bandidos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+    },
+    {
+      "id": "tanaris-huesos",
+      "nombre": "Montones de huesos con rocs de fuego e hienas",
+      "tipo": "farmeo", "nivel": 45, "zona": "Tanaris",
+      "objetos": ["Giant Egg"],
+      "por_hora": [{"objeto": "Giant Egg", "cantidad": 12}], "oro_hora": 5,
+      "punto": {"mapa": 1446}, "bichos": ["Roc de fuego", "Hiena Llagapata"],
+      "notas": "Tres montones de huesos llenos de rocs de fuego e hienas que reaparecen muchísimo y se juntan bien para matarlos en área. Grises de vendedor y huevos gigantes, que piden los cocineros para pasar a artesano (ver «Huevos gigantes y carne de almeja»). La guía marca los tres montones en un mapa (V1.5, pág. 72): el mapa del addon pinta todos los rocs e hienas de Tanaris. Estimado por hora: unos 150 bichos.",
+      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
     },
     {
       "id": "tuercespina-sur",
@@ -296,13 +493,38 @@
     },
     {
       "id": "feralas-ciervos",
-      "nombre": "Ciervos alados Plumagris",
+      "nombre": "Alacervos Rozapluma",
       "tipo": "farmeo", "nivel": 45, "zona": "Feralas",
-      "objetos": [],
-      "oro_hora": 6,
-      "punto": {"mapa": 1444}, "bichos": ["Alacervo Plumavieja"],
-      "notas": "Fáciles de matar, reaparecen muy rápido y sueltan muchos grises para el vendedor. Estimado por hora: unos 150 ciervos; solo grises para el vendedor.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+      "mejor_con": [393],
+      "objetos": ["Vibrant Plume", "Thick Leather"],
+      "por_hora": [{"objeto": "Vibrant Plume", "cantidad": 25}, {"objeto": "Thick Leather", "cantidad": 90}], "oro_hora": 5,
+      "punto": {"mapa": 1444}, "bichos": ["Alacervo Rozapluma"],
+      "notas": "Oro de vendedor puro: fáciles de matar y reaparecen muy rápido porque hay misiones que piden lo que sueltan. Están por toda la parte sur de Feralas. Los grises que se buscan: pico afilado (8 platas al vendedor), pico amarillo curvo (casi 7) y hueso hueco de ala (6); además la pluma vibrante (8 platas al vendedor; durante la Feria de la Luna Negra puede valer más en la subasta). Con Desollar, cuero de más, y alguna verde, azul o hasta épica. Estimado por hora: unos 150 ciervos, pluma en uno de cada seis; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.1; Studen, YouTube (transcripción que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=DHhcrvvyweQ"
+    },
+    {
+      "id": "feralas-gorilas-osos",
+      "nombre": "Gorilas y osos del norte de Feralas",
+      "tipo": "farmeo", "nivel": 48, "zona": "Feralas",
+      "mejor_con": [393],
+      "objetos": ["Thick Leather"],
+      "por_hora": [{"objeto": "Thick Leather", "cantidad": 40}], "oro_hora": 6,
+      "punto": {"mapa": 1444, "x": 45, "y": 23}, "bichos": ["Tronador Groddoc", "Patriarca Cueracero"],
+      "notas": "Sueltan muchísimos grises distintos que el vendedor paga bien, y con Desollar se gana más. La guía solo lo marca en un mapa (V1.5, pág. 70); por el nivel creo que son los gorilas Groddoc y los osos Cueracero del norte (hacia 45,23): si en el juego es otro sitio, avísame. Estimado por hora: unos 130 bichos; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
+    },
+    {
+      "id": "azshara-hipogrifos",
+      "nombre": "Hipogrifos Tronatesta del oeste de Azshara",
+      "tipo": "farmeo", "nivel": 50, "nivel_minimo": 47, "zona": "Azshara (oeste, junto a Punta Talrendis)",
+      "mejor_con": [393],
+      "objetos": ["Long Elegant Feather", "Thick Leather", "Rugged Leather", "Stag Meat"],
+      "por_hora": [{"objeto": "Long Elegant Feather", "cantidad": 25}, {"objeto": "Thick Leather", "cantidad": 90}, {"objeto": "Rugged Leather", "cantidad": 10}, {"objeto": "Stag Meat", "cantidad": 8}], "oro_hora": 8,
+      "punto": {"mapa": 1447, "x": 18, "y": 55}, "bichos": ["Hipogrifo Tronatesta", "Corredor Pezuñamusgo"],
+      "notas": "Hipogrifos de nivel 46-48 en grupos por la zona: se va de un grupo a otro sin parar. Vale cualquier clase, aunque él lo hace con mago y AoE. Lo bueno es la pluma elegante larga (la vio a unas 38 platas en la subasta); también cae la pluma de hipogrifo sin estropear, que es de misión y no se vende, grises y alguna verde. Mete en los grupos a los ciervos Pezuñamusgo que haya cerca: carne de ciervo y más cuero. Con Desollar rinde bastante más (cuero grueso y algo de basto), pero se gana sin él. Cuidado con un élite de nivel alto que patrulla. Hay vendedor y reparación en el campamento de la Alianza (Punta Talrendis); la Horda lo tiene lejos. Truco de Alianza antes del 60: pon la piedra de hogar en Azshara, ve a Ventormenta a por el bufo de mundo «Poderío de Ventormenta» (celeridad y regeneración de maná, 1 h, se mantiene al morir) y vuelve con la piedra. Si hay mucha gente, cambia de capa (addon LayerSwap). De paso se sube nivel: medio nivel en su prueba. El vídeo da 50-60 o/h con mago y AoE en una prueba de 20 minutos; lo de aquí es para una clase normal. Estimado por hora: unos 130 bichos, pluma en uno de cada cinco; el cuero, solo con Desollar.",
+      "fuente": "Ozerborn, YouTube (transcripción que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=GBTeH_H9qh4"
     },
     {
       "id": "tierras-devastadas",
@@ -343,7 +565,7 @@
       "objetos": ["Iridescent Pearl"],
       "por_hora": [{"objeto": "Iridescent Pearl", "cantidad": 2.5}], "oro_hora": 2.5,
       "punto": {"mapa": 1437}, "bichos": ["Múrloc Branquiazul", "Saltacharco Branquiazul", "Batidor Branquiazul", "Habitabosta Branquiazul", "Guerrero Branquiazul", "Oráculo Branquiazul", "Asaltante Branquiazul"],
-      "notas": "Ahora sirven: varias recetas nuevas de Peletería ligadas al recogerlas piden bastantes. Bajarán hacia el final, porque las piden sobre todo los que suben. Estimado por hora: unos 120 múrlocs.",
+      "notas": "Ahora sirven: varias recetas nuevas de Peletería ligadas al recogerlas piden bastantes. Bajarán hacia el final, porque las piden sobre todo los que suben. Ya ha pasado: según un vídeo del 15-11-2026 (https://www.youtube.com/watch?v=rQuvT137PLo), en su servidor bajaron de 1 oro (9-11) a 8 platas (13-11), casi lo que paga el vendedor (7,5 platas). Mira tus precios antes de farmearlas. Estimado por hora: unos 120 múrlocs.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
@@ -451,12 +673,12 @@
     {
       "id": "tela-vil",
       "nombre": "Sátiros (tela vil)",
-      "tipo": "farmeo", "nivel": 50, "zona": "Azshara (tres campamentos) o Frondavil",
+      "tipo": "farmeo", "nivel": 50, "zona": "Frondavil o Azshara",
       "objetos": ["Felcloth", "Runecloth", "Mageweave Cloth"],
       "por_hora": [{"objeto": "Felcloth", "cantidad": 3}, {"objeto": "Runecloth", "cantidad": 30}, {"objeto": "Mageweave Cloth", "cantidad": 10}], "oro_hora": 13,
-      "punto": {"mapa": 1447}, "bichos": ["Sátiro Legashi", "Pícaro Legashi", "Clamainferno Legashi"],
-      "notas": "En Frondavil la zona buena es la más disputada; algunos dan tejido mágico en vez de tela rúnica. Estimado por hora: unos 110 sátiros.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+      "punto": {"mapa": 1448}, "bichos": ["Sátiro Fuego de Jade", "Pícaro Fuego de Jade", "Jurapenas Fuego de Jade", "Acechasombras Fuego de Jade", "Timador Fuego de Jade", "Traidor Fuego de Jade", "Clamainferno Fuego de Jade", "Sátiro Legashi", "Pícaro Legashi", "Clamainferno Legashi"],
+      "notas": "En Frondavil la zona buena es la más disputada; algunos dan tejido mágico en vez de tela rúnica. En Azshara ha cambiado (guía V1.2): los tres campamentos de antes están vacíos y los sátiros están ahora en otra zona, con el mismo botín y buena reaparición; el mapa del addon aún los pinta en los campamentos viejos, así que de momento la flecha lleva a Frondavil. Estimado por hora: unos 110 sátiros.",
+      "fuente": "Guía de Studen v1.1 y v1.2", "fecha": "2026-11-16"
     },
     {
       "id": "formula-fuerza-superior",
@@ -509,6 +731,61 @@
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
     },
     {
+      "id": "ungoro-ravasaurios",
+      "nombre": "Raptores ravasaurio",
+      "tipo": "farmeo", "nivel": 50, "zona": "Cráter de Un'Goro",
+      "mejor_con": [393],
+      "objetos": ["Pristine Raptor Skull", "Elder Raptor Feathers", "Tribal Raptor Feathers", "Thick Leather", "Rugged Leather"],
+      "por_hora": [{"objeto": "Pristine Raptor Skull", "cantidad": 10}, {"objeto": "Elder Raptor Feathers", "cantidad": 8}, {"objeto": "Tribal Raptor Feathers", "cantidad": 15}, {"objeto": "Thick Leather", "cantidad": 30}, {"objeto": "Rugged Leather", "cantidad": 6}], "oro_hora": 3,
+      "punto": {"mapa": 1449}, "bichos": ["Ravasaurio", "Corredor Ravasaurio", "Cazador ravasaurio"],
+      "notas": "Sueltan grises caros para el vendedor: calavera de raptor prístino (9 platas), plumas de raptor viejo (16,58) y plumas de raptor tribales (8). Además se desuellan. Están en el sureste del cráter. Estimado por hora: unos 120 raptores; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
+    },
+    {
+      "id": "peste-este-bestias",
+      "nombre": "Bestias del sur de las Tierras de la Peste del Este",
+      "tipo": "farmeo", "nivel": 52, "zona": "Tierras de la Peste del Este",
+      "mejor_con": [393],
+      "objetos": ["Evil Bat Eye", "Rugged Leather", "Thick Leather"],
+      "por_hora": [{"objeto": "Evil Bat Eye", "cantidad": 10}, {"objeto": "Rugged Leather", "cantidad": 20}, {"objeto": "Thick Leather", "cantidad": 10}], "oro_hora": 6,
+      "punto": {"mapa": 1423}, "bichos": ["Murcipeste", "Cachorro de can de peste", "Can de peste"],
+      "notas": "Todas las bestias del sur de la zona sueltan buenos grises de vendedor. Céntrate en los murciélagos: dan lo que más vale, como el ojo de murciélago malvado (20 platas al vendedor, o más en la subasta porque se entrega en la Feria de la Luna Negra). Con Desollar, más oro. Estimado por hora: unas 120 bestias; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
+    },
+    {
+      "id": "estepas-dragonantes",
+      "nombre": "Dragonantes negros (escamas de dragón negro)",
+      "tipo": "farmeo", "nivel": 55, "zona": "Las Estepas Ardientes",
+      "mejor_con": [393],
+      "objetos": ["Black Dragonscale", "Rugged Leather", "Thick Leather"],
+      "por_hora": [{"objeto": "Black Dragonscale", "cantidad": 8}, {"objeto": "Rugged Leather", "cantidad": 15}, {"objeto": "Thick Leather", "cantidad": 15}], "oro_hora": 6,
+      "punto": {"mapa": 1428}, "bichos": ["Estirpe negra", "Dragauro negro", "Vermis negro", "Draco negro"],
+      "notas": "Cualquier dragonante de Las Estepas Ardientes se desuella y da escamas de dragón negro, además de cuero grueso y basto. Los élites sueltan hasta 22 platas cada uno. Las escamas las piden la cadena de la montura de brujo a nivel 60 y varias recetas. Estimado por hora: unos 70 dragonantes (muchos son élites); las escamas y el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
+    },
+    {
+      "id": "cuna-sables",
+      "nombre": "Sables de hielo de Cuna del Invierno",
+      "tipo": "farmeo", "nivel": 56, "zona": "Cuna del Invierno",
+      "mejor_con": [393],
+      "objetos": ["Frostsaber Leather", "Rugged Leather", "Thick Leather"],
+      "por_hora": [{"objeto": "Frostsaber Leather", "cantidad": 4}, {"objeto": "Rugged Leather", "cantidad": 25}, {"objeto": "Thick Leather", "cantidad": 10}], "oro_hora": 7,
+      "punto": {"mapa": 1452, "x": 52, "y": 14}, "bichos": ["Cachorro sable de hielo", "Sable de Hielo", "Cazadora Sable de Hielo", "Acechador Sable de Hielo"],
+      "notas": "Un sitio lleno de sables de hielo: sueltan muchos grises que el vendedor paga bien y se desuellan (cuero basto y grueso, y cuero Sable de Hielo). Estimado por hora: unos 120 sables; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
+    },
+    {
+      "id": "hyjal-receta-alquimia",
+      "nombre": "Receta nueva de Alquimia de los guardias viles de Hyjal",
+      "tipo": "farmeo", "nivel": 59, "nivel_minimo": 58, "zona": "Monte Hyjal, al norte de Dae'Gun",
+      "objetos": ["Recipe: Transmute Legionite", "Runecloth", "Felcloth", "Demonic Rune"],
+      "por_hora": [{"objeto": "Recipe: Transmute Legionite", "cantidad": 1.2}, {"objeto": "Runecloth", "cantidad": 20}, {"objeto": "Felcloth", "cantidad": 4.5}, {"objeto": "Demonic Rune", "cantidad": 9.5}], "oro_hora": 6,
+      "punto": {"mapa": 2482, "x": 52, "y": 35}, "bichos": ["Felguard Sentinel"],
+      "notas": "Los «Felguard Sentinel» (nivel 58-59, sin traducir en el juego) del norte de Dae'Gun sueltan la receta de Transmutar: legionita, que se puede comerciar (ver «Transmutaciones»). Según Wowhead, la receta cae en un 1,4 % y además dan tela rúnica (22 %), runas demoníacas (11 %) y tela vil (5 %). Questie aún no tiene Hyjal: el addon apunta dónde los matas. Estimado por hora: unos 85 guardias; la receta, algo más de una por hora.",
+      "enlace": "https://www.wowhead.com/forever/npc=249229/felguard-sentinel",
+      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
+    },
+    {
       "id": "ungoro-mocos",
       "nombre": "Mocos de Un'Goro",
       "tipo": "farmeo", "nivel": 50, "zona": "Cráter de Un'Goro",
@@ -517,6 +794,18 @@
       "punto": {"mapa": 1449}, "bichos": ["Moco"],
       "notas": "El patrón se vende en la subasta y la bolsa puede traer una mascota. Estimado por hora: unos 110 mocos.",
       "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+    },
+    {
+      "id": "ungoro-cristales",
+      "nombre": "Cristales de poder y tierra de Un'Goro",
+      "tipo": "farmeo", "nivel": 50, "nivel_minimo": 48, "zona": "Cráter de Un'Goro",
+      "mejor_con": [393, 186],
+      "objetos": ["Red Power Crystal", "Blue Power Crystal", "Green Power Crystal", "Yellow Power Crystal", "Un'Goro Soil", "Devilsaur Leather"],
+      "por_hora": [{"objeto": "Red Power Crystal", "cantidad": 30}, {"objeto": "Blue Power Crystal", "cantidad": 30}, {"objeto": "Green Power Crystal", "cantidad": 30}, {"objeto": "Yellow Power Crystal", "cantidad": 30}, {"objeto": "Un'Goro Soil", "cantidad": 30}, {"objeto": "Devilsaur Leather", "cantidad": 2}],
+      "punto": {"mapa": 1449}, "nodos": ["Cristal de poder", "Montón de porquería de Un'Goro"],
+      "notas": "No hay que matar nada: se recorre el cráter con montura recogiendo cristales de poder y montones de tierra. Vale para cualquier clase y sin profesiones; el nivel 50 es para moverse tranquilo por la zona. Los cristales se venden porque mucha gente los compra en vez de buscarlos: hacen falta 7 de cada color para la misión de Un'Goro que abre otras tres (la guía de RestedXP manda comprarlos), en Forever 15 de cada color para invocar jefes en la mazmorra nueva de Un'Goro (también caen dentro, pero la gente va preparada) y luego se entregan a cambio de bufos. En el vídeo sacó 19 oros en 20 minutos (unos 57 oros/h) solo con cristales y tierra, en un reino PvE de la UE; en tu reino los cristales y la tierra van a unas 3-7 platas, así que aquí rinde mucho menos: que lo valore el motor con tus precios. Con Desollar: desuella los gorilas muertos dentro y fuera de la cueva del norte (mucha gente hace allí su misión y no los desuella) y los demosaurios muertos que encuentres; el cuero de demosaurio ha bajado porque ahora da varios por desuello y cae en la mazmorra. Con Minería, recoge las vetas de paso. No vayas a Un'Goro solo para esto, que el viaje se come la hora: hazlo cuando ya estés allí (subiendo, en la mazmorra o en los diarios de nivel 60) y guarda los cristales que te sobren de las misiones. Estimado por hora: unos 120 cristales entre los cuatro colores y 30 de tierra; el cuero, solo con Desollar.",
+      "fuente": "YouTube (vídeo que pasó Piti)", "fecha": "2026-11-18",
+      "enlace": "https://www.youtube.com/watch?v=hM2LSIsAURU"
     },
     {
       "id": "rutas-60",
@@ -710,7 +999,7 @@
       "nombre": "Transmutaciones de Alquimia",
       "tipo": "crafteo",
       "objetos": ["Arcanite Bar", "Legionite Bar", "Essence of Fire", "Essence of Earth", "Essence of Water", "Essence of Air", "Living Essence", "Essence of Undeath"],
-      "notas": "Tienen espera y comparten la misma: una transmutación por personaje cada vez. Por eso compensa tener varios personajes con Alquimia. Forever añade Transmutar: legionita (1 barra de torio pesado y 1 cristal vil, Alquimia 275, nivel 35), con 2 días de espera como la arcanita (47 h en el cliente). Kaychak lo deja como duda, pero las tablas del cliente les dan la misma categoría de espera: cada 2 días eliges una de las dos. A Kaychak no le preocupa, porque así llegan menos barras de cada una a la subasta y aguanta el precio. La legionita la piden sobre todo piezas de nivel 60 ligadas al equipar de Herrería e Ingeniería (12 los Quijotes de campeón y el Yelmo incondicional). Sin resolver: ni Merchant Map ni Wowhead dicen aún dónde se consigue la receta ni de dónde sale el cristal vil (cabe en bolsa de minería, así que seguramente se mine). La barra de torio pesado se funde con Minería 300 y, según guías de la beta, su mineral sale en Monte Hyjal: no cuentes con la legionita al principio. La arcanita (lingote de torio y cristal arcano, con la receta de Alchemist Pestlezugg) la piden 88 recetas, 16 de ellas épicos que se ligan al equipar; la legionita, 22 recetas y 12 épicos. CJ Mann pone las dos entre los mejores ingresos pasivos.",
+      "notas": "Tienen espera y comparten la misma: una transmutación por personaje cada vez. Por eso compensa tener varios personajes con Alquimia. Forever añade Transmutar: legionita (1 barra de torio pesado y 1 cristal vil, Alquimia 275, nivel 35), con 2 días de espera como la arcanita (47 h en el cliente). Kaychak lo deja como duda, pero las tablas del cliente les dan la misma categoría de espera: cada 2 días eliges una de las dos. A Kaychak no le preocupa, porque así llegan menos barras de cada una a la subasta y aguanta el precio. La legionita la piden sobre todo piezas de nivel 60 ligadas al equipar de Herrería e Ingeniería (12 los Quijotes de campeón y el Yelmo incondicional). La guía de Studen V1.5 dice que los guardias viles de Monte Hyjal («Felguard Sentinel», al norte de Dae'Gun) sueltan la receta, que se puede comerciar, en un 1,4 % (ver «Receta nueva de Alquimia de los guardias viles de Hyjal»). Sin resolver: de dónde sale el cristal vil (cabe en bolsa de minería, así que seguramente se mine). La barra de torio pesado se funde con Minería 300 y, según guías de la beta, su mineral sale en Monte Hyjal: no cuentes con la legionita al principio. La arcanita (lingote de torio y cristal arcano, con la receta de Alchemist Pestlezugg) la piden 88 recetas, 16 de ellas épicos que se ligan al equipar; la legionita, 22 recetas y 12 épicos. CJ Mann pone las dos entre los mejores ingresos pasivos.",
       "fuente": "Guía de Studen v1.1; Kaychak, YouTube (2026-11-02); CJ Mann, YouTube (2026-11-03); datos del juego", "fecha": "2026-11-04",
       "enlace": "https://www.youtube.com/watch?v=o2gQOhyRTU8"
     },
@@ -720,8 +1009,8 @@
       "tipo": "crafteo",
       "profesiones": [{"id": 197, "nivel": 215}],
       "objetos": ["White Bandit Mask"],
-      "notas": "Se fabrica con tejido mágico y se vende al vendedor: oro seguro sin comisión ni esperas cuando el tejido mágico está barato. El patrón es botín del mundo.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+      "notas": "Se fabrica con tejido mágico y se vende al vendedor: oro seguro sin comisión ni esperas cuando el tejido mágico está barato. El patrón es botín del mundo. Ojo: la guía V1.5 dice que lo han nerfeado y lo quita (la V1.2 daba 43,65 platas al vendedor, con el hilo y el blanqueador a 20,22): mira cuánto paga ahora el vendedor antes de fabricarlo.",
+      "fuente": "Guía de Studen v1.1 y v1.5", "fecha": "2026-11-18"
     },
     {
       "id": "varitas-encantamiento",
@@ -729,7 +1018,7 @@
       "tipo": "crafteo",
       "profesiones": [{"id": 333, "nivel": 10}],
       "objetos": ["Lesser Magic Wand", "Greater Magic Wand"],
-      "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas. Aviso de Kaychak (31-10-2026, https://www.youtube.com/watch?v=ryub9vdTKq0): lo recomiendan muchos vídeos y en los megaservidores lo hará muchísima gente, así que te quitarán las ventas al momento y el margen será mínimo. Además, al final de la beta la subasta empezó a cobrar 1 plata de depósito por cada puesta, que pierdes si no se vende. Antes de fabricar, mira en la subasta cuántos venden y a cuánto. NERF: desde el 1 de octubre de 2026 las varitas se venden al vendedor por 1 cobre (lo avisa Ceedsy en su vídeo de cómo sacar 10 oros el primer día, que se basaba en eso: https://www.youtube.com/watch?v=NDdiw-q_-qw). Los datos del juego aún dicen 1 plata 10 la menor y 2 plata la mayor porque el cambio es del servidor: el addon apunta el precio real en cuanto ve una varita. Solo queda venderlas en la subasta. Desde el nerf, el polvo extraño y las esencias mágicas tienen otra salida: con ellos se llenan los cajones saqueados de curiosidades (ver «Cajones saqueados»), así que se venden en la subasta. CJ Mann (03-11-2026, https://www.youtube.com/watch?v=gzfLo4vBsGo) lo vuelve a proponer para el primer día: comprar lino a poco más de lo que paga el vendedor, hacer verdes, desencantarlos y fabricar varitas con madera simple de vendedor. Los 50 oros que cita son de un amigo suyo en el primer día de Classic, anunciándolas a otros jugadores: aquí solo cuenta la subasta, y él mismo avisa de que a partir del segundo día el precio cae mucho. Él habla de togas y jubones de lino marrón, pero según los datos del juego el jubón es blanco y no se puede desencantar, y la toga gasta 3 madejas donde los pantalones gastan 2: mejor pantalones.",
+      "notas": "La menor pide Encantamiento 10 y la mayor 70. Todos los lanzadores las quieren al subir. Para subir Encantamiento barato, fabrica cosas baratas con Costura o Peletería y desencántalas. Aviso de Kaychak (31-10-2026, https://www.youtube.com/watch?v=ryub9vdTKq0): lo recomiendan muchos vídeos y en los megaservidores lo hará muchísima gente, así que te quitarán las ventas al momento y el margen será mínimo. Además, al final de la beta la subasta empezó a cobrar 1 plata de depósito por cada puesta, que pierdes si no se vende. Antes de fabricar, mira en la subasta cuántos venden y a cuánto. NERF: desde el 1 de octubre de 2026 las varitas se venden al vendedor por 1 cobre (lo avisa Ceedsy en su vídeo de cómo sacar 10 oros el primer día, que se basaba en eso: https://www.youtube.com/watch?v=NDdiw-q_-qw). Los datos del juego aún dicen 1 plata 10 la menor y 2 plata la mayor porque el cambio es del servidor: el addon apunta el precio real en cuanto ve una varita. Solo queda venderlas en la subasta. Un vídeo del 15-11-2026 (https://www.youtube.com/watch?v=rQuvT137PLo) dice que la mayor se vende por «dos» (plata, se entiende) frente a 15 en Classic: sea 2 plata o 1 cobre, no compensa. En el mismo vídeo: el 10-11 la granada de hierro bajó de 5 plata a 1,25 al vendedor; antes de seguir una guía de fabricar para vender, mira su fecha. Desde el nerf, el polvo extraño y las esencias mágicas tienen otra salida: con ellos se llenan los cajones saqueados de curiosidades (ver «Cajones saqueados»), así que se venden en la subasta. CJ Mann (03-11-2026, https://www.youtube.com/watch?v=gzfLo4vBsGo) lo vuelve a proponer para el primer día: comprar lino a poco más de lo que paga el vendedor, hacer verdes, desencantarlos y fabricar varitas con madera simple de vendedor. Los 50 oros que cita son de un amigo suyo en el primer día de Classic, anunciándolas a otros jugadores: aquí solo cuenta la subasta, y él mismo avisa de que a partir del segundo día el precio cae mucho. Él habla de togas y jubones de lino marrón, pero según los datos del juego el jubón es blanco y no se puede desencantar, y la toga gasta 3 madejas donde los pantalones gastan 2: mejor pantalones.",
       "fuente": "Guía de Studen v1.1; CJ Mann, YouTube (2026-11-03)", "fecha": "2026-11-04"
     },
     {
@@ -911,9 +1200,9 @@
       "tipo": "inversion",
       "objetos": ["Shadowfang", "Feet of the Lynx", "Twisted Chanter's Staff", "Keller's Girdle", "Sanguine Sandals", "Sentry Cloak",
                   "Tigerstrike Mantle", "Cobalt Crusher", "Zealot Blade", "Staff of the Blessed Seer", "Mantle of Thieves", "Gloomshroud Armor", "Forest Tracker Epaulets", "Hotshot Pilot's Gloves",
-                  "Pendulum of Doom", "Staff of Jordan", "Krol Blade", "Bow of Searing Arrows", "Underworld Band"],
-      "notas": "Al principio están baratos porque hay poco oro. Ojo: con los cambios de equipo de Forever puede que no sean los mejores esta vez.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+                  "Staff of Jordan", "Krol Blade", "Bow of Searing Arrows", "Underworld Band"],
+      "notas": "Al principio están baratos porque hay poco oro. Ojo: con los cambios de equipo de Forever puede que no sean los mejores esta vez. El Péndulo de la Fatalidad ya no está: ahora se liga al recogerlo (guía V1.5).",
+      "fuente": "Guía de Studen v1.1 y v1.5", "fecha": "2026-11-18"
     },
     {
       "id": "patron-guanteletes-demosaurio",
