@@ -352,14 +352,17 @@ def _expected(ctx: _Context, e: CatalogEntry, resolved: dict[str, int]) -> tuple
             lines.append(f"{qty:g} {name}/h al vendedor a {format_money(vendor)}")
             continue
         s = ctx.a.signals.get(item_id)
-        cap = s.sales_per_day * MARKET_SHARE / hours_day if s is not None and s.sales_per_day else None
+        cap = s.sales_per_day * MARKET_SHARE / hours_day if s is not None and s.sales_per_day is not None else None
         to_ah = qty if cap is None else min(qty, cap)
         rest = qty - to_ah
         ah_later = p.net_of(s.forecast) if s is not None and s.forecast else ah
         now += to_ah * ah + rest * vendor
         week += to_ah * max(ah_later, vendor) + rest * vendor
         text = f"{qty:g} {name}/h a {format_money(ah)} en la subasta"
-        if rest > 0:
+        if rest > 0 and not to_ah:
+            text = (f"{qty:g} {name}/h: en la subasta no he visto vender ninguna, así que "
+                    + (f"al vendedor ({format_money(vendor)})" if vendor else "no se vende"))
+        elif rest > 0:
             text += (f"; el mercado solo se lleva unas {cap:.0f} por hora de juego, el resto "
                      + (f"al vendedor ({format_money(vendor)})" if vendor else "no se vende"))
         elif cap is None:

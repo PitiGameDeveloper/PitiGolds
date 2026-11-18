@@ -85,6 +85,13 @@ class Panel(unittest.TestCase):
         self.assertFalse(row.measured)
         self.assertTrue(any("el mercado solo se lleva unas 3 por hora" in d for d in row.details))
 
+    def test_si_no_se_vende_ninguna_va_al_vendedor(self):
+        self.signals[4304].sales_per_day = 0
+        row = self.build([self.pieles()]).farms[0]
+        self.assertEqual(row.per_hour, 2 * G + 40 * 150)
+        self.assertTrue(any("no he visto vender ninguna" in d for d in row.details))
+        self.assertFalse(any("aún no sé" in d for d in row.details))
+
     def test_lo_medido_manda_y_el_que_falta_algo_dice_que_y_cuanto(self):
         measured = FarmSummary(activity="pieles", zone="Feralas", sessions=2, hours=1.5, value_now=45 * G,
                                value_later=45 * G)

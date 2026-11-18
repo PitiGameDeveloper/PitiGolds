@@ -1,5 +1,5 @@
 -- Añade al tooltip de cada objeto lo que ha calculado el motor: precio de mercado
--- en la subasta, mediana de las últimas 36 horas y cuánto cuesta fabricarlo.
+-- en la subasta, si va a subir o bajar (flecha verde o roja) y cuánto cuesta fabricarlo.
 local ADDON, ns = ...
 
 -- Iconos de moneda del juego. GetCoinTextureString ya no es global en todos los clientes
@@ -81,7 +81,13 @@ local function StackCount(tooltip, itemID, sellTotal)
   return 1
 end
 
+-- Flechas de color (la fuente del juego no trae «↑» ni «↓»): la de las listas, teñida.
+-- |Truta:alto:ancho:x:y:anchoTextura:altoTextura:izq:der:arriba:abajo:r:g:b|t
+local ARROW_UP = "|TInterface\\Buttons\\Arrow-Up-Up:14:14:0:-2:16:16:0:16:0:16:64:255:64|t"
+local ARROW_DOWN = "|TInterface\\Buttons\\Arrow-Down-Up:14:14:0:2:16:16:0:16:0:16:255:64:64|t"
+
 -- Lo que vale el montón que tienes (no uno lleno) y, entre paréntesis, la unidad.
+
 local function PriceText(unit, count, total)
   if count > 1 then
     return ns.Money(total or unit * count) .. " |cffcccccc(" .. ns.Money(unit) .. ")|r"
@@ -164,8 +170,8 @@ local function AddLines(tooltip, itemID, sellTotal)
 
   -- "mercado,mediana,tendencia,ventas" (mediana de 36 horas; tendencia: b = baja, s = sube;
   -- ventas: unidades vendidas al día, estimadas)
-  local market, median, trend, sales
-  if price then market, median, trend, sales = price:match("^(%d*),(%d*),?(%a*),?([%d%.]*)$") end
+  local market, _, trend, sales
+  if price then market, _, trend, sales = price:match("^(%d*),(%d*),?(%a*),?([%d%.]*)$") end
   market = tonumber(market)
   -- Lo que acabas de ver en la subasta manda sobre el precio del motor.
   local seen = ns.ScanMarket and ns.ScanMarket(itemID)
@@ -187,16 +193,14 @@ local function AddLines(tooltip, itemID, sellTotal)
 
   if market then
     local right = PriceText(market, count)
-    if median ~= "" and tonumber(median) ~= market then
-      right = right .. "  |cff999999(36 horas: " .. ns.Money(median) .. ")|r"
-    end
     if sales and sales ~= "" then
       right = right .. "  |cffccccccventas/día: " .. sales .. "|r"
     end
+    -- Hacia dónde va el precio en las próximas 36 horas, según el motor.
     if trend == "b" then
-      right = right .. "  |cffff4040baja|r"
+      right = right .. " " .. ARROW_DOWN
     elseif trend == "s" then
-      right = right .. "  |cff40ff40sube|r"
+      right = right .. " " .. ARROW_UP
     end
     if auctionWins then
       tooltip:AddDoubleLine("Subasta:", right, BEST_R, BEST_G, BEST_B, 1, 1, 1)

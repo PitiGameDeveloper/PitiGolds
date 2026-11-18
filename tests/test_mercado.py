@@ -54,6 +54,30 @@ class VentasEstimadas(unittest.TestCase):
         self.assertIsNone(estimate_sales([a, b], [a.time, b.time]))
         self.assertIsNone(compute_signals([a, b], [a.time, b.time]).days_of_supply)
 
+    def test_las_busquedas_con_la_lista_entera_tambien_cuentan(self):
+        # Escaneo completo y, 6 h después, una búsqueda del objeto: faltan 6 a 100.
+        a = Point(T0, 100, 10, 1, "100:10", "full")
+        b = Point(T0 + 6 * H, 100, 4, None, "100:4", "search")
+        self.assertAlmostEqual(estimate_sales([a, b], [a.time]), 24.0)
+        # Dos búsquedas seguidas, sin escaneo completo.
+        c = Point(T0 + 12 * H, 100, 1, None, "100:1", "search")
+        self.assertAlmostEqual(estimate_sales([b, c], []), 12.0)
+
+    def test_una_busqueda_sin_lista_o_sin_el_objeto_no_es_que_se_vendiera(self):
+        a = Point(T0, 100, 10, 1, "100:10", "full")
+        b = Point(T0 + 6 * H, 100, 10, None, None, "search")   # solo el mínimo de la lista de resultados
+        self.assertIsNone(estimate_sales([a, b], [a.time]))
+
+    def test_las_ventas_miran_una_semana_y_el_precio_36_horas(self):
+        a = Point(T0, 100, 10, 1, "100:10", "full")
+        b = Point(T0 + 6 * H, 100, 4, 1, "100:4", "full")
+        later = Point(T0 + 4 * DAY, 100, 4, 1, "100:4", "browse")
+        s = compute_signals([a, b, later], [a.time, b.time])
+        self.assertAlmostEqual(s.sales_per_day, 24.0)
+        self.assertEqual(s.points, 1)   # el precio solo con las últimas 36 h
+        too_old = Point(T0 + 8 * DAY, 100, 4, 1, "100:4", "browse")
+        self.assertIsNone(compute_signals([a, b, too_old], [a.time, b.time]).sales_per_day)
+
     def test_escaneos_muy_separados_no_cuentan(self):
         a = Point(T0, 100, 10, 1, "100:10", "full")
         b = Point(T0 + 20 * H, 100, 0, 1, "", "full")

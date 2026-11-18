@@ -4,7 +4,8 @@ Todo es cálculo, sin IA. Para cada objeto se miran las últimas 36 horas (al em
 precios fluctúan mucho, así que una semana entera daría señales viejas):
   - tendencia del precio (regresión sobre el logaritmo del precio de mercado),
   - si hay cada vez más o menos unidades a la venta, y más o menos vendedores,
-  - cuántas unidades se venden al día (comparando escaneos completos seguidos),
+  - cuántas unidades se venden al día (comparando fotos seguidas de la lista de subastas: escaneos
+    completos y búsquedas que traen la lista entera; esto mira 7 días, porque cambia más despacio),
   - para cuántos días de ventas hay género («días de oferta»),
   - si el precio está por encima o por debajo de su mediana.
 Con eso se calcula un riesgo de bajada (0-100) y una previsión a 36 horas que mezcla la tendencia
@@ -31,6 +32,7 @@ MIN_POINTS = 3            # escaneos mínimos para hablar de tendencia
 MIN_SPAN_DAYS = 1.0       # y que cubran al menos un día
 MAX_PAIR_GAP_HOURS = 12   # escaneos más separados no sirven para contar ventas (las subastas caducan)
 MIN_SALES_HOURS = 6       # con menos tiempo observado, estirarlo a un día da cifras absurdas
+SALES_WINDOW_DAYS = 7     # las ventas al día cambian despacio: se miran más días que el precio
 SALE_ZONE = 1.2           # solo cuentan como vendidas las unidades hasta un 20 % sobre el precio de mercado
 DAMPING = 0.5             # la tendencia se proyecta a mitad de fuerza
 REVERSION = 0.8           # cada día se mantiene el 80 % de la distancia a la mediana
@@ -43,7 +45,7 @@ class Point:
     quantity: int
     owners: int | None
     book: str | None
-    kind: str             # full o browse
+    kind: str             # full, browse o search
 
 
 @dataclass
@@ -96,20 +98,29 @@ def _slope(xs: list[float], ys: list[float]) -> float | None:
     return fit[0] if fit else None
 
 
+def _snapshots(points: list[Point], full_scan_times: list[int]) -> list[tuple[int, Point | None]]:
+    """Fotos de la lista entera de subastas del objeto, por orden. Cada escaneo completo es una (si
+    el objeto no sale, es que no quedaba ninguno: None), y cada búsqueda que trajo su lista entera
+    también. Una búsqueda sin el objeto no dice nada: solo cuenta si lo buscaste."""
+    shots: dict[int, Point | None] = {t: None for t in full_scan_times}
+    for p in points:
+        if p.kind == "full" or (p.kind == "search" and p.book):
+            shots[p.time] = p
+    return sorted(shots.items(), key=lambda item: item[0])
+
+
 def estimate_sales(points: list[Point], full_scan_times: list[int]) -> float | None:
-    """Unidades vendidas al día. Entre dos escaneos completos seguidos, las unidades que había
-    a buen precio y ya no están se cuentan como vendidas, menos las que aparecen nuevas a un precio
-    más bajo (alguien que retira su montón y lo vuelve a poner más barato). La subasta no dice qué
-    caducó, así que sigue siendo una cota alta. Sin MIN_SALES_HOURS observadas no dice nada."""
-    by_time = {p.time: p for p in points if p.kind == "full"}
+    """Unidades vendidas al día. Entre dos fotos seguidas de la lista de subastas, las unidades que
+    había a buen precio y ya no están se cuentan como vendidas, menos las que aparecen nuevas a un
+    precio más bajo (alguien que retira su montón y lo vuelve a poner más barato). La subasta no dice
+    qué caducó, así que sigue siendo una cota alta. Sin MIN_SALES_HOURS observadas no dice nada."""
+    shots = _snapshots(points, full_scan_times)
     sold = 0
     days = 0.0
-    for a_time, b_time in zip(full_scan_times, full_scan_times[1:]):
-        a = by_time.get(a_time)
+    for (a_time, a), (b_time, b) in zip(shots, shots[1:]):
         gap_hours = (b_time - a_time) / 3600
         if a is None or not a.book or gap_hours <= 0 or gap_hours > MAX_PAIR_GAP_HOURS:
             continue
-        b = by_time.get(b_time)
         before = dict(parse_book(a.book))
         current = dict(parse_book(b.book)) if b is not None and b.book else {}
         # Solo se puede afirmar que algo falta en precios que el libro nuevo enseña entero.
@@ -241,8 +252,9 @@ def compute_signals(points: list[Point], full_scan_times: list[int], now: int | 
                 s.sellers_change = owned[-1][1] / owned[0][1] - 1
         mean = statistics.fmean(p.price for p in window)
         s.volatility = statistics.pstdev(p.price for p in window) / mean if mean else None
-    fulls = [t for t in full_scan_times if window[0].time <= t <= now]
-    s.sales_per_day = estimate_sales(window, fulls)
+    since = now - SALES_WINDOW_DAYS * DAY
+    s.sales_per_day = estimate_sales([p for p in points if since <= p.time <= now],
+                                     [t for t in full_scan_times if since <= t <= now])
     if s.sales_per_day:
         s.days_of_supply = s.quantity / s.sales_per_day
     _score(s)
@@ -264,7 +276,7 @@ def compute_signals(points: list[Point], full_scan_times: list[int], now: int | 
 
 
 def load_series(conn: sqlite3.Connection, item_ids: Iterable[int] | None = None,
-                days: float = WINDOW_DAYS * 3) -> tuple[dict[int, list[Point]], list[int]]:
+                days: float = max(WINDOW_DAYS * 3, SALES_WINDOW_DAYS)) -> tuple[dict[int, list[Point]], list[int]]:
     """Historial de cada objeto (últimos `days` días de datos) y horas de los escaneos completos."""
     reference = conn.execute("SELECT MAX(time) FROM scans").fetchone()[0]
     if not reference:

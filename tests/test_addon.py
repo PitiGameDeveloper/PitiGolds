@@ -116,6 +116,20 @@ class TooltipVentaYSubasta(unittest.TestCase):
         # Sin ventas en el dato no sale la línea.
         self.assertNotIn("ventas/día", self.mock.Tooltip(818, 1, 150))
 
+    def test_flecha_verde_si_sube_y_roja_si_baja_sin_la_mediana(self):
+        self.lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,250,s,", [818] = "140,170,b," } }')
+        up = self.mock.Tooltip(2840, 1, 10)
+        self.assertIn("Arrow-Up-Up", up)
+        self.assertIn(":64:255:64|t", up)          # verde
+        self.assertNotIn("36 horas", up)
+        self.assertNotIn("2p 50c", up)              # ni la mediana
+        down = self.mock.Tooltip(818, 1, 150)
+        self.assertIn("Arrow-Down-Up", down)
+        self.assertIn(":255:64:64|t", down)         # roja
+        # Si no se sabe hacia dónde va, sin flecha.
+        self.lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,250,," } }')
+        self.assertNotIn("Arrow-", self.mock.Tooltip(2840, 3))
+
     def test_sale_aunque_el_cliente_no_llame_a_los_post_calls(self):
         tooltip = self.mock.Tooltip(2840, 1, 10, True)
         self.assertEqual(tooltip.split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c", TIENES])
@@ -256,6 +270,91 @@ class SubastaEnVivoYCompra(unittest.TestCase):
         self.assertIn("   Alter = 2o 0p 0c", lines)
         self.assertIn(f"   {me} = " + self.mock.ns.Money(money), lines)
         self.assertEqual(lines[-1], "   Banco de banda = 50o 0p 0c")
+
+
+class EscaneoAutomatico(unittest.TestCase):
+    """Al abrir la subasta se escanea entera sola, sin dejar de apuntar lo que buscas."""
+
+    def setUp(self):
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
+        lua.execute(f'dofile("{lua_path(TESTS_DIR / "escenario.lua")}")')
+        mock = lua.globals().Mock
+        mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
+        mock.Fire("ADDON_LOADED", "PitiGolds")
+        mock.Fire("PLAYER_LOGIN")
+        lua.execute('''
+          Mock.commodity = { [2840] = { { unitPrice = 400, quantity = 30 } } }
+          C_AuctionHouse.GetNumCommoditySearchResults = function(id) return #(Mock.commodity[id] or {}) end
+          C_AuctionHouse.GetCommoditySearchResultInfo = function(id, i) return Mock.commodity[id][i] end''')
+        mock.Advance(10)
+        self.lua, self.mock = lua, mock
+
+    def fulls(self):
+        return self.lua.eval('(function() local t = {} for _, s in ipairs(PitiGoldsDB.scans) do '
+                             'if s.type == "full" then t[#t + 1] = s end end return t end)()')
+
+    def test_se_escanea_sola_y_apunta_lo_que_buscas_mientras(self):
+        mock = self.mock
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(6)   # el escaneo completo ya está pedido
+        self.assertNotEqual(mock.ns.Scan.state, "idle")
+        mock.Fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2840)
+        mock.Advance(10)
+        self.assertEqual(len(self.fulls()), 1)
+        self.assertEqual(self.fulls()[1]["items"][2770], "120,20,1,1|120:20")
+        search = self.lua.eval('(function() for _, s in ipairs(PitiGoldsDB.scans) do '
+                               'if s.type == "search" then return s end end end)()')
+        self.assertEqual(search["items"][2840], "400,30,1|400:30")
+
+    def test_no_repite_antes_de_15_minutos(self):
+        mock = self.mock
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(20)
+        mock.Fire("AUCTION_HOUSE_CLOSED")
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(20)
+        self.assertEqual(len(self.fulls()), 1)
+        mock.Fire("AUCTION_HOUSE_CLOSED")
+        mock.Advance(15 * 60)
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(20)
+        self.assertEqual(len(self.fulls()), 2)
+
+    def test_si_cierras_a_medias_se_repite_al_volver(self):
+        mock = self.mock
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(6)
+        mock.Fire("AUCTION_HOUSE_CLOSED")
+        mock.Advance(20)
+        self.assertEqual(len(self.fulls()), 0)
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(20)
+        self.assertEqual(len(self.fulls()), 1)
+
+    def test_se_puede_apagar(self):
+        mock = self.mock
+        mock.Slash("auto")
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(20)
+        self.assertEqual(len(self.fulls()), 0)
+        mock.Slash("auto")
+        self.assertTrue(self.lua.eval("PitiGoldsDB.autoScan"))
+
+    def test_un_completo_vacio_no_se_guarda(self):
+        self.lua.execute("Mock.replicate = {}")
+        self.mock.Fire("AUCTION_HOUSE_SHOW")
+        self.mock.Advance(20)
+        self.assertEqual(len(self.fulls()), 0)
+
+    def test_aprovecha_el_completo_que_pide_otro_addon(self):
+        mock = self.mock
+        self.lua.execute("PitiGoldsDB.autoScan = false")
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(6)
+        mock.Fire("REPLICATE_ITEM_LIST_UPDATE")   # el botón de escanear de Auctionator
+        mock.Advance(10)
+        self.assertEqual(len(self.fulls()), 1)
 
 
 class FiltroDeProfesiones(unittest.TestCase):

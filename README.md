@@ -303,6 +303,12 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 3. En la casa de subastas aparecen dos botones encima de la ventana:
    - **PG: Materiales**: recorre materiales, consumibles, recetas y gemas. Guarda el precio mínimo y la cantidad total de cada objeto. Se puede repetir cuando quieras.
    - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores.
+     **Se hace solo** a los 5 segundos de abrir la subasta, si el último tiene más de 15 minutos. Es una
+     sola petición al servidor (tarda de medio minuto a un minuto), así que puedes buscar y comprar
+     mientras tanto: lo que buscas se sigue apuntando. Si cierras la subasta antes de que acabe, se
+     repite al volver a abrirla. Si pides un escaneo completo desde otro addon (el botón de
+     Auctionator), también se aprovecha. Un escaneo en el que el servidor no manda nada no se guarda.
+     `/pg auto` lo apaga o lo vuelve a encender.
    - **Fabricar x**: cuántas veces quieres fabricar la receta del botón **Buscar** (empieza con el número
      que tengas junto a «Crear todo»). Al abrir uno de sus materiales para comprarlo se marca solo lo que
      falta: lo que pide la receta por ese número, menos lo que ya tienes en bolsas y banco. Si vienes de la
@@ -350,8 +356,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    aprender y qué vender. Queda guardado también en `datos/informe.md`.
 6. Tras el siguiente `/reload`, al pasar el ratón por un objeto verás en su tooltip:
    - **Venta:** lo que paga el vendedor (sustituye a la línea «Precio de venta» del juego).
-   - **Subasta:** el precio de mercado, con la mediana de 36 horas, «baja» o «sube» si el motor lo ve
-     así, y **ventas/día**: las unidades que se venden al día en la subasta (estimadas).
+   - **Subasta:** el precio de mercado, una **flecha verde hacia arriba** si el motor ve que va a subir
+     en las próximas 36 horas o **roja hacia abajo** si va a bajar (sin flecha si no está claro), y **ventas/día**: las unidades que se venden al día en la subasta (estimadas).
    - Si sabes fabricarlo, cuánto cuesta y cuánto ganas.
    - **Desencantar:** si es un arma o armadura verde, azul o morada, lo que sale al desencantarla (con la
      probabilidad de cada material, de la tabla clásica) y lo que vale cada material en la subasta; arriba,
@@ -402,10 +408,14 @@ Con al menos 3 escaneos repartidos en más de un día, el motor calcula para cad
 - **Tendencia del precio** y lo limpia que es: una caída constante cuenta mucho; un precio que va y
   viene, poco.
 - **Unidades a la venta y número de vendedores**: si cada vez hay más, el precio acabará cediendo.
-- **Ventas al día**: unidades que había a buen precio y desaparecen entre dos escaneos completos
-  seguidos (como mucho 12 horas de diferencia), menos las que aparecen nuevas a un precio más bajo
-  (alguien que quita su montón y lo vuelve a poner más barato). La subasta no dice si lo que falta se
-  vendió o caducó, así que es una cota alta.
+- **Ventas al día**: unidades que había a buen precio y desaparecen entre dos fotos seguidas de la
+  lista de subastas del objeto (como mucho 12 horas de diferencia), menos las que aparecen nuevas a un
+  precio más bajo (alguien que quita su montón y lo vuelve a poner más barato). Sirven de foto los
+  escaneos completos y también tus búsquedas: cada vez que abres un objeto en la subasta, a mano o
+  desde Auctionator, se apunta su lista entera. Mira los últimos 7 días (el precio, solo 36 horas),
+  y hacen falta al menos 6 horas observadas en total. La subasta no dice si lo que falta se vendió
+  o caducó, así que es una cota alta. Si en ese tiempo no ha desaparecido ninguna, el panel lo manda
+  al vendedor en vez de decir que aún no lo sabe.
 - **Días de oferta**: para cuántos días de ventas hay género.
 - **Riesgo de bajada (0-100)** y **previsión a 36 horas**, que mezcla la tendencia (a mitad de fuerza)
   con la vuelta a la mediana según lo limpia que sea la tendencia.
@@ -413,7 +423,7 @@ Con al menos 3 escaneos repartidos en más de un día, el motor calcula para cad
 Son reglas fijas, sin IA, y su acierto se mide repitiendo la previsión en momentos pasados: el informe
 dice qué porcentaje acertó y cuánto habría acertado decir siempre «estable». Si no supera a eso, no te
 fíes de ella. Con confianza media o alta, la previsión cambia los consejos: lo que tiende a bajar se
-vende ya aunque esté barato, y lo que sube se espera. En el tooltip aparece «baja» o «sube».
+vende ya aunque esté barato, y lo que sube se espera. En el tooltip sale como una flecha verde (sube) o roja (baja).
 
 Todo el motor usa las **últimas 36 horas** (`HISTORY_DAYS` en `motor/pricing.py`): la mediana, la tendencia
 y la previsión. «Sube» o «baja» sale de esa previsión, y el precio al que se espera un objeto que sube es
@@ -623,6 +633,7 @@ Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 |---|---|
 | `/pg materiales` | Escaneo de materiales (con la subasta abierta) |
 | `/pg completo` | Escaneo completo (con la subasta abierta) |
+| `/pg auto` | Enciende o apaga el escaneo completo automático al abrir la subasta |
 | `/pg estado` | Qué hay guardado y cuánto hace que lo leyó el motor |
 | `/pg log` | Últimas líneas del registro, con los errores si los hay |
 | `/pg panel` | Muestra u oculta el panel |

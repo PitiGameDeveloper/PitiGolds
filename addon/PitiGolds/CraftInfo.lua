@@ -212,7 +212,7 @@ local function RunSearch(search)
   if #search.items == 0 then return end
   local AH = C_AuctionHouse
   if not AH then return end
-  if ns.Scan and ns.Scan.state ~= "idle" then
+  if ns.Scan and ns.Scan.state == "browse" then
     ns.Print("espera a que acabe el escaneo para buscar los materiales.")
     return
   end

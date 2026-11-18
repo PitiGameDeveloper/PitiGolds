@@ -1,5 +1,8 @@
 -- Escáner de la casa de subastas.
---   Completo: toda la subasta, una por una (C_AuctionHouse.ReplicateItems).
+--   Completo: toda la subasta, una por una (C_AuctionHouse.ReplicateItems). Se hace solo al abrir
+--             la subasta si el último tiene más de AUTO_EVERY (/pg auto lo apaga). Es una sola
+--             petición al servidor, así que no choca con tus búsquedas: se siguen apuntando.
+--             Si otro addon (Auctionator) pide la subasta entera, también se aprovecha.
 --   Materiales: recorre las categorías de profesiones y consumibles y guarda el
 --             precio mínimo y la cantidad total de cada objeto, incluidos los
 --             que se venden por unidades (commodities).
@@ -8,6 +11,8 @@ local ADDON, ns = ...
 
 local BOOK_LEVELS = 10           -- niveles de precio que se guardan por objeto
 local BROWSE_STALL_SECONDS = 20  -- sin respuesta durante este tiempo se pasa a la siguiente categoría
+local AUTO_DELAY = 5             -- segundos tras abrir la subasta antes del escaneo automático
+local AUTO_EVERY = 15 * 60       -- como mucho un escaneo automático cada 15 minutos
 
 local Scan = { state = "idle", token = 0 }
 ns.Scan = Scan
@@ -37,6 +42,7 @@ local function Finish(kind, items, count)
     count = count,
     items = items,
   })
+  if kind == "full" then PitiGoldsDB.lastFull = time() end
   Scan.state = "idle"
   Scan.token = Scan.token + 1
   ns.Log(("Escaneo %s: %d objetos en %d s"):format(kind, count, time() - Scan.startedAt))
@@ -111,13 +117,14 @@ local function ProcessReplicate(total)
   end)
 end
 
-function Scan.StartFull()
+function Scan.StartFull(auto)
   if not CanStart() then return end
   Scan.state = "full_wait"
   Scan.token = Scan.token + 1
   Scan.startedAt = time()
   C_AuctionHouse.ReplicateItems()
-  ns.Print("escaneo completo pedido al servidor; tarda un poco, no cierres la subasta.")
+  ns.Print((auto and "escaneo completo automático en marcha" or "escaneo completo pedido al servidor")
+    .. "; tarda un poco. Puedes buscar y comprar mientras tanto; si cierras la subasta, se repite al volver.")
   if ns.RefreshUI then ns.RefreshUI() end
   local token = Scan.token
   C_Timer.After(90, function()
@@ -129,6 +136,13 @@ end
 
 -- Cuando llega la lista se espera a que el número de subastas deje de cambiar.
 ns.On("REPLICATE_ITEM_LIST_UPDATE", function()
+  if Scan.state == "idle" and ns.ahOpen and time() - (PitiGoldsDB.lastFull or 0) > 60 then
+    -- Lo ha pedido otro addon (el botón de escanear de Auctionator): se aprovecha.
+    Scan.token = Scan.token + 1
+    Scan.startedAt = time()
+    Scan.state = "full_wait"
+    ns.Log("Escaneo completo pedido por otro addon: se aprovecha")
+  end
   if Scan.state ~= "full_wait" then return end
   Scan.state = "full_settle"
   local token = Scan.token
@@ -137,7 +151,10 @@ ns.On("REPLICATE_ITEM_LIST_UPDATE", function()
     if Scan.token ~= token then return end
     local n = C_AuctionHouse.GetNumReplicateItems()
     if n == last then stable = stable + 1 else stable, last = 0, n end
-    if stable >= 2 then
+    if stable >= 2 and n == 0 then
+      -- Un completo vacío diría que se ha vendido todo: mejor no guardarlo.
+      Cancel("el servidor no ha mandado ninguna subasta; no guardo el escaneo completo.")
+    elseif stable >= 2 then
       ProcessReplicate(n)
     else
       C_Timer.After(0.5, check)
@@ -287,7 +304,7 @@ local browseMin = {}
 
 -- Lista de resultados: el precio mínimo y la cantidad de cada objeto.
 local function RecordBrowse()
-  if Scan.state ~= "idle" then return end
+  if Scan.state == "browse" then return end
   local found = {}
   for _, r in ipairs(C_AuctionHouse.GetBrowseResults() or {}) do
     local key = r.itemKey
@@ -364,13 +381,13 @@ local function RecordItem(itemKey)
 end
 
 ns.On("COMMODITY_SEARCH_RESULTS_UPDATED", function(_, itemID)
-  if Scan.state ~= "idle" or not itemID then return end
+  if Scan.state == "browse" or not itemID then return end
   ns.Debounce("ahcommodity" .. itemID, 0.3, function() RecordCommodity(itemID) end)
 end)
 local lastItemKey -- el último objeto suelto abierto: el que compras con PlaceBid
 
 ns.On("ITEM_SEARCH_RESULTS_UPDATED", function(_, itemKey)
-  if Scan.state ~= "idle" or type(itemKey) ~= "table" or not itemKey.itemID then return end
+  if Scan.state == "browse" or type(itemKey) ~= "table" or not itemKey.itemID then return end
   lastItemKey = itemKey
   ns.Debounce("ahitem" .. itemKey.itemID, 0.3, function() RecordItem(itemKey) end)
 end)
@@ -411,7 +428,7 @@ local function Requery(itemKey)
   if not (ns.ahOpen and itemKey and AH.SendSearchQuery) then return end
   local sorts = { { sortOrder = Enum.AuctionHouseSortOrder.Price, reverseSort = false } }
   SendWhenReady(function()
-    if ns.ahOpen and Scan.state == "idle" then pcall(AH.SendSearchQuery, itemKey, sorts, false) end
+    if ns.ahOpen and Scan.state ~= "browse" then pcall(AH.SendSearchQuery, itemKey, sorts, false) end
   end)
 end
 
@@ -455,7 +472,7 @@ end
 local function OnBrowseEvent()
   if Scan.state == "browse" then
     ns.Debounce("ahbrowse", 0.3, AdvanceBrowse)
-  elseif Scan.state == "idle" and ns.ahOpen then
+  elseif ns.ahOpen then  -- tus búsquedas, también con el escaneo completo en marcha
     ns.Debounce("ahsearch", 0.3, RecordBrowse)
   end
 end
@@ -521,12 +538,19 @@ ns.On("OWNED_AUCTIONS_UPDATED", RecordOwnedAuctions)
 
 -- Apertura y cierre de la subasta -------------------------------------------------------
 
+local function AutoScanDue()
+  return PitiGoldsDB.autoScan ~= false and time() - (PitiGoldsDB.lastFull or 0) >= AUTO_EVERY
+end
+
 local function OnAuctionHouseOpened()
   if ns.ahOpen then return end
   ns.ahOpen = true
   if ns.ShowAuctionButtons then ns.ShowAuctionButtons() end
+  C_Timer.After(AUTO_DELAY, function()
+    if ns.ahOpen and Scan.state == "idle" and AutoScanDue() then Scan.StartFull(true) end
+  end)
   C_Timer.After(1, function()
-    if ns.ahOpen and Scan.state == "idle" and C_AuctionHouse.QueryOwnedAuctions then
+    if ns.ahOpen and Scan.state ~= "browse" and C_AuctionHouse.QueryOwnedAuctions then
       pcall(C_AuctionHouse.QueryOwnedAuctions, {})
     end
   end)
@@ -536,7 +560,7 @@ local function OnAuctionHouseClosed()
   if not ns.ahOpen then return end
   ns.ahOpen = false
   search, searchExact = nil, {}  -- la próxima visita empieza otro escaneo de búsquedas
-  Cancel(Scan.state ~= "idle" and "escaneo cancelado al cerrar la subasta." or nil)
+  Cancel(Scan.state ~= "idle" and "escaneo cancelado al cerrar la subasta; el completo se repite solo al volver." or nil)
   if ns.HideAuctionButtons then ns.HideAuctionButtons() end
 end
 
@@ -556,3 +580,8 @@ end)
 
 ns.Command("completo", "escaneo completo de la subasta", function() Scan.StartFull() end)
 ns.Command("materiales", "escaneo de materiales y consumibles", function() Scan.StartMaterials() end)
+ns.Command("auto", "enciende o apaga el escaneo completo automático al abrir la subasta", function()
+  PitiGoldsDB.autoScan = PitiGoldsDB.autoScan == false
+  ns.Print(PitiGoldsDB.autoScan and "escaneo automático encendido: al abrir la subasta, como mucho cada 15 minutos."
+    or "escaneo automático apagado. Vuelve a encenderlo con /pg auto.")
+end)
