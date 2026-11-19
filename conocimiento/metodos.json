@@ -786,6 +786,50 @@
       "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
     },
     {
+      "id": "hyjal-tortugas-estofado",
+      "nombre": "Estofado de tortuga sabroso (+20 aguante) de las tortugas de Hyjal",
+      "tipo": "farmeo", "nivel": 58, "nivel_minimo": 55, "zona": "Monte Hyjal, junto a Cradle of Tranquility",
+      "profesiones": [{"id": 185, "nivel": 275}],
+      "objetos": ["Savory Turtle Stew", "Turtle Meat", "Recipe: Savory Turtle Stew", "Soothing Spices"],
+      "por_hora": [{"objeto": "Turtle Meat", "cantidad": 45}], "oro_hora": 3,
+      "punto": {"mapa": 2482}, "bichos": ["Child of Tortolla"],
+      "notas": "Comida nueva de Forever: +20 de aguante durante 15 minutos (y el +5 % de experiencia), nivel 45. Las «Child of Tortolla» (sin traducir; Questie aún no tiene Hyjal) del campamento junto a Cradle of Tranquility sueltan la receta (5,26 %, Cocina 275) y la carne de tortuga. La receta se liga al recogerla: no se vende, el negocio es cocinar el estofado (3 carnes de tortuga y 3 especias calmantes, que vende cualquier proveedor de cocina) o vender la carne. La guía lo marca en un mapa (V1.6, pág. 133). Estimado: unas 100 tortugas por hora y carne en algo menos de la mitad.",
+      "fuente": "Guía de Studen v1.6", "fecha": "2026-11-19"
+    },
+    {
+      "id": "hyjal-venados-filete",
+      "nombre": "Filete de venado humeante (+20 fuerza) con carne de Hyjal",
+      "tipo": "farmeo", "nivel": 58, "nivel_minimo": 55, "zona": "Monte Hyjal, junto a Cradle of Tranquility",
+      "profesiones": [{"id": 185, "nivel": 275}],
+      "objetos": ["Steaming Stag Steak", "Stag Meat", "Recipe: Steaming Stag Steak", "Soothing Spices"],
+      "por_hora": [{"objeto": "Stag Meat", "cantidad": 60}], "oro_hora": 3,
+      "punto": {"mapa": 2482},
+      "notas": "Comida nueva de Forever: +20 de fuerza durante 15 minutos (y el +5 % de experiencia), nivel 45. La receta (Cocina 275, ligada al recogerla) se gana con la misión «No We're Cooking» de Monte Hyjal. La carne de ciervo sale mejor en el mismo sitio que las tortugas, junto a Cradle of Tranquility, porque los bichos reaparecen muchísimo (V1.6, pág. 134); la guía no dice cómo se llaman: el addon apunta dónde los matas. Cada filete lleva 3 carnes de ciervo y 4 especias calmantes (de vendedor). Estimado: unos 130 bichos por hora y carne en la mitad.",
+      "fuente": "Guía de Studen v1.6", "fecha": "2026-11-19"
+    },
+    {
+      "id": "cuna-invierno-filete-golpeveloz",
+      "nombre": "Filete Golpeveloz (+20 agilidad) de los sables de hielo de Cuna del Invierno",
+      "tipo": "farmeo", "nivel": 60, "nivel_minimo": 58, "zona": "Cuna del Invierno, Roca Sable de Hielo",
+      "profesiones": [{"id": 185, "nivel": 275}],
+      "objetos": ["Swiftstrike Steak", "Tiger Meat", "Recipe: Swiftstrike Steak", "Soothing Spices"],
+      "por_hora": [{"objeto": "Tiger Meat", "cantidad": 40}], "oro_hora": 4,
+      "punto": {"mapa": 1452}, "bichos": ["Vigilorgullo Sable de Hielo"],
+      "notas": "Comida nueva de Forever: +20 de agilidad durante 15 minutos (y el +5 % de experiencia), nivel 45. Los Vigilorgullo Sable de Hielo (59-60) de la Roca Sable de Hielo, al norte de Cuna del Invierno, sueltan la receta (5,5 %, Cocina 275, ligada al recogerla) y la carne de tigre. Cada filete lleva 3 carnes de tigre y 2 especias calmantes (de vendedor). La agilidad la quieren pícaros, cazadores y tanques: suele ser la que más se vende de las cuatro. Mapa en la V1.6, pág. 135. Estimado: unos 90 bichos por hora y carne en algo menos de la mitad.",
+      "fuente": "Guía de Studen v1.6", "fecha": "2026-11-19"
+    },
+    {
+      "id": "peste-este-hachee-murcielago",
+      "nombre": "Hachee de murciélago (+20 intelecto) de los murcipestes de las Tierras de la Peste del Este",
+      "tipo": "farmeo", "nivel": 57, "nivel_minimo": 54, "zona": "Tierras de la Peste del Este",
+      "profesiones": [{"id": 185, "nivel": 275}],
+      "objetos": ["Bat Hachee", "Meaty Bat Wing", "Recipe: Bat Hachee", "Soothing Spices"],
+      "por_hora": [{"objeto": "Meaty Bat Wing", "cantidad": 50}], "oro_hora": 3,
+      "punto": {"mapa": 1423}, "bichos": ["Murcipeste"],
+      "notas": "Comida nueva de Forever: +20 de intelecto durante 15 minutos (y el +5 % de experiencia), nivel 45. La receta (3,67 %, Cocina 275, ligada al recogerla) solo la sueltan los Murcipeste monstruoso (56-58); las alas de murciélago carnosas, todos los murcipestes de la zona. Cada hachee lleva 3 alas y 2 especias calmantes (de vendedor). Mapa en la V1.6, pág. 136. Estimado: unos 100 murciélagos por hora y alas en la mitad; la receta, unas 3 horas.",
+      "fuente": "Guía de Studen v1.6", "fecha": "2026-11-19"
+    },
+    {
       "id": "ungoro-mocos",
       "nombre": "Mocos de Un'Goro",
       "tipo": "farmeo", "nivel": 50, "zona": "Cráter de Un'Goro",

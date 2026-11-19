@@ -1,6 +1,52 @@
 {
   "_formato": "Lo que opina el asesor de cada método para la situación de Piti (sus personajes, profesiones, nivel y precios). La rellena el asesor al revisar (/revisar). farmeos: por id de metodos.json. crafteos: por número de receta (sale en datos/panel.md). nota: del 1 al 10. por_que: por qué es bueno o malo para Piti, en una o dos frases. pasos: los pasos exactos (dónde ir, qué matar o recoger, qué vender y dónde). receta (crafteos, si los datos del juego no lo dicen): {\"como\": instructor, vendedor, subasta, botin, reputacion o mision, \"donde\": quién la vende o dónde cae, \"precio\": ..., \"requisito\": reputación o divisas}. fecha: cuándo se revisó.",
-  "fecha": "",
-  "farmeos": {},
+  "fecha": "2026-11-19",
+  "farmeos": {
+    "cuna-invierno-filete-golpeveloz": {
+      "nota": 2,
+      "por_que": "~6,5 o/h estimados, el mejor de las cuatro comidas nuevas, pero tu Brujo tiene nivel 43 y Cocina 22: le faltan 15 niveles y 250 puntos de Cocina.",
+      "pasos": [
+        "Cuando el Brujo sea 58+: Sube Cocina a 275 antes (unos 6,5 o con la guía: python -m motor guia cocina) y compra especias calmantes en cualquier proveedor de cocina.",
+        "Ve a la Roca Sable de Hielo, al norte de Cuna del Invierno, y mata Vigilorgullo Sable de Hielo hasta que caiga la receta (5,5 %, unos 18 bichos).",
+        "Guarda la carne de tigre; vende los grises al vendedor.",
+        "Cocina filetes (3 carnes + 2 especias) y compara en la subasta el filete con la carne cruda.",
+        "Mídelo con «Farmear este»."
+      ],
+      "fecha": "2026-11-19"
+    },
+    "hyjal-venados-filete": {
+      "nota": 2,
+      "por_que": "~4,3 o/h estimados con la carne cruda y la subasta solo se lleva unas 39 carnes por hora; necesitas nivel 55 y Cocina 275 (tienes 43 y 22).",
+      "pasos": [
+        "Cuando el Brujo sea 55+: Sube Cocina a 275 antes (unos 6,5 o con la guía: python -m motor guia cocina) y compra especias calmantes en cualquier proveedor de cocina.",
+        "Haz la misión «No We're Cooking» en Monte Hyjal para la receta.",
+        "Mata los ciervos junto a Cradle of Tranquility (reaparecen muchísimo) y guarda la carne de ciervo.",
+        "Cocina filetes (3 carnes + 4 especias) y mídelo con «Farmear este»."
+      ],
+      "fecha": "2026-11-19"
+    },
+    "hyjal-tortugas-estofado": {
+      "nota": 2,
+      "por_que": "~4 o/h estimados vendiendo la carne; la receta se liga al recogerla y necesitas nivel 55 y Cocina 275 (tienes 43 y 22).",
+      "pasos": [
+        "Cuando el Brujo sea 55+: Sube Cocina a 275 antes (unos 6,5 o con la guía: python -m motor guia cocina) y compra especias calmantes en cualquier proveedor de cocina.",
+        "Mata las Child of Tortolla junto a Cradle of Tranquility (Monte Hyjal) hasta la receta (5,26 %).",
+        "Guarda la carne de tortuga y cocina estofados (3 carnes + 3 especias).",
+        "Mídelo con «Farmear este»."
+      ],
+      "fecha": "2026-11-19"
+    },
+    "peste-este-hachee-murcielago": {
+      "nota": 2,
+      "por_que": "~3,6 o/h estimados; la receta solo cae de los Murcipeste monstruoso (3,67 %) y necesitas nivel 54 y Cocina 275 (tienes 43 y 22).",
+      "pasos": [
+        "Cuando el Brujo sea 54+: Sube Cocina a 275 antes (unos 6,5 o con la guía: python -m motor guia cocina) y compra especias calmantes en cualquier proveedor de cocina.",
+        "En las Tierras de la Peste del Este mata murcipestes (todos dan alas); prioriza los monstruosos para la receta.",
+        "Cocina hachee (3 alas + 2 especias) y compara con vender las alas.",
+        "Mídelo con «Farmear este»."
+      ],
+      "fecha": "2026-11-19"
+    }
+  },
   "crafteos": {}
 }
