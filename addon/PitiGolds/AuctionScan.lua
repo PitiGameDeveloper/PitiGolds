@@ -128,9 +128,10 @@ if C_AuctionHouse and C_AuctionHouse.ReplicateItems then
   end)
 end
 
--- Segundos hasta que el servidor vuelva a atender un completo (0: ya se puede pedir).
+-- Segundos hasta que el servidor vuelva a atender un completo (0: ya se puede pedir). Cuenta
+-- desde que llegó el último: una petición que no llegó a contestarse no bloquea la siguiente.
 local function ReplicateWait()
-  return math.max(0, (PitiGoldsDB.lastFullRequest or 0) + REPLICATE_EVERY - time())
+  return math.max(0, (PitiGoldsDB.lastFullReply or 0) + REPLICATE_EVERY - time())
 end
 
 -- El servidor contestó a la última petición pero no se guardó (se cerró la subasta a medias):
@@ -160,7 +161,7 @@ function Scan.StartFull(auto)
       Adopt("se aprovecha la lista que ya había llegado")
     elseif not auto then
       ns.Print(("el servidor solo da un escaneo completo cada 15 minutos (cuenta también Auctionator);"
-        .. " el último se pidió hace %d min. Vuelve a probar a las %s."):format(
+        .. " el último llegó hace %d min y ya está guardado. Vuelve a probar a las %s."):format(
         math.floor((REPLICATE_EVERY - ReplicateWait()) / 60), date("%H:%M", time() + ReplicateWait())))
     end
     return
@@ -175,8 +176,8 @@ function Scan.StartFull(auto)
   local token = Scan.token
   C_Timer.After(FULL_TIMEOUT, function()
     if Scan.token == token and Scan.state == "full_wait" then
-      Cancel(("el servidor no respondió al escaneo completo. Si llega más tarde se guarda solo;"
-        .. " si no, se puede volver a pedir a las %s."):format(date("%H:%M", time() + ReplicateWait())))
+      Cancel("el servidor no respondió al escaneo completo. Si llega más tarde se guarda solo;"
+        .. " si no, vuelve a pedirlo con PG: Completo.")
     end
   end)
 end
@@ -609,7 +610,7 @@ local function OnAuctionHouseClosed()
   if not ns.ahOpen then return end
   ns.ahOpen = false
   search, searchExact = nil, {}  -- la próxima visita empieza otro escaneo de búsquedas
-  Cancel(Scan.state ~= "idle" and "escaneo cancelado al cerrar la subasta; el completo se guarda solo al volver." or nil)
+  Cancel(Scan.state ~= "idle" and "escaneo cancelado al cerrar la subasta; el completo sigue solo al volver." or nil)
   if ns.HideAuctionButtons then ns.HideAuctionButtons() end
 end
 

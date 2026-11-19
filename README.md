@@ -305,12 +305,14 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores.
      **Se hace solo** a los 5 segundos de abrir la subasta, si el último tiene más de 15 minutos. Es una
      sola petición al servidor (tarda de medio minuto a un minuto), así que puedes buscar y comprar
-     mientras tanto: lo que buscas se sigue apuntando. Si cierras la subasta antes de que acabe, se
-     guarda al volver a abrirla. Si pides un escaneo completo desde otro addon (el botón de
-     Auctionator), también se aprovecha. Un escaneo en el que el servidor no manda nada no se guarda.
-     El servidor solo da **un completo cada 15 minutos por cuenta** (contando los de Auctionator): si
-     lo pides antes, el addon no lo manda y te dice a qué hora puedes volver a pedirlo. Si el servidor
-     tarda más de 3 minutos en contestar, se da por perdido, pero si la lista llega después se guarda igual.
+     mientras tanto: lo que buscas se sigue apuntando. Si cierras la subasta antes de que acabe, al
+     volver a abrirla se guarda lo que ya hubiera llegado o, si no llegó nada, se pide otra vez. Si
+     pides un escaneo completo desde otro addon (el botón de Auctionator), también se aprovecha. Un
+     escaneo en el que el servidor no manda nada no se guarda. El servidor solo da **un completo cada
+     15 minutos por cuenta** (contando los de Auctionator): cuando ya ha llegado uno, el addon no pide
+     otro hasta que pasen y te dice a qué hora puedes. Una petición que no llegó a contestarse no
+     cuenta. Si el servidor tarda más de 3 minutos en contestar, se da por perdido, pero si la lista
+     llega después se guarda igual.
      `/pg auto` lo apaga o lo vuelve a encender.
    - **Fabricar x**: cuántas veces quieres fabricar la receta del botón **Buscar** (empieza con el número
      que tengas junto a «Crear todo»). Al abrir uno de sus materiales para comprarlo se marca solo lo que
