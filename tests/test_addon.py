@@ -356,6 +356,33 @@ class EscaneoAutomatico(unittest.TestCase):
         mock.Advance(10)
         self.assertEqual(len(self.fulls()), 1)
 
+    def test_no_pide_otro_antes_de_que_el_servidor_lo_permita(self):
+        mock = self.mock
+        self.lua.execute("""PitiGoldsDB.autoScan = false
+          Mock.peticiones = 0
+          local original = C_AuctionHouse.ReplicateItems
+          C_AuctionHouse.ReplicateItems = function() Mock.peticiones = Mock.peticiones + 1 end
+          hooksecurefunc(C_AuctionHouse, "ReplicateItems", function() PitiGoldsDB.lastFullRequest = time() end)""")
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Slash("completo")          # el servidor no contesta (límite de 15 minutos)
+        mock.Advance(200)
+        self.assertEqual(mock.ns.Scan.state, "idle")
+        mock.Slash("completo")          # antes de 15 minutos: avisa y no pide nada
+        self.assertEqual(self.lua.eval("Mock.peticiones"), 1)
+        self.assertIn("cada 15 minutos", self.lua.eval("Mock.chat[#Mock.chat]"))
+
+    def test_guarda_el_completo_que_llega_tarde(self):
+        mock = self.mock
+        self.lua.execute("""PitiGoldsDB.autoScan = false
+          C_AuctionHouse.ReplicateItems = function()
+            Mock.Schedule(200, function() Mock.Fire("REPLICATE_ITEM_LIST_UPDATE") end)
+          end
+          hooksecurefunc(C_AuctionHouse, "ReplicateItems", function() PitiGoldsDB.lastFullRequest = time() end)""")
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Slash("completo")
+        mock.Advance(220)
+        self.assertEqual(len(self.fulls()), 1)
+
 
 class FiltroDeProfesiones(unittest.TestCase):
     CRAFTS = """PitiGoldsGenerated = { methods = { farms = {}, crafts = {

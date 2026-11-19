@@ -13,6 +13,10 @@ local BOOK_LEVELS = 10           -- niveles de precio que se guardan por objeto
 local BROWSE_STALL_SECONDS = 20  -- sin respuesta durante este tiempo se pasa a la siguiente categoría
 local AUTO_DELAY = 5             -- segundos tras abrir la subasta antes del escaneo automático
 local AUTO_EVERY = 15 * 60       -- como mucho un escaneo automático cada 15 minutos
+-- El servidor solo atiende un ReplicateItems cada 15 minutos por cuenta (también los de
+-- Auctionator): si se pide antes, no contesta nada.
+local REPLICATE_EVERY = 15 * 60
+local FULL_TIMEOUT = 180         -- un completo de un reino lleno ha llegado a tardar 88 s
 
 local Scan = { state = "idle", token = 0 }
 ns.Scan = Scan
@@ -117,33 +121,78 @@ local function ProcessReplicate(total)
   end)
 end
 
+-- Cualquier petición de la subasta entera, la nuestra o la de otro addon, cuenta para el límite.
+if C_AuctionHouse and C_AuctionHouse.ReplicateItems then
+  hooksecurefunc(C_AuctionHouse, "ReplicateItems", function()
+    PitiGoldsDB.lastFullRequest = time()
+  end)
+end
+
+-- Segundos hasta que el servidor vuelva a atender un completo (0: ya se puede pedir).
+local function ReplicateWait()
+  return math.max(0, (PitiGoldsDB.lastFullRequest or 0) + REPLICATE_EVERY - time())
+end
+
+-- El servidor contestó a la última petición pero no se guardó (se cerró la subasta a medias):
+-- el cliente conserva la lista, así que se aprovecha sin pedir otra. Si no contestó, lo que
+-- tenga el cliente es el completo anterior, ya guardado.
+local function PendingReplicate()
+  local reply = PitiGoldsDB.lastFullReply or 0
+  return reply >= (PitiGoldsDB.lastFullRequest or 0) and reply > (PitiGoldsDB.lastFull or 0)
+    and C_AuctionHouse.GetNumReplicateItems() > 0
+end
+
+local Settle
+
+local function Adopt(why)
+  Scan.token = Scan.token + 1
+  Scan.startedAt = time()
+  Scan.state = "full_wait"
+  ns.Log("Escaneo completo: " .. why)
+  Settle()
+end
+
 function Scan.StartFull(auto)
   if not CanStart() then return end
+  if ReplicateWait() > 0 then
+    if PendingReplicate() then
+      ns.Print("guardando el escaneo completo que ya había llegado; tarda un poco.")
+      Adopt("se aprovecha la lista que ya había llegado")
+    elseif not auto then
+      ns.Print(("el servidor solo da un escaneo completo cada 15 minutos (cuenta también Auctionator);"
+        .. " el último se pidió hace %d min. Vuelve a probar a las %s."):format(
+        math.floor((REPLICATE_EVERY - ReplicateWait()) / 60), date("%H:%M", time() + ReplicateWait())))
+    end
+    return
+  end
   Scan.state = "full_wait"
   Scan.token = Scan.token + 1
   Scan.startedAt = time()
   C_AuctionHouse.ReplicateItems()
   ns.Print((auto and "escaneo completo automático en marcha" or "escaneo completo pedido al servidor")
-    .. "; tarda un poco. Puedes buscar y comprar mientras tanto; si cierras la subasta, se repite al volver.")
+    .. "; tarda un poco. Puedes buscar y comprar mientras tanto; si cierras la subasta, se guarda al volver.")
   if ns.RefreshUI then ns.RefreshUI() end
   local token = Scan.token
-  C_Timer.After(90, function()
+  C_Timer.After(FULL_TIMEOUT, function()
     if Scan.token == token and Scan.state == "full_wait" then
-      Cancel("el servidor no respondió al escaneo completo.")
+      Cancel(("el servidor no respondió al escaneo completo. Si llega más tarde se guarda solo;"
+        .. " si no, se puede volver a pedir a las %s."):format(date("%H:%M", time() + ReplicateWait())))
     end
   end)
 end
 
 -- Cuando llega la lista se espera a que el número de subastas deje de cambiar.
 ns.On("REPLICATE_ITEM_LIST_UPDATE", function()
+  PitiGoldsDB.lastFullReply = time()
   if Scan.state == "idle" and ns.ahOpen and time() - (PitiGoldsDB.lastFull or 0) > 60 then
-    -- Lo ha pedido otro addon (el botón de escanear de Auctionator): se aprovecha.
-    Scan.token = Scan.token + 1
-    Scan.startedAt = time()
-    Scan.state = "full_wait"
-    ns.Log("Escaneo completo pedido por otro addon: se aprovecha")
+    -- Lo ha pedido otro addon (el botón de escanear de Auctionator) o ha llegado tarde: se aprovecha.
+    Adopt("pedido por otro addon o llegado tarde: se aprovecha")
+  elseif Scan.state == "full_wait" then
+    Settle()
   end
-  if Scan.state ~= "full_wait" then return end
+end)
+
+function Settle()
   Scan.state = "full_settle"
   local token = Scan.token
   local last, stable = -1, 0
@@ -161,7 +210,7 @@ ns.On("REPLICATE_ITEM_LIST_UPDATE", function()
     end
   end
   check()
-end)
+end
 
 -- Escaneo de materiales ---------------------------------------------------------------
 
@@ -560,7 +609,7 @@ local function OnAuctionHouseClosed()
   if not ns.ahOpen then return end
   ns.ahOpen = false
   search, searchExact = nil, {}  -- la próxima visita empieza otro escaneo de búsquedas
-  Cancel(Scan.state ~= "idle" and "escaneo cancelado al cerrar la subasta; el completo se repite solo al volver." or nil)
+  Cancel(Scan.state ~= "idle" and "escaneo cancelado al cerrar la subasta; el completo se guarda solo al volver." or nil)
   if ns.HideAuctionButtons then ns.HideAuctionButtons() end
 end
 
