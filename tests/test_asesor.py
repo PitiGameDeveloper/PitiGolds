@@ -12,7 +12,7 @@ from pathlib import Path
 from motor import db as dbmod
 from motor.analysis import analyze
 from motor.catalogo import CatalogError, catalog_problems, load_catalog
-from motor.fuentes import collect, mark_done, parse_feed, word_text
+from motor.fuentes import TranscriptError, collect, mark_done, parse_feed, word_text
 from motor.report import build_advice_report
 
 NOW = 1_793_000_000  # finales de octubre de 2026
@@ -117,6 +117,52 @@ class Novedades(unittest.TestCase):
         rows, _ = self.collect(now=time.time())
         self.assertEqual([r["title"] for r in rows if r["source"] == "fuentes/"], ["guia.docx"])
         self.assertEqual(word_text(doc), "## Perlas\nAlmejas en Tuercespina")
+
+
+class Transcripciones(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        self.conn = dbmod.connect(root / "p.db")
+        self.folder = root / "fuentes"
+        self.folder.mkdir()
+        self.calls = []
+
+    def tearDown(self):
+        self.conn.close()
+        self.tmp.cleanup()
+
+    def collect(self, transcribe):
+        def counted(vid):
+            self.calls.append(vid)
+            return transcribe(vid)
+        return collect(self.conn, SOURCES, 7, now=NOW, fetch=fake_fetch, folder=self.folder, transcribe=counted)
+
+    def test_baja_la_transcripcion_con_su_minuto(self):
+        snippets = [(1.0, "Hola"), (12.5, "vamos a\nVega"), (250.0, "mata basiliscos"), (3700, "fin")]
+        rows, errors = self.collect(lambda vid: ("es", snippets))
+        self.assertEqual(self.calls, ["abc"])  # el vídeo viejo no
+        path = self.folder / "youtube" / "abc.txt"
+        lines = path.read_text(encoding="utf-8").splitlines()
+        self.assertEqual(lines[0], "Enlace: https://www.youtube.com/watch?v=abc")
+        self.assertEqual(lines[-3:], ["[0:01] Hola vamos a Vega", "[4:10] mata basiliscos", "[1:01:40] fin"])
+        video = next(r for r in rows if r["title"] == "Best Gold Farm in Forever")
+        self.assertTrue(video["summary"].startswith(f"Transcripción: {path} · Basilisks"))
+        # No sale como archivo suelto de fuentes/ ni se vuelve a bajar.
+        self.assertFalse(any(r["source"] == "fuentes/" for r in rows))
+        self.collect(lambda vid: ("es", snippets))
+        self.assertEqual(self.calls, ["abc"])
+
+    def test_sin_subtitulos_se_apunta_cuando_los_tenga(self):
+        def none(vid):
+            raise TranscriptError("el vídeo no tiene subtítulos")
+        rows, errors = self.collect(none)
+        self.assertIn("Vídeo «Best Gold Farm in Forever» sin transcripción: el vídeo no tiene subtítulos", errors)
+        video = next(r for r in rows if r["title"] == "Best Gold Farm in Forever")
+        self.assertEqual(video["summary"], "Basilisks in STV & skinning, 30g/h")
+        rows, errors = self.collect(lambda vid: ("en", [(0, "hi")]))
+        video = next(r for r in rows if r["title"] == "Best Gold Farm in Forever")
+        self.assertTrue(video["summary"].startswith("Transcripción:"))
 
 
 class ValidarCatalogo(unittest.TestCase):

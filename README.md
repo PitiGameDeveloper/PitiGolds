@@ -158,7 +158,14 @@ extra. Ábrela como carpeta de una sesión en Claude Code (la app de escritorio,
 El asesor no hace cuentas: las hace el motor y él las lee y te las explica. Solo edita los archivos de
 `conocimiento/` (métodos, sus notas, rutas de recolección y fuentes); el código no lo toca.
 
-**Transcripciones de vídeos**: guárdalas como `.txt` (o `.docx`) en `fuentes/` con el enlace del vídeo
+**Vídeos de YouTube**: haz doble clic en **`novedades.cmd`**. Mira los canales de `conocimiento/fuentes.json`
+(y el resto de fuentes), y de cada vídeo o short nuevo baja la transcripción (los subtítulos, también los
+automáticos; en español o inglés si los hay) a `fuentes/youtube/<vídeo>.txt`, con el minuto de cada trozo.
+Después, si tienes Claude Code en la consola (`claude`), abre el asesor y le pide que investigue; si no,
+ábrelo tú y pídele «Investiga». Si un vídeo aún no tiene subtítulos, lo dice y lo vuelve a probar la próxima
+vez. Para añadir un canal, pásale el enlace al asesor.
+
+**Otras transcripciones**: guárdalas como `.txt` (o `.docx`) en `fuentes/` con el enlace del vídeo
 dentro, por ejemplo en la primera línea. El asesor no puede ver vídeos: si la transcripción no basta («farmea
 aquí» señalando el mapa), te pregunta lo concreto con el enlace y el minuto, y el método queda en espera.
 
@@ -172,8 +179,8 @@ Este comando lista solo lo nuevo y aún sin revisar: título, fecha y resumen de
 los feeds de `conocimiento/fuentes.json` (de entrada, las noticias de Forever de Wowhead y r/woweconomy)
 y los archivos nuevos que dejes en `fuentes/`. El asesor criba por el título y abre a fondo como mucho
 5. Cada novedad sale una sola vez.
-- **YouTube**: se añaden canales con su código `UC...`. Solo se leen el título y la descripción, no
-  los subtítulos.
+- **YouTube**: se añaden canales con su código `UC...`. De cada vídeo nuevo se baja la transcripción
+  (hace falta `youtube-transcript-api`, que instalan `instalar.cmd` y `novedades.cmd`).
 - **Discord**: no se puede leer sin cuenta. Copia lo que te interese a un `.txt` en `fuentes/` y saldrá
   como novedad.
 
@@ -674,7 +681,8 @@ El código vive en esta carpeta (`addon/PitiGolds/`). Al juego llega con WowUp, 
 Para ponerlo en el juego (la primera vez, tras reinstalar WoW o al clonar el repositorio en otro PC):
 
 1. Si no existe `.venv`: `python -m venv .venv` y `.venv\Scripts\python -m pip install -r requirements-dev.txt`
-   (solo hace falta para las pruebas; el motor funciona con Python a secas).
+   (solo hace falta para las pruebas; el motor funciona con Python a secas, salvo las transcripciones de
+   YouTube, que necesitan `requirements.txt` y las instala el paso siguiente).
 2. Doble clic en **`instalar.cmd`**. Si queda un enlace de la instalación antigua, lo quita.
 3. En WowUp, con WoW Forever elegido: **Obtener addons → Instalar desde URL** y pega
    `https://github.com/PitiGameDeveloper/PitiGolds`.

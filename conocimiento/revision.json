@@ -2,6 +2,50 @@
   "_formato": "Lo que opina el asesor de cada método para la situación de Piti (sus personajes, profesiones, nivel y precios). La rellena el asesor al revisar (/revisar). farmeos: por id de metodos.json. crafteos: por número de receta (sale en datos/panel.md). nota: del 1 al 10. por_que: por qué es bueno o malo para Piti, en una o dos frases. pasos: los pasos exactos (dónde ir, qué matar o recoger, qué vender y dónde). receta (crafteos, si los datos del juego no lo dicen): {\"como\": instructor, vendedor, subasta, botin, reputacion o mision, \"donde\": quién la vende o dónde cae, \"precio\": ..., \"requisito\": reputación o divisas}. fecha: cuándo se revisó.",
   "fecha": "2026-11-19",
   "farmeos": {
+    "clarofluvial-patriarcas": {
+      "nota": 8,
+      "por_que": "~9,6 o/h estimados y tu Brujo (43, Desollar 261) ya lo puede hacer; casi todo es gris de vendedor, así que no depende de la subasta.",
+      "pasos": [
+        "Con el Brujo, ve a Clarofluvial, al sureste de Rog'mar, entre la posada y las rocas del sur.",
+        "Mata y desuella los patriarcas de las llanuras; si hay gente, sube a las rocas justo debajo de Rog'mar y a la meseta del jefe de misión.",
+        "Vende al vendedor las colas y bigotes (7-8 platas cada uno); el cuero pesado, a la subasta.",
+        "Si está lleno, cambia a los coyotes de al lado (clarofluvial-lobos).",
+        "Mídelo con «Farmear este»."
+      ],
+      "fecha": "2026-11-19"
+    },
+    "tierras-devastadas": {
+      "nota": 6,
+      "por_que": "Con tus precios sale ~50 o/h estimados, pero es por lo caras que están hoy las cinco partes en la subasta y eso puede caer al llegar más gente; tu Brujo necesita nivel 45 (tiene 43).",
+      "pasos": [
+        "Cuando el Brujo sea 45: ve a las Tierras Devastadas y mata jabalíes, buitres, escórpidos, hienas y basiliscos por toda la zona (los del sur son de hasta 52).",
+        "Desuella todo lo que mates.",
+        "Guarda pulmones, mollejas, pinzas, quijadas y cerebros; mira su precio en la subasta antes de ponerlos y no inundes el mercado: pon pocos cada vez.",
+        "Vende los grises al vendedor y mídelo con «Farmear este»."
+      ],
+      "fecha": "2026-11-19"
+    },
+    "perla-dorada": {
+      "nota": 5,
+      "por_que": "~11,8 o/h estimados, pero la mayor parte es la perla dorada, que es pura suerte (una cada 2-3 horas); tu Brujo necesita nivel 44 (tiene 43).",
+      "pasos": [
+        "Con el Brujo a 44: ve a la isla de las nagas Crestafuria en la costa de Feralas.",
+        "Mátalas de dos en dos y abre todas las almejas de boca grande.",
+        "Perlas a la subasta (la dorada y la negra); la tela de paño mágico también.",
+        "Mídelo con «Farmear este»: si en dos horas no cae perla dorada, vuelve a los patriarcas."
+      ],
+      "fecha": "2026-11-19"
+    },
+    "paramos-cueva": {
+      "nota": 2,
+      "por_que": "~3 o/h estimados: está bien para un personaje de 14, pero el Brujo saca mucho más en Clarofluvial, el Mago (13) y el Druida (10) aún no llegan, y solo es de la Alianza.",
+      "pasos": [
+        "Solo con un alt de la Alianza de nivel 14-18: ve a la cantera de la Costa del Oro, en el oeste de Páramos de Poniente.",
+        "Quédate en la primera cueva pequeña y mata todo lo que reaparezca; abre los cofres que salgan.",
+        "Tela a la subasta; verdes y grises al vendedor. Mídelo con «Farmear este»."
+      ],
+      "fecha": "2026-11-19"
+    },
     "cuna-invierno-filete-golpeveloz": {
       "nota": 2,
       "por_que": "~6,5 o/h estimados, el mejor de las cuatro comidas nuevas, pero tu Brujo tiene nivel 43 y Cocina 22: le faltan 15 niveles y 250 puntos de Cocina.",

@@ -4,6 +4,10 @@ conocimiento/fuentes.json lista feeds (Wowhead, Reddit...) y canales de YouTube.
 cualquier archivo nuevo en fuentes/ (PDF, Word, texto: una guía comprada, mensajes de Discord
 copiados a un .txt...).
 
+De los vídeos de YouTube se baja además la transcripción (los subtítulos, también los automáticos) a
+fuentes/youtube/<vídeo>.txt, y la novedad dice dónde está. Hace falta youtube-transcript-api
+(requirements.txt); sin ella todo sigue funcionando, pero sin transcripciones.
+
 Solo se listan título, fecha, enlace y un resumen corto. Leer a fondo lo que interese lo hace el
 asesor, y así se gastan pocos tokens: cada novedad sale una vez, y cuando el asesor la ha
 revisado (fuentes --hecho) ya no vuelve a salir.
@@ -34,6 +38,10 @@ DEFAULT_DAYS = 7
 MAX_PER_SOURCE = 15
 SUMMARY_CHARS = 300
 USER_AGENT = "PitiGolds (addon personal; https://github.com/PitiGameDeveloper)"
+
+TRANSCRIPT_DIR = "youtube"
+TRANSCRIPT_LANGS = ["es", "es-ES", "es-419", "en", "en-US", "en-GB"]
+TRANSCRIPT_BLOCK = 30  # segundos de vídeo por línea de la transcripción, cada una con su minuto
 
 ATOM = "{http://www.w3.org/2005/Atom}"
 MEDIA = "{http://search.yahoo.com/mrss/}"
@@ -114,6 +122,100 @@ def parse_feed(data: bytes, source: str) -> list[Novelty]:
     return items
 
 
+class TranscriptError(Exception):
+    """No se ha podido bajar la transcripción. `stop`: no merece la pena probar con más vídeos."""
+
+    def __init__(self, reason: str, stop: bool = False):
+        super().__init__(reason)
+        self.stop = stop
+
+
+Transcriber = Callable[[str], tuple[str, list[tuple[float, str]]]]
+
+
+def video_id(item: Novelty) -> str | None:
+    found = (re.search(r"yt:video:([\w-]+)", item.key)
+             or re.search(r"(?:[?&]v=|/shorts/|youtu\.be/)([\w-]+)", item.url))
+    return found.group(1) if found else None
+
+
+def fetch_transcript(vid: str) -> tuple[str, list[tuple[float, str]]]:
+    """Idioma y fragmentos (segundo, texto) de los subtítulos de un vídeo: en español o inglés si
+    los hay, y si no, los primeros que tenga."""
+    try:
+        import youtube_transcript_api as yta
+    except ImportError:
+        raise TranscriptError("falta youtube-transcript-api (pip install -r requirements.txt)", stop=True)
+    try:
+        available = yta.YouTubeTranscriptApi().list(vid)
+        try:
+            transcript = available.find_transcript(TRANSCRIPT_LANGS)
+        except yta.NoTranscriptFound:
+            transcript = next(iter(available), None)
+            if transcript is None:
+                raise TranscriptError("el vídeo no tiene subtítulos")
+        fetched = transcript.fetch()
+    except (yta.TranscriptsDisabled, yta.NoTranscriptFound):
+        raise TranscriptError("el vídeo no tiene subtítulos")
+    except (yta.RequestBlocked, yta.IpBlocked):
+        raise TranscriptError("YouTube ha bloqueado la descarga; prueba más tarde", stop=True)
+    except (yta.YouTubeTranscriptApiException, OSError) as exc:
+        raise TranscriptError(type(exc).__name__)
+    return fetched.language_code, [(s.start, s.text) for s in fetched.snippets]
+
+
+def _clock(seconds: float) -> str:
+    seconds = int(seconds)
+    h, m, s = seconds // 3600, seconds // 60 % 60, seconds % 60
+    return f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
+
+
+def transcript_text(item: Novelty, language: str, snippets: list[tuple[float, str]]) -> str:
+    """El enlace arriba (como en las transcripciones que deja Piti) y el texto en bloques de
+    TRANSCRIPT_BLOCK segundos, cada uno con su minuto, para poder preguntar por un momento concreto."""
+    lines = [f"Enlace: {item.url}", f"Título: {item.title}",
+             f"Publicado: {time.strftime('%Y-%m-%d', time.localtime(item.published))}",
+             f"Subtítulos: {language}", ""]
+    block_start, block = None, []
+    for start, text in snippets:
+        text = " ".join(text.replace("\n", " ").split())
+        if not text:
+            continue
+        if block_start is not None and start - block_start >= TRANSCRIPT_BLOCK:
+            lines.append(f"[{_clock(block_start)}] " + " ".join(block))
+            block_start, block = None, []
+        if block_start is None:
+            block_start = start
+        block.append(text)
+    if block:
+        lines.append(f"[{_clock(block_start)}] " + " ".join(block))
+    return "\n".join(lines) + "\n"
+
+
+def attach_transcripts(items: list[Novelty], folder: Path, transcribe: Transcriber) -> list[str]:
+    """Baja la transcripción de los vídeos que aún no la tienen y pone en el resumen de cada uno
+    dónde está. Devuelve los vídeos que se han quedado sin ella y por qué."""
+    errors, stopped = [], False
+    for item in items:
+        vid = video_id(item)
+        if not vid:
+            continue
+        path = folder / TRANSCRIPT_DIR / f"{vid}.txt"
+        if not path.is_file():
+            if stopped:
+                continue
+            try:
+                language, snippets = transcribe(vid)
+            except TranscriptError as exc:
+                errors.append(f"Vídeo «{item.title}» sin transcripción: {exc}")
+                stopped = exc.stop
+                continue
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(transcript_text(item, language, snippets), encoding="utf-8")
+        item.summary = f"Transcripción: {path}" + (f" · {item.summary}" if item.summary else "")
+    return errors
+
+
 def first_link(path: Path) -> str | None:
     """El primer enlace de un archivo de texto o Word: el vídeo de una transcripción, por ejemplo."""
     try:
@@ -162,9 +264,11 @@ def word_text(path: Path) -> str:
 
 
 def collect(conn: sqlite3.Connection, sources: list[dict], days: float = DEFAULT_DAYS, now: float | None = None,
-            fetch: Callable[[str], bytes] = _get, folder: Path = LOCAL_DIR) -> tuple[list[sqlite3.Row], list[str]]:
+            fetch: Callable[[str], bytes] = _get, folder: Path = LOCAL_DIR,
+            transcribe: Transcriber | None = None) -> tuple[list[sqlite3.Row], list[str]]:
     """Lee las fuentes, guarda lo nuevo y devuelve lo publicado en los últimos `days` días que aún
-    no se ha revisado, y los errores (una fuente caída no para las demás)."""
+    no se ha revisado, y los errores (una fuente caída no para las demás). Con `transcribe`
+    (fetch_transcript), baja también la transcripción de los vídeos de YouTube."""
     now = time.time() if now is None else now
     cutoff = now - days * 86400
     found, errors = [], []
@@ -173,17 +277,22 @@ def collect(conn: sqlite3.Connection, sources: list[dict], days: float = DEFAULT
         try:
             items = parse_feed(fetch(feed_url(source)), name)
         except (OSError, ValueError, ET.ParseError, KeyError) as exc:
-            errors.append(f"{name}: {exc}")
+            errors.append(f"No he podido leer {name}: {exc}")
             continue
         pattern = source.get("filtro")
         if pattern:
             items = [i for i in items if re.search(pattern, f"{i.title} {i.summary}", re.IGNORECASE)]
         recent = sorted((i for i in items if i.published >= cutoff), key=lambda i: -i.published)
-        found += recent[:source.get("max", MAX_PER_SOURCE)]
+        recent = recent[:source.get("max", MAX_PER_SOURCE)]
+        if transcribe and source.get("tipo") == "youtube":
+            errors += attach_transcripts(recent, folder, transcribe)
+        found += recent
     found += [i for i in local_files(folder) if i.published >= cutoff]
     with conn:
+        # Si un vídeo ya guardado consigue ahora su transcripción, se apunta (sin tocar si está revisado).
         conn.executemany(
-            "INSERT OR IGNORE INTO source_items VALUES (?, ?, ?, ?, ?, ?, ?, 'nuevo')",
+            "INSERT INTO source_items VALUES (?, ?, ?, ?, ?, ?, ?, 'nuevo') ON CONFLICT(key) DO UPDATE "
+            "SET summary = excluded.summary WHERE excluded.summary LIKE 'Transcripción:%'",
             [(i.key, i.source, i.title, i.url, i.published, i.summary, int(now)) for i in found])
     return pending(conn, days, now), errors
 

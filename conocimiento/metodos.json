@@ -107,10 +107,11 @@
       "nombre": "Cueva de humanoides de Páramos de Poniente (Alianza)",
       "tipo": "farmeo", "nivel": 14, "zona": "Páramos de Poniente",
       "objetos": ["Linen Cloth", "Wool Cloth"],
-      "por_hora": [{"objeto": "Linen Cloth", "cantidad": 35}, {"objeto": "Wool Cloth", "cantidad": 20}], "oro_hora": 1.2,
+      "por_hora": [{"objeto": "Linen Cloth", "cantidad": 35}, {"objeto": "Wool Cloth", "cantidad": 20}], "oro_hora": 2.5,
       "punto": {"mapa": 1436, "x": 30, "y": 47}, "bichos": ["Despojador Defias", "Saqueador Defias", "Bastardo Zarparrío", "Minero Zarparrío", "Herborista Zarparrío"],
-      "notas": "La cantera de la Costa del Oro: gnolls Zarparrío y Defias que reaparecen a lo loco. Mucha tela, plata suelta y verdes (BoE). Es de la Alianza. Estimado por hora: unos 150 bichos.",
-      "fuente": "Guía de Studen v1.5", "fecha": "2026-11-18"
+      "notas": "La cantera de la Costa del Oro: gnolls Zarparrío y Defias que reaparecen a lo loco porque van ligados a una misión. Quédate en la primera cueva pequeña, no en la galería de dentro. Mucha tela, plata suelta (unas 70 platas por hora solo en monedas, según Studen) y bastantes verdes que el vendedor paga a varias platas. Hay cofres que salen en varios rincones de la cueva y vetas si tienes Minería. Studen sacó unos 3 o 4 de oro por hora contando verdes y grises en su prueba de 9 minutos. Es de la Alianza. Estimado por hora: unos 150 bichos.",
+      "fuente": "Guía de Studen v1.5; Studen, YouTube (2026-11-18)", "fecha": "2026-11-19",
+      "enlace": "https://www.youtube.com/watch?v=4XzndI-YtVo"
     },
     {
       "id": "baldios-ventura",
@@ -355,8 +356,9 @@
       "objetos": ["Soft Bushy Tail", "Bristly Whisker", "Long Soft Tail", "Heavy Leather"],
       "por_hora": [{"objeto": "Soft Bushy Tail", "cantidad": 30}, {"objeto": "Bristly Whisker", "cantidad": 30}, {"objeto": "Long Soft Tail", "cantidad": 30}, {"objeto": "Heavy Leather", "cantidad": 40}], "oro_hora": 2,
       "punto": {"mapa": 2548},
-      "notas": "Zona nueva. Los «Wildplains Patriarch» reaparecen rápido, se desuellan y sueltan grises que paga muy bien el vendedor (7-8 platas cada uno). Están al sureste de Rog'mar, entre la posada y las rocas del sur. Estimado por hora: unos 150 bichos; el cuero, solo con Desollar.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-11-09"
+      "notas": "Zona nueva. Los «Wildplains Patriarch» reaparecen rápido, se desuellan y sueltan grises que paga muy bien el vendedor (7-8 platas cada uno). Están al sureste de Rog'mar, entre la posada y las rocas del sur; si hay mucha gente, sube un poco al norte, justo debajo de Rog'mar, alrededor y entre las rocas y en la meseta del jefe de misión. Quedan cerca de los coyotes (clarofluvial-lobos): si uno está lleno, prueba el otro. Studen lo pone en su top 5 para la montura del 40, con más de 10 de oro por hora. Estimado por hora: unos 150 bichos; el cuero, solo con Desollar.",
+      "fuente": "Guía de Studen v1.1; Studen, YouTube (2026-11-18)", "fecha": "2026-11-19",
+      "enlace": "https://www.youtube.com/watch?v=LcqaK7fZSCg"
     },
     {
       "id": "clarofluvial-lobos",
@@ -534,8 +536,9 @@
       "objetos": ["Blasted Boar Lung", "Vulture Gizzard", "Scorpok Pincer", "Snickerfang Jowl", "Basilisk Brain"],
       "por_hora": [{"objeto": "Blasted Boar Lung", "cantidad": 8}, {"objeto": "Vulture Gizzard", "cantidad": 8}, {"objeto": "Scorpok Pincer", "cantidad": 8}, {"objeto": "Snickerfang Jowl", "cantidad": 8}, {"objeto": "Basilisk Brain", "cantidad": 8}], "oro_hora": 3,
       "punto": {"mapa": 1419}, "bichos": ["Jabalí Cenicrín", "Destripador negro", "Aguijonero Scorpok", "Hiena risitas", "Basilisco Rocarroja", "Vitropiel Rocarroja"],
-      "notas": "Se entregan en una misión repetible que da consumibles de +25 a una característica, así que los compra mucha gente. También oro de grises y pieles. Estimado por hora: unos 110 bichos de todas las clases.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+      "notas": "Se entregan en una misión repetible que da consumibles de +25 a una característica, así que los compra mucha gente (para subir rápido y para bandas). Toda la zona está llena de estas bestias, de nivel 46 a 48 en el norte y hasta 52 más al sur: se puede hacer desde finales de los 40 mientras subes. Studen, con un mago de 52, saca unos 8 de oro por hora solo con los grises, más las pieles si desuellas (cuero grueso y robusto, escamas de escórpido). El precio de las cinco partes cambia mucho: mira la subasta antes. Estimado por hora: unos 110 bichos de todas las clases.",
+      "fuente": "Guía de Studen v1.1; Studen, YouTube (2026-11-16)", "fecha": "2026-11-19",
+      "enlace": "https://www.youtube.com/watch?v=60l_sDyF_6s"
     },
     {
       "id": "interior-trolls",
@@ -664,11 +667,12 @@
       "id": "perla-dorada",
       "nombre": "Nagas de la cueva de la Isla del Terror",
       "tipo": "farmeo", "nivel": 44, "zona": "Feralas",
-      "objetos": ["Golden Pearl"],
-      "por_hora": [{"objeto": "Golden Pearl", "cantidad": 0.4}, {"objeto": "Mageweave Cloth", "cantidad": 20}], "oro_hora": 10,
+      "objetos": ["Golden Pearl", "Black Pearl", "Big-mouth Clam"],
+      "por_hora": [{"objeto": "Golden Pearl", "cantidad": 0.4}, {"objeto": "Black Pearl", "cantidad": 2}, {"objeto": "Mageweave Cloth", "cantidad": 20}], "oro_hora": 10,
       "punto": {"mapa": 1444}, "bichos": ["Jinete de olas Crestafuria", "Gritón Crestafuria", "Guerrero Crestafuria", "Sirena Crestafuria", "Myrmidón Crestafuria", "Hechicera Crestafuria", "Guardia serpiente Crestafuria"],
-      "notas": "La perla dorada sale de almejas con muy poca probabilidad, pero siempre se vende. Las nagas son de nivel 44 y reaparecen rápido. Estimado por hora: unas 110 nagas; la perla, una cada dos o tres horas.",
-      "fuente": "Guía de Studen v1.1", "fecha": "2026-10-30"
+      "notas": "Las nagas Crestafuria de la isla sueltan almejas de boca grande (van ligadas a una misión) y de ahí salen las perlas. En Forever hay muchas recetas nuevas que piden perlas, así que la dorada se vende aún mejor (también la piden la Vara de arcanita, el Vestido del destino y el encantamiento de poder con hechizos) y otra perla más barata, probablemente la negra, ha subido. Las nagas tienen poca vida y poca armadura: se pueden hacer de dos en dos desde los 40 y pico mientras subes. Estimado por hora: unas 110 nagas; la perla dorada, una cada dos o tres horas.",
+      "fuente": "Guía de Studen v1.1; Studen, YouTube (2026-11-15)", "fecha": "2026-11-19",
+      "enlace": "https://www.youtube.com/watch?v=WS8ynL0asV4"
     },
     {
       "id": "tela-vil",
@@ -1154,6 +1158,27 @@
       "fuente": "Kadrath, YouTube (transcripción que pasó Piti)",
       "fecha": "2026-11-11",
       "enlace": "https://www.youtube.com/watch?v=alGZP_4Pw20"
+    },
+    {
+      "id": "cocina-vendedor",
+      "nombre": "Cocinar para el vendedor con Master Chef",
+      "tipo": "crafteo",
+      "profesiones": [{"id": 185, "nivel": 1}],
+      "objetos": ["Hot Wolf Ribs", "Carrion Surprise", "Roast Raptor", "Seasoned Wolf Kabob", "Curiously Tasty Omelet", "Blood Sausage", "Boar Ribs"],
+      "notas": "Se compra la carne en la subasta y las especias al vendedor, se cocina junto a una hoguera y se vende todo al vendedor: oro puro, casi sin moverse. Solo compensa con el talento de Legacy de profesiones Master Chef (50 % de probabilidad de sacar uno más); sin él, con los precios de Piti casi todas las recetas quedan a cero. Studen sacó 9 de oro por hora con el kebab de lobo salpimentado (120 crafteos en 6 minutos, unos 3 segundos cada uno) y dice que se llega a 12 según la receta del día. Con los precios de Piti de hoy, lo que más deja por crafteo con Master Chef: costillas de lobo picantes y sorpresa de carroñero (unas 1,8 platas), raptor asado (1,5), kebab de lobo salpimentado (1,5) y la tortilla con un sabor curioso (1). Mira a cuánto está la carne antes de comprar: al comprar 100 de golpe sube. El talento de trueque abarata otro 10 % las especias. La varilla para remover que suelta las Minas de la Muerte (29 %) cocina un 25 % más rápido. Ideal para un alt o para quien no quiere farmear para la montura del 40.",
+      "fuente": "Studen, YouTube (2026-11-19)",
+      "fecha": "2026-11-19",
+      "enlace": "https://www.youtube.com/watch?v=lVW3ovlyANU"
+    },
+    {
+      "id": "semanal-oro-60",
+      "nombre": "Misión semanal de oro a nivel 60",
+      "tipo": "diario",
+      "nivel": 60,
+      "notas": "Desde la semana del 13 de noviembre hay una misión semanal para personajes de nivel 60 que da una cantidad de oro al azar, hasta 100. Cada semana pide algo distinto: esta (18 de noviembre) hay que hacer Cumbre de Roca Negra y Profundidades de Roca Negra. Hazla con cada personaje de 60 si la mazmorra de la semana es asequible.",
+      "fuente": "Wowhead (2026-11-13 y 2026-11-18)",
+      "fecha": "2026-11-19",
+      "enlace": "https://www.wowhead.com/news=383846/new-max-level-weekly-quest-rewards-up-to-100-gold-in-wow-forever"
     },
     {
       "id": "tinte-ceruleo",

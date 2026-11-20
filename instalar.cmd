@@ -21,6 +21,8 @@ dir /AL /B "%ADDONS%" 2>nul | findstr /X /I PitiGolds >nul && (
   echo He quitado el enlace antiguo de PitiGolds.
 )
 
+rem Para bajar las transcripciones de los vídeos de YouTube (novedades.cmd).
+"%PY%" -m pip install -q -r requirements.txt
 "%PY%" -m motor datos-juego
 rem Vigilar arranca solo y sin ventana con Windows (se quita con: python -m motor arranque --quitar).
 "%PY%" -m motor arranque

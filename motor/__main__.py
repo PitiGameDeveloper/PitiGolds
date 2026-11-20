@@ -31,7 +31,7 @@ from .config import Config, load_config
 from .gamedata import update_game_data
 from .merchantmap import update_merchant_map
 from .spawns import catalog_warnings, update_spawns
-from .fuentes import DEFAULT_DAYS, LOCAL_DIR, collect, load_sources, mark_done, word_text
+from .fuentes import DEFAULT_DAYS, LOCAL_DIR, collect, fetch_transcript, load_sources, mark_done, word_text
 from .generated import write_generated
 from .ingest import ingest_file
 from .leveling import plan_leveling
@@ -266,11 +266,11 @@ def cmd_fuentes(config: Config, days: float, done: list[int] | None, text_of: st
         if done is not None:
             print(f"{mark_done(conn, done, days)} novedades marcadas como revisadas.")
             return 0
-        rows, errors = collect(conn, load_sources(), days)
+        rows, errors = collect(conn, load_sources(), days, transcribe=fetch_transcript)
     finally:
         conn.close()
     for e in errors:
-        print(f"No he podido leer {e}")
+        print(e)
     if not rows:
         print(f"Nada nuevo en los últimos {days:g} días.")
         return 0

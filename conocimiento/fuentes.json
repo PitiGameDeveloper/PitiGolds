@@ -1,5 +1,5 @@
 {
-  "_formato": "Fuentes que revisa el asesor con /buscar-metodos (python -m motor fuentes). tipo: rss (Wowhead, Reddit, blogs: url del feed) o youtube (channel_id: el código UC... del canal, que sale en la dirección youtube.com/channel/UC...). filtro (opcional): expresión regular sobre título y resumen; lo que no la cumple no sale. max (opcional): novedades como mucho por fuente, 15 si no se dice. Además salen solos los archivos nuevos de la carpeta fuentes/ (PDF, Word, texto).",
+  "_formato": "Fuentes que revisa el asesor con /buscar-metodos (python -m motor fuentes). tipo: rss (Wowhead, Reddit, blogs: url del feed) o youtube (channel_id: el código UC... del canal, que sale en la dirección youtube.com/channel/UC...; de cada vídeo y short nuevo se baja la transcripción a fuentes/youtube/). filtro (opcional): expresión regular sobre título y resumen; lo que no la cumple no sale. max (opcional): novedades como mucho por fuente, 15 si no se dice. Además salen solos los archivos nuevos de la carpeta fuentes/ (PDF, Word, texto).",
   "fuentes": [
     {
       "nombre": "Wowhead: noticias de Forever",
@@ -12,6 +12,11 @@
       "tipo": "rss",
       "url": "https://www.reddit.com/r/woweconomy/new/.rss",
       "filtro": "forever"
+    },
+    {
+      "nombre": "YouTube: Studen Albatroz",
+      "tipo": "youtube",
+      "channel_id": "UCdstOzMVSXEjpBrNYyG_D0A"
     }
   ]
 }

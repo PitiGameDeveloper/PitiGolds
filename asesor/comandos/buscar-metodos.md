@@ -19,7 +19,8 @@ cuando quiere métodos nuevos o cuando el addon le avisa de que ningún método 
      crea; PDF con Read (por páginas si es largo);
    - enlaces de webs, con WebFetch, pidiendo solo los métodos concretos (dónde, nivel, profesión, objetos,
      cuánto da);
-   - de YouTube solo hay título y descripción: si parece importante y no hay transcripción, pídesela a Piti.
+   - vídeos de YouTube: si el resumen dice «Transcripción: <archivo>», léela con Read (cada trozo lleva su
+     minuto, `[4:10]`). Si no la tiene (el vídeo aún no tiene subtítulos) y parece importante, pídesela a Piti.
 4. **No puedes ver los vídeos.** Si la transcripción no basta para saber cómo funciona un método («farmea
    en esta zona» señalándola, «mata a estos» sin decir cuáles, una ruta que solo se ve en el mapa...):
    - añade el método igualmente con lo que sepas y pon la duda en `pendiente`;
