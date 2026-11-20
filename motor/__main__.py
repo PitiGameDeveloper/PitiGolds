@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import sqlite3
+import subprocess
 import sys
 import time
 import unicodedata
@@ -379,7 +380,24 @@ def _to_log(config: Config) -> Path:
     return log
 
 
+def _code_stamp() -> float:
+    """Última modificación del código del motor: si cambia, vigilar tiene que reiniciarse,
+    porque sigue con el código viejo cargado y escribiría Generated.lua con las cuentas viejas."""
+    return max((p.stat().st_mtime for p in Path(__file__).parent.rglob("*.py")), default=0.0)
+
+
+def _restart(lock) -> int:
+    """Suelta el bloqueo y arranca otro vigilar con el código nuevo; espera a que termine."""
+    print(f"[{time.strftime('%H:%M:%S')}] El código del motor ha cambiado: me reinicio para usar el nuevo.")
+    if lock is not None:
+        lock.close()
+    root = Path(__file__).resolve().parent.parent
+    return subprocess.call([sys.executable, "-m", "motor", *sys.argv[1:]], cwd=root)
+
+
 def cmd_vigilar(config: Config, interval: float, hidden: bool = False) -> int:
+    lock = None
+    code = _code_stamp()
     if sys.platform == "win32":
         lock = _only_one(config)
         if lock is None:
@@ -397,6 +415,9 @@ def cmd_vigilar(config: Config, interval: float, hidden: bool = False) -> int:
     seen: dict[str, float] = {}
     next_game_check = 0.0
     while True:
+        if _code_stamp() != code:
+            time.sleep(2)  # que termine de guardarse lo que se esté cambiando
+            return _restart(lock)
         if time.time() >= next_game_check:
             try:
                 check_game_data(config)
