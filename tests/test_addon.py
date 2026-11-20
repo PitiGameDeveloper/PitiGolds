@@ -419,6 +419,33 @@ class EscaneoAutomatico(unittest.TestCase):
         mock.Advance(6)
         self.assertEqual(self.lua.eval("Mock.peticiones"), 2)
 
+    def test_el_completo_espera_a_que_el_servidor_acepte_peticiones(self):
+        mock = self.mock
+        self.lua.execute("""PitiGoldsDB.autoScan = false
+          Mock.listo = false
+          C_AuctionHouse.IsThrottledMessageSystemReady = function() return Mock.listo end""")
+        self.contar_peticiones()
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Slash("completo")
+        mock.Advance(2)
+        self.assertEqual(self.lua.eval("Mock.peticiones"), 0)   # si se pide ahora, el servidor la tira
+        self.lua.execute("Mock.listo = true")
+        mock.Fire("AUCTION_HOUSE_THROTTLED_SYSTEM_READY")
+        self.assertEqual(self.lua.eval("Mock.peticiones"), 1)
+        mock.Advance(20)
+        self.assertEqual(len(self.fulls()), 1)
+
+    def test_si_no_avisa_de_que_esta_listo_se_pide_igual(self):
+        mock = self.mock
+        self.lua.execute("""PitiGoldsDB.autoScan = false
+          C_AuctionHouse.IsThrottledMessageSystemReady = function() return false end""")
+        self.contar_peticiones()
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Slash("completo")
+        mock.Advance(40)
+        self.assertEqual(self.lua.eval("Mock.peticiones"), 1)
+        self.assertEqual(len(self.fulls()), 1)
+
     def test_guarda_el_completo_que_llega_tarde(self):
         mock = self.mock
         self.lua.execute("""PitiGoldsDB.autoScan = false

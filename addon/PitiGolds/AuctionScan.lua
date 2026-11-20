@@ -30,6 +30,7 @@ local function Cancel(reason)
   Scan.state = "idle"
   Scan.token = Scan.token + 1
   Scan.pendingSend = nil
+  Scan.pendingReplicate = nil
   if reason then ns.Print(reason) end
   if ns.RefreshUI then ns.RefreshUI() end
 end
@@ -144,6 +145,7 @@ local function PendingReplicate()
 end
 
 local Settle
+local SendReplicate
 
 local function Adopt(why)
   Scan.token = Scan.token + 1
@@ -169,11 +171,30 @@ function Scan.StartFull(auto)
   Scan.state = "full_wait"
   Scan.token = Scan.token + 1
   Scan.startedAt = time()
-  C_AuctionHouse.ReplicateItems()
+  Scan.auto = auto
   ns.Print((auto and "escaneo completo automático en marcha" or "escaneo completo pedido al servidor")
     .. "; tarda un poco. Puedes buscar y comprar mientras tanto; si cierras la subasta, se guarda al volver.")
   if ns.RefreshUI then ns.RefreshUI() end
-  local token = Scan.token
+  -- Si el servidor de subastas aún no acepta mensajes (justo al abrirla, o tras una búsqueda),
+  -- tira la petición sin decir nada: se espera a que esté listo.
+  if not C_AuctionHouse.IsThrottledMessageSystemReady or C_AuctionHouse.IsThrottledMessageSystemReady() then
+    SendReplicate()
+  else
+    ns.Log("Escaneo completo: espero a que el servidor de subastas acepte la petición")
+    Scan.pendingReplicate = true
+    local token = Scan.token
+    C_Timer.After(15, function()  -- si el aviso de «listo» no llega, se pide igual
+      if Scan.token == token and Scan.pendingReplicate then SendReplicate() end
+    end)
+  end
+end
+
+function SendReplicate()
+  Scan.pendingReplicate = nil
+  if Scan.state ~= "full_wait" or not ns.ahOpen then return end
+  Scan.startedAt = time()
+  C_AuctionHouse.ReplicateItems()
+  local token, auto = Scan.token, Scan.auto
   C_Timer.After(FULL_TIMEOUT, function()
     if Scan.token == token and Scan.state == "full_wait" then
       PitiGoldsDB.lastFullTimeout = time()
@@ -239,6 +260,10 @@ end
 ns.AuctionSendWhenReady = SendWhenReady
 
 ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", function()
+  if Scan.pendingReplicate then  -- el completo va antes que nada: es una sola petición
+    SendReplicate()
+    return
+  end
   local fn = Scan.pendingSend
   if fn then
     Scan.pendingSend = nil
