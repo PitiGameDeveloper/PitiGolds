@@ -64,7 +64,8 @@ En los crafteos salen los pasos exactos con tus personajes:
   a Y». Cuando la aprendas, pulsa **Actualizar**.
 - **Si ya la sabes**, la lista de la compra con lo que tienes, contando bolsas, banco, buzón y banco de
   banda de todos tus personajes: qué le tiene que enviar cada personaje por correo al que fabrica, qué
-  comprar a qué vendedor (y en qué zona) y en la subasta, cuántas fabricar y a qué precio ponerlas.
+  comprar en la subasta (o, si un material no está en la subasta, a qué vendedor y en qué zona), cuántas
+  fabricar y a qué precio ponerlas.
 
 La pestaña tiene **todas las recetas del juego**: primero las que dan dinero, luego las que dan pérdida
 (con el beneficio en negativo y un aviso en sus pasos) y al final las que aún no tienen precio, con `?` y
@@ -152,7 +153,6 @@ extra. Ábrela como carpeta de una sesión en Claude Code (la app de escritorio,
 | «¿Qué hago hoy? Tengo 2 horas» (`que-hago`) | Lee tus datos y te da un plan: qué vender y a qué ritmo, qué craftear, qué farmear y qué medir. |
 | «Investiga» o «Busca métodos nuevos» (`buscar-metodos`) | Sesión de investigación: lee lo que has dejado en `fuentes/` y lo publicado en los últimos 7 días, y añade al catálogo los métodos concretos con lo que dan por hora. Lo que no se entienda sin ver un vídeo te lo pregunta, con el enlace. |
 | «Revisa los métodos» (`revisar`) | Pone nota del 1 al 10 a cada farmeo y crafteo según tus personajes, con el porqué y los pasos. Sale en el addon. |
-| «Mira los chollos» (`chollos`) | Comprueba en Wowhead si algún vendedor vende los posibles chollos y lo apunta (solo hace falta si no se han podido bajar los datos de Merchant Map). |
 | «¿Me compensa subir Sastrería?» (`subir-profesion`) | Guía de subida, coste, y si se recupera según el comparador. |
 
 El asesor no hace cuentas: las hace el motor y él las lee y te las explica. Solo edita los archivos de
@@ -208,15 +208,15 @@ ella a lo largo de 4 semanas según las horas que juegas (por defecto 10 a la se
 .venv\Scripts\python -m motor ajustes --horas-semana 12 --semanas 4
 ```
 
-Entran tus farmeos, tus crafteos rentables, la reventa desde vendedores, las mejores recetas de tus
+Entran tus farmeos, tus crafteos rentables, las mejores recetas de tus
 profesiones que aún no sabes y la mejor receta de cada profesión que no tienes. Para cada uno: oro por
-hora hoy y en 36 horas, máximo al día (crafteos y reventas), **inversión** (oro y horas de subir la
+hora hoy y en 36 horas, máximo al día (crafteos), **inversión** (oro y horas de subir la
 profesión y aprender la receta), **en cuánto se recupera**, **cuánto ganas** frente a tu referencia en
 esas semanas y un **veredicto**.
 
 Las cuentas:
 - Un **farmeo** ocupa tu tiempo: las horas de preparación no dan nada y el oro invertido se resta.
-- Un **crafteo o una reventa** los limita el mercado, no tu tiempo, así que se hacen además de farmear:
+- Un **crafteo** lo limita el mercado, no tu tiempo, así que se hace además de farmear:
   suman lo que el mercado absorbe cada día y restan el rato que le quitan a tu farmeo.
 - El oro por hora va del de hoy al previsto a 36 horas. Si tu farmeo actual va a bajar, un método nuevo
   puede compensar aunque hoy dé casi lo mismo.
@@ -378,7 +378,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    Los precios van por lo que tienes en el montón y, entre paréntesis, por unidad (`15p 0c (3p 0c)` si
    tienes 5). En verde sale lo que más deja por unidad: el vendedor o la subasta, a la que se le quita su 5 % de comisión.
 7. En la ventana de cada profesión, debajo de los materiales de la receta elegida, salen **Fabricar:**
-   (lo que cuestan los materiales de una fabricación, cada uno al mejor precio entre subasta y vendedor)
+   (lo que cuestan los materiales de una fabricación, cada uno a su precio de subasta, o al de vendedor si
+   no está en la subasta)
    y **Ganancia:** (lo que se cobra vendiendo lo fabricado, ya sin comisión, menos ese coste; en verde o
    en rojo). Son las mismas cuentas del informe, así que se ponen al día con cada `/reload`; si acabas de
    ver en la subasta alguno de sus materiales o lo fabricado, se recalculan al momento con ese precio
@@ -510,10 +511,12 @@ por ejemplo): de 12.500 objetos con precio, solo unos 1.900 los vende algún PNJ
 - **Comprobados en Forever** (unos 220 vendedores): precio de verdad, existencias limitadas, si se
   paga con divisa y lo del Classic que ya no venden.
 - **Lista del Classic** (sacada de Questie, unos 1.000 vendedores): qué vende cada uno, sin precio.
-  Se cuenta al precio de los datos del juego y sale como «sin comprobar».
+  Se cuenta al precio de los datos del juego y sale como «sin comprobar». Tampoco dice si las
+  existencias son limitadas: los materiales de botín (hierbas, tela, mineral...) se dan por limitados.
 
-Para el coste de un material manda, por este orden: el vendedor que has visto tú, el comprobado
-de Merchant Map y el de la lista del Classic. Solo cuentan los vendedores de la facción de tus
+Los precios de vendedor solo cuentan para el coste de un crafteo cuando el material no está en la
+subasta (ver «Coste de un crafteo»). Manda, por este orden: el vendedor que has
+visto tú, el comprobado de Merchant Map y el de la lista del Classic. Solo cuentan los vendedores de la facción de tus
 personajes, sin límite de existencias, que cobran en oro y que no son de fiestas. El precio
 comprobado lleva los descuentos de reputación de quien lo vio, así que si se parece (±15 %) se usa
 el de los datos del juego. Lo que no sale en Merchant Map se da por no vendido: ya no aparece la
@@ -540,21 +543,6 @@ catálogo (por el principio del nombre, en español o en inglés) y pasa sus sit
 `python -m motor metodos` avisa de los farmeos que se quedarían solo con la zona: sin bichos en el
 catálogo o con nombres que Questie no tiene. Las zonas nuevas de Forever (Clarofluvial) aún no salen en
 Questie: ahí el mapa se va llenando con los sitios donde matas tú.
-
-El informe añade:
-- **Comprar a vendedores y revender**: lo que un vendedor (visto por ti o de Merchant Map) vende por
-  debajo de lo que pagan en la subasta, con lo que da como mucho al día. La columna «Dato» dice de
-  dónde sale el precio; los «sin comprobar» conviene confirmarlos abriendo su ventana.
-- **Posibles chollos de vendedor**: solo si no se han podido bajar los datos de Merchant Map. Son
-  objetos de tus crafteos o farmeos que en la subasta (ya sin
-  comisión) se pagan al menos un 30 % más de lo que costaría comprárselos a un vendedor, si alguno los vende. Hay que mirar fuera del juego si alguien los vende:
-  - `python -m motor chollos` lista los que toca comprobar;
-  - `python -m motor chollo <id> nadie` o `python -m motor chollo <id> vende "Grimtak (Ratchet), Honorable"`
-    apunta lo encontrado (en la Fase 4 lo hará el asesor de Claude).
-
-  Si sale «nadie», se vuelve a mirar a la semana, a las dos y a las cuatro, y después solo con
-  versiones nuevas del juego. Los materiales de botín (tela, mineral, hierbas, cuero...) y lo que
-  farmeas se miran una vez y después solo con versiones nuevas.
 
 ## Datos del juego
 
@@ -602,8 +590,10 @@ Con estos datos el informe añade:
   el objeto) no rebaja lo que dijo un escaneo completo de hace menos de 6 horas; si el mínimo ha subido,
   sí manda. Con 3 escaneos o más en las últimas 36 horas se usa también la **mediana**,
   y nada se valora por encima de la mediana + 25 %.
-- **Coste de un crafteo**: cada material al precio más barato entre la subasta y un vendedor (si no tiene
-  límite de existencias). Los materiales opcionales no cuentan. Lo que se paga con divisas (Merchant's
+- **Coste de un crafteo**: cada material a su precio de subasta, aunque un vendedor lo venda más barato.
+  Solo si un material no está en la subasta se mira si lo vende un vendedor sin límite de existencias:
+  entonces cuenta a su precio y la descripción del crafteo dice a quién se compra y en qué zona. Si
+  tampoco lo vende nadie, el crafteo queda sin precio. Los materiales opcionales no cuentan. Lo que se paga con divisas (Merchant's
   Favor...) se muestra aparte.
 - **Lo que sacas**: precio de mercado de lo fabricado menos el 5 % de comisión y el depósito, o lo que
   paga el vendedor si es más.
@@ -625,12 +615,9 @@ Con estos datos el informe añade:
   compensa vendérselo al vendedor. El total del consejo ya cuenta con ese precio medio.
 - **Crafteos con mercado pequeño**: si puedes fabricar más de lo que se vende, la columna «Ya puedes
   hacer» dice cuántas hacer al día, y el beneficio enseña también el previsto a 36 horas («ya no
-  compensa» si el precio va a dejarlo en pérdidas). Lo mismo en la reventa desde vendedores.
+  compensa» si el precio va a dejarlo en pérdidas).
 - **Crafteos con espera** (tela lunar, transmutaciones): el máximo al día es lo que deja la espera, una por
   cada personaje que sabe la receta. Por eso compensa tener varios alters con la misma profesión.
-- **El 30 % de los posibles chollos** es solo un filtro para decidir qué merece la pena mirar fuera del
-  juego, no una garantía de beneficio: si se confirma un vendedor, la reventa pasa por las mismas cuentas
-  de ritmo y previsión.
 
 Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 

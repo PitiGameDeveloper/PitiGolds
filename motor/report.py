@@ -150,14 +150,6 @@ def _missing_hint(p) -> str:
     return p.name
 
 
-def _later_cell(profit: int, week: int | None) -> str:
-    if week is None:
-        return ""
-    if week <= 0:
-        return "ya no compensa"
-    return format_money(week)
-
-
 def _profit_cell(profit: int, week: int | None) -> str:
     """Beneficio de hoy y, si va a cambiar mucho, el previsto a 36 horas."""
     text = format_money(profit)
@@ -216,40 +208,6 @@ def _business_section(a: Analysis, limit: int) -> list[str]:
                         format_money(e.profit) if e.profit is not None else "?",
                         format_money(e.per_hour) if e.per_hour is not None else ""]
                        for e in trading[:limit]])
-    return out
-
-
-def _vendor_sections(a: Analysis, limit: int) -> list[str]:
-    out = []
-    if a.vendor_flips:
-        out += ["", "## Comprar a vendedores y revender", "",
-                "Vendedores que venden por debajo de lo que pagan en la subasta: los que has visto y los de "
-                "Merchant Map. Los «sin comprobar» salen de la lista del Classic, al precio de los datos del juego: "
-                "abre su ventana para confirmarlo.", ""]
-        out += _table(["Objeto", "Vendedor", "Dato", "Compras a", "Vendes por", "Ganas por unidad", "En 36 horas",
-                       "Como mucho al día",
-                       "Existencias"],
-                      [[f.name, f.vendor, f.source, format_money(f.buy), format_money(f.sell), format_money(f.profit),
-                        _later_cell(f.profit, f.profit_later),
-                        format_money(f.gold_per_day) if f.gold_per_day is not None else "",
-                        "limitadas" if f.limited else "sin límite"] for f in a.vendor_flips[:limit]])
-    candidates = a.vendor_candidates
-    if candidates:
-        due = sum(1 for c in candidates if c.due)
-        out += ["", "## Posibles chollos de vendedor", "",
-                "Objetos de tus crafteos o farmeos que en la subasta (ya sin comisión) se pagan al menos un 30 % más "
-                "de lo que costaría comprárselos a un vendedor. No se sabe si alguno lo vende: hay que mirarlo fuera del juego. Los materiales de "
-                "botín (tela, mineral, hierbas...) y lo que farmeas se miran una vez y después solo con versiones "
-                "nuevas del juego.",
-                "",
-                f"Toca comprobar {due}. Lista: python -m motor chollos. Para apuntar lo que encuentres: "
-                "python -m motor chollo <id> nadie, o python -m motor chollo <id> vende \"vendedor, zona y condiciones\".",
-                ""]
-        out += _table(["Objeto", "ID", "Por qué importa", "Si lo vende alguien, ganarías", "Resultado",
-                       "Siguiente comprobación"],
-                      [[c.name, c.item_id, c.why, f"{format_money(c.gain)} por unidad",
-                        c.status + (f": {c.detail}" if c.detail else ""), c.next_check]
-                       for c in candidates[:limit]])
     return out
 
 
@@ -400,7 +358,6 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
                    "ponles nombre con /pg farmeo <nombre>.")
 
     out += _business_section(a, limit)
-    out += _vendor_sections(a, limit)
 
     notes = []
     no_price = [s.name for s in a.sales if s.action == "sin precio"]
@@ -644,7 +601,7 @@ def build_plan_section(methods, baseline, settings) -> list[str]:
                    "addon lo medirá solo.")
     out.append(f"Juegas {settings.hours_per_week:g} h a la semana y se compara a {settings.horizon_weeks:g} semanas "
                "(cámbialo con python -m motor ajustes --horas-semana N --semanas N).")
-    out.append("En crafteos y reventas, el oro por hora es por hora de gestión; lo que de verdad los limita es "
+    out.append("En crafteos, el oro por hora es por hora de gestión; lo que de verdad los limita es "
                "el máximo al día, y se hacen además de farmear.")
     if settings.legacy_skillup:
         out.append(f"Las guías de subida cuentan con tu talento de Legacy (+{settings.legacy_skillup:g} % de "

@@ -12,6 +12,10 @@ Precio de cada oferta: el comprobado puede llevar descuentos de reputación de q
 que se usa el de los datos del juego si se parece (±15 %) y, si no, el comprobado. Lo que solo sale
 en la lista del Classic se cuenta al precio de los datos del juego, como «sin comprobar». Los dos
 son por compra (un lote de vendor_stack unidades) y se pasan a precio por unidad.
+
+La lista del Classic no dice si las existencias son limitadas. Los vendedores de material de botín
+(hierbas, tela, mineral...) las tienen limitadas casi siempre, así que esas ofertas sin comprobar se
+cuentan como limitadas: no sirven para el coste de un crafteo (Vi'el no vende Gromsanguina sin fin).
 """
 
 from __future__ import annotations
@@ -29,6 +33,8 @@ SOURCE = "https://raw.githubusercontent.com/knofle/MerchantMap/main"
 FILES = ["VendorData.lua", "VerifiedData.lua"]
 REFRESH_DAYS = 7
 PRICE_MATCH = 0.15       # el precio de los datos del juego vale si está a ±15 % del comprobado
+TRADEGOODS = 7           # gd_items.class_id de los materiales
+LOOT_SUBCLASSES = {5, 6, 7, 8, 9, 10, 12}  # tela, cuero, metal y piedra, carne, hierba, elemental, encantamiento
 
 _STRING = r'"((?:[^"\\]|\\.)*)"'
 _CLASSIC = re.compile(r'^\[(\d+)\]=\{' + _STRING + r',(?:nil|"(?:[^"\\]|\\.)*"),"(\w*)",(\d+),[-0-9.]+,[-0-9.]+,'
@@ -188,12 +194,6 @@ def has_data(conn: sqlite3.Connection) -> bool:
     return conn.execute("SELECT 1 FROM mm_vendor_items LIMIT 1").fetchone() is not None
 
 
-def sold_item_ids(conn: sqlite3.Connection) -> set[int]:
-    """Objetos que algún vendedor vende por oro (para buscar reventas)."""
-    return {r[0] for r in conn.execute("SELECT DISTINCT item_id FROM mm_vendor_items WHERE currency = 0 "
-                                       "AND holiday = 0")}
-
-
 def _sides(conn: sqlite3.Connection) -> set[str]:
     """Facciones de tus personajes: A, H o las dos si no hay ninguno."""
     found = {r[0] for r in conn.execute("SELECT DISTINCT faction FROM characters WHERE faction IS NOT NULL")}
@@ -216,9 +216,12 @@ def known_vendors(conn: sqlite3.Connection) -> dict[int, KnownVendor]:
     Fuera los de fiestas y los de la otra facción."""
     sides = _sides(conn)
     # buy_price: lo que cobra un vendedor por vendor_stack unidades.
-    catalog = {r[0]: (r[1] or None, max(r[2] or 1, 1)) for r in conn.execute(
-        "SELECT item_id, buy_price, vendor_stack FROM gd_items WHERE item_id IN "
-        "(SELECT item_id FROM mm_vendor_items)")}
+    catalog, loot = {}, set()
+    for r in conn.execute("SELECT item_id, buy_price, vendor_stack, class_id, subclass_id FROM gd_items "
+                          "WHERE item_id IN (SELECT item_id FROM mm_vendor_items)"):
+        catalog[r[0]] = (r[1] or None, max(r[2] or 1, 1))
+        if r[3] == TRADEGOODS and r[4] in LOOT_SUBCLASSES:
+            loot.add(r[0])
     best: dict[int, tuple] = {}
     counts: dict[int, int] = {}
     rows = conn.execute(
@@ -234,7 +237,9 @@ def known_vendors(conn: sqlite3.Connection) -> dict[int, KnownVendor]:
         item_id = r["item_id"]
         counts[item_id] = counts.get(item_id, 0) + 1
         price = None if r["currency"] else offer_price(r["price"], *catalog.get(item_id, (None, 1)))
-        k = KnownVendor(vendor=r["vendor"], zone=r["zone"], price=price, limited=bool(r["limited"]),
+        # Material de botín sin comprobar: casi seguro que con existencias limitadas.
+        limited = bool(r["limited"]) or (not r["verified"] and item_id in loot)
+        k = KnownVendor(vendor=r["vendor"], zone=r["zone"], price=price, limited=limited,
                         currency=bool(r["currency"]), verified=bool(r["verified"]))
         rank = (k.currency, k.price is None, k.limited, not k.verified, k.price or 0)
         if item_id not in best or rank < best[item_id][0]:

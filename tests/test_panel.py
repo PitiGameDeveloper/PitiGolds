@@ -184,6 +184,9 @@ class Panel(unittest.TestCase):
         self.assertEqual(rows[101].prep[0], "Grom: le faltan 10 puntos de Costura (200/210).")
         self.assertEqual((rows[100].crafts_day, rows[100].reagents[0].vendor, rows[100].reagents[0].zone),
                          (4, "Tejedor", "Orgrimmar"))
+        # El paño no está en la subasta: la descripción dice a quién se compra.
+        self.assertIn("Paño no está en la subasta: se cuenta comprado a Tejedor (Orgrimmar) por 5 p 0 c la unidad.",
+                      rows[100].details)
         self.assertEqual([r.recipe_id for r in panel.crafts][:2], [100, 101])
         # El verdict propone hacer antes el crafteo rápido.
         self.assertIn("Antes, fabrica 4 × Prenda 100 con Grom", "\n".join(panel.verdict.lines))

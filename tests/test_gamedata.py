@@ -114,8 +114,10 @@ class Importacion(unittest.TestCase):
         c.execute("INSERT INTO scans VALUES ('s', 'full', 1000, 0, 0, 'R', 'Horde', 'A-R', 0, 'X')")
         c.executemany("INSERT INTO prices VALUES ('s', ?, ?, 10, 1, 1, NULL, ?)", [
             (2840, 300, 300), (2845, 5000, 5000), (118, 100, 100), (2447, 20, 20), (765, 30, 30), (9100, 1500, 1500),
+            (2880, 100, 100),
         ])
-        c.execute("INSERT INTO vendor_items (item_id, price, limited, vendor) VALUES (2880, 100, 0, 'Grimtak')")
+        # Aunque un vendedor lo venda más barato, el material se compra en la subasta.
+        c.execute("INSERT INTO vendor_items (item_id, price, limited, vendor) VALUES (2880, 50, 0, 'Grimtak')")
         c.commit()
 
         a = analyze(c)

@@ -788,6 +788,10 @@ class AddonMasMotor(unittest.TestCase):
             # Cuántos caben en cada pila (de los datos del juego): el depósito de la subasta es por pila.
             conn.executemany("INSERT INTO gd_items (item_id, stackable) VALUES (?, ?)",
                              [(i, 20) for i in (2589, 2592, 2770, 2840, 2880, 818, 5000)] + [(2845, 1)])
+            # Los materiales se compran siempre en la subasta: el flujo también tiene que estar allí.
+            conn.execute("INSERT INTO scans (scan_id, type, time) VALUES ('flujo', 'search', 1)")
+            conn.execute("INSERT INTO prices (scan_id, item_id, min_price, quantity, market_price) "
+                         "VALUES ('flujo', 2880, 100, 50, 100)")
             a = analyze(conn)
             crafts = {c.recipe_id: c for c in a.crafts}
             smelt, axe, helm = crafts[1001], crafts[1002], crafts[1003]
@@ -795,10 +799,10 @@ class AddonMasMotor(unittest.TestCase):
             self.assertEqual((smelt.cost, smelt.value, smelt.profit), (120, 280, 160))
             self.assertEqual(smelt.craftable_now, 15)
             self.assertEqual(smelt.difficulty_name, "amarilla")
-            # 6 barras a 300 en la subasta + flujo a 100 del vendedor; el paño opcional no cuenta. El hacha
+            # 6 barras a 300 y flujo a 100, todo en la subasta; el paño opcional no cuenta. El hacha
             # no se apila: pierde la plata entera de depósito.
             self.assertEqual((axe.cost, axe.value, axe.profit), (1900, 4650, 2750))
-            self.assertEqual([r.source for r in axe.reagents], ["subasta", "vendedor"])
+            self.assertEqual([r.source for r in axe.reagents], ["subasta", "subasta"])
             self.assertFalse(helm.known)
             self.assertEqual([m.name for m in helm.missing], ["Barra de bronce"])
             self.assertEqual(helm.currencies, ["10 Favor del mercader"])
@@ -838,7 +842,7 @@ class AddonMasMotor(unittest.TestCase):
             # Ventana de profesión: coste y ganancia de la receta elegida, bajo los materiales.
             self.assertIn('[1002] = "1900,2750",', content)
             # Y su desglose, para recalcularla en el juego con lo que se vea en la subasta.
-            self.assertIn('[1002] = "2845,1,4650,18,100|2840:6:300:;2880:1:100:100",', content)
+            self.assertIn('[1002] = "2845,1,4650,18,100|2840:6:300:;2880:1:100:",', content)
             lua.execute('''
               local form = Mock.NewFrame()
               form.Reagents = Mock.NewFrame()
@@ -870,7 +874,7 @@ class AddonMasMotor(unittest.TestCase):
             self.assertFalse(info.shown)
 
             # Ventana de métodos: el hacha ya la sabe hacer, así que salen los pasos con lo que tiene.
-            self.assertIn("vendor = \"Grimtak\"", content)
+            self.assertNotIn("vendor = \"Grimtak\"", content)   # los materiales, solo de la subasta
             mock.ClickButton("Mejor farmeo")
             methods = mock.ns.Methods
             methods.Open("crafts")
@@ -878,7 +882,8 @@ class AddonMasMotor(unittest.TestCase):
             methods.Select(names.index("Hacha de cobre") + 1)
             detail = methods.DetailText()
             self.assertIn("Hoy: 1 × Hacha de cobre con Brujo", detail)
-            self.assertIn("Viaja a Durotar, habla con Grimtak y compra x1 Flujo débil", detail)
+            self.assertNotIn("Grimtak", detail)
+            self.assertIn("Flujo débil", detail)
             self.assertNotIn("Barra de cobre (", detail)   # las 6 barras ya están en su banco
             self.assertIn("Fabrica x1 Hacha de cobre con Brujo.", detail)
             self.assertIn("Ponlo en la subasta: x1 a", detail)
@@ -1523,12 +1528,16 @@ class Contabilidad(unittest.TestCase):
             conn = dbmod.connect(Path(tmp) / "p.db")
             self.assertEqual(ingest_file(conn, "TEST#1", sv).ledger_events, len(self.events))
             self.assertEqual(ingest_file(conn, "TEST#1", sv).ledger_events, 0)  # no se duplica
+            # Los materiales se compran siempre en la subasta: el flujo también tiene que estar allí.
+            conn.execute("INSERT INTO scans (scan_id, type, time) VALUES ('flujo', 'search', 1)")
+            conn.execute("INSERT INTO prices (scan_id, item_id, min_price, quantity, market_price) "
+                         "VALUES ('flujo', 2880, 100, 50, 100)")
             a = analyze(conn)
             items = {e.name: e for e in a.business.items}
             axe = items["Hacha de cobre"]
             self.assertEqual(axe.origin, "fabricado")
             self.assertEqual((axe.crafted, axe.posted, axe.sold), (2, 2, 1))
-            # 6 lingotes a lo que te costaron (300) + flujo del vendedor (100).
+            # 6 lingotes a lo que te costaron (300) + flujo de la subasta (100).
             self.assertEqual(axe.unit_cost, 1900)
             self.assertEqual(axe.deposits_lost, 50)
             self.assertEqual(axe.profit, 5000 - 250 - 1900 - 50)

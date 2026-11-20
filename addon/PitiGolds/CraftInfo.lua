@@ -9,7 +9,9 @@ local AH_CUT = 0.05
 
 -- La receta con lo último visto en la subasta (tus búsquedas o un escaneo que el motor aún no ha
 -- leído). Parte del desglose del motor (recipeParts): "objeto,unidades,valor,venta,depósito|
--- material:cantidad:coste:tienda;...". Devuelve coste y ganancia, o nil si no hay nada más nuevo.
+-- material:cantidad:coste:tienda;...". tienda solo viene si el motor no lo vio en la subasta y lo
+-- cuenta a precio de vendedor: si ahora sí se ve en la subasta, manda la subasta.
+-- Devuelve coste y ganancia, o nil si no hay nada más nuevo.
 local function LiveCraft(detail)
   if type(detail) ~= "string" or not ns.ScanMarket then return nil end
   local head, parts = detail:match("^([^|]*)|(.*)$")
@@ -22,8 +24,7 @@ local function LiveCraft(detail)
     local seen = ns.ScanMarket(tonumber(item))
     if seen then
       used = true
-      local vendor = tonumber(shop)
-      price = vendor and math.min(vendor, seen) or seen
+      price = seen
     end
     if not price then return nil end
     cost = cost + price * tonumber(qty)

@@ -5,7 +5,7 @@ horizonte (4 semanas por defecto) según las horas que juegas a la semana:
 
   - Farmeos: ocupan tu tiempo. Si hay que prepararlos (subir una profesión), las horas de
     preparación no dan nada y el oro invertido se resta.
-  - Crafteos y reventas: los limita el mercado, no tu tiempo. Se hacen además de tu farmeo:
+  - Crafteos: los limita el mercado, no tu tiempo. Se hacen además de tu farmeo:
     dan lo que el mercado absorbe cada día, menos el rato que le quitan a tu farmeo.
 
 En los dos casos el oro por hora (o por día) va cambiando del de hoy al previsto a 36 horas, y
@@ -20,7 +20,6 @@ import sqlite3
 from dataclasses import dataclass, field
 
 from .analysis import Analysis
-from .business import MARKET_SHARE
 from .crafting import profession_levels
 from .db import get_meta, set_meta
 from .leveling import LevelingPlan, plan_leveling
@@ -30,7 +29,6 @@ DEFAULT_HOURS_PER_WEEK = 10.0
 DEFAULT_HORIZON_WEEKS = 4.0
 DEFAULT_MIN_GOLD_HOUR = 5.0   # por debajo de este oro por hora, un farmeo «no da dinero»
 MIN_BASELINE_HOURS = 0.5      # un farmeo de menos de media hora no sirve de referencia
-FLIP_SECONDS = 15             # comprar al vendedor y poner a la venta, por unidad
 MAX_LEARN_OPTIONS = 5
 MAX_OTHER_PROFESSIONS = 3
 
@@ -73,11 +71,11 @@ def save_settings(conn: sqlite3.Connection, settings: Settings) -> None:
 @dataclass
 class Method:
     name: str
-    kind: str                         # farmeo, crafteo o reventa
+    kind: str                         # farmeo o crafteo
     who: str | None = None
-    per_hour: int | None = None       # crafteos y reventas: por hora de gestión
+    per_hour: int | None = None       # crafteos: por hora de gestión
     per_hour_later: int | None = None
-    per_day_cap: int | None = None    # crafteos y reventas: lo máximo al día
+    per_day_cap: int | None = None    # crafteos: lo máximo al día
     per_day_cap_later: int | None = None
     minutes_per_day: float | None = None
     measured: bool = False
@@ -199,18 +197,6 @@ def build_methods(conn: sqlite3.Connection, a: Analysis, s: Settings | None = No
     for c in a.crafts:
         if c.known and c.complete and c.profit > 0:
             methods.append(_craft_method(c, f"Fabricar {c.name}", c.known_by[0]))
-
-    for f in a.vendor_flips:
-        m = Method(name=f"Revender {f.name} de {f.vendor}", kind="reventa", per_hour=f.profit * 3600 // FLIP_SECONDS)
-        if f.sales_per_day:
-            units = f.sales_per_day * MARKET_SHARE
-            m.per_day_cap = f.gold_per_day
-            m.minutes_per_day = units * FLIP_SECONDS / 60
-            if f.profit_later is not None and f.profit:
-                m.per_day_cap_later = round(f.gold_per_day * max(0.0, f.profit_later / f.profit))
-        if f.limited:
-            m.notes.append("existencias limitadas: el máximo real puede ser menor")
-        methods.append(m)
 
     levels = profession_levels(conn)
     primaries = _primaries(conn)

@@ -6,8 +6,6 @@
     python -m motor informe    qué craftear, qué aprender y qué vender
     python -m motor datos-juego  descarga las recetas y objetos del juego (wago.tools), qué vende
                                cada vendedor (Merchant Map) y dónde salen los bichos (Questie)
-    python -m motor chollos    posibles chollos de vendedor que toca comprobar fuera del juego
-    python -m motor chollo <id> nadie | vende "detalle"   apunta lo que encuentres
     python -m motor ajustes --horas-semana 10 --semanas 4 --legado-subida 0   para comparar métodos
     python -m motor guia herreria [--desde 50] [--hasta 150]  guía de subida con su coste
     python -m motor metodos    los métodos de tus guías (conocimiento/metodos.json) con tus precios
@@ -31,7 +29,7 @@ from .libranzas import writ_problems
 from .catalogo import CATALOG_PATH, catalog_problems, load_catalog
 from .config import Config, load_config
 from .gamedata import update_game_data
-from .merchantmap import has_data, update_merchant_map
+from .merchantmap import update_merchant_map
 from .spawns import catalog_warnings, update_spawns
 from .fuentes import DEFAULT_DAYS, LOCAL_DIR, collect, load_sources, mark_done, word_text
 from .generated import write_generated
@@ -43,7 +41,6 @@ from .planner import build_methods, load_settings, save_settings
 from .report import build_advice_report, build_guides_section, build_report, guide_filename, render_guide
 from .recoleccion import route_problems
 from .revision import review_problems
-from .vendors import record_check
 
 
 def write_report(conn: sqlite3.Connection, config: Config, analysis=None, panel=None) -> str:
@@ -483,43 +480,6 @@ def cmd_estado(config: Config) -> int:
     return 0
 
 
-def cmd_chollos(config: Config, show_all: bool) -> int:
-    if not config.db_path.exists():
-        print("Todavía no hay base de datos. Ejecuta antes: python -m motor leer")
-        return 1
-    conn = dbmod.connect(config.db_path)
-    try:
-        candidates = analyze(conn).vendor_candidates
-        known = has_data(conn)
-    finally:
-        conn.close()
-    shown = candidates if show_all else [c for c in candidates if c.due]
-    if not shown:
-        if known and not candidates:
-            print("No hay nada que comprobar: los datos de Merchant Map ya dicen quién vende cada cosa. "
-                  "Lo que vende algún PNJ por debajo de la subasta sale en el informe, en «Comprar a vendedores "
-                  "y revender».")
-        else:
-            print("No toca comprobar ninguno." if candidates else "No hay posibles chollos de vendedor.")
-        return 0
-    print("Mira si algún vendedor los vende (en Wowhead, la pestaña «Vendido por»)\n"
-          "y apúntalo con: python -m motor chollo <id> nadie | vende \"vendedor, zona y condiciones\"\n")
-    for c in shown:
-        print(f"{c.item_id:>7}  {c.name:<32} {c.why:<34} si lo vende alguien: +{format_money(c.gain)}/ud"
-              + (f"  [{c.status}{': ' + c.detail if c.detail else ''}]" if c.status != "sin comprobar" else ""))
-    return 0
-
-
-def cmd_chollo(config: Config, item_id: int, result: str, detail: str | None) -> int:
-    conn = dbmod.connect(config.db_path)
-    try:
-        record_check(conn, item_id, sold=(result == "vende"), detail=detail)
-    finally:
-        conn.close()
-    print(f"Apuntado: {item_id} {result}" + (f" ({detail})" if detail else "") + ".")
-    return 0
-
-
 def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -535,12 +495,6 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("informe", help="qué craftear, qué recetas aprender y qué vender")
     game = sub.add_parser("datos-juego", help="descarga las recetas y objetos del juego de wago.tools")
     game.add_argument("--forzar", action="store_true", help="vuelve a importarlos aunque estén al día")
-    deals = sub.add_parser("chollos", help="posibles chollos de vendedor que toca comprobar fuera del juego")
-    deals.add_argument("--todos", action="store_true", help="también los que no toca comprobar todavía")
-    deal = sub.add_parser("chollo", help="apunta si algún vendedor vende un objeto")
-    deal.add_argument("item_id", type=int)
-    deal.add_argument("resultado", choices=["nadie", "vende"])
-    deal.add_argument("detalle", nargs="?", help="vendedor, zona y condiciones (si lo vende alguien)")
     settings = sub.add_parser("ajustes", help="horas que juegas a la semana y semanas a comparar")
     settings.add_argument("--horas-semana", type=float)
     settings.add_argument("--semanas", type=float)
@@ -576,10 +530,6 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_fuentes(config, args.dias, args.hecho, args.texto)
     if args.cmd == "guia":
         return cmd_guia(config, args.profesion, args.desde, args.hasta)
-    if args.cmd == "chollos":
-        return cmd_chollos(config, args.todos)
-    if args.cmd == "chollo":
-        return cmd_chollo(config, args.item_id, args.resultado, args.detalle)
     if args.cmd == "informe":
         return cmd_informe(config)
     if args.cmd == "datos-juego":

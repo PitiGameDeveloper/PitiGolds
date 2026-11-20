@@ -22,7 +22,6 @@ Ejecútalo desde esta carpeta (si no existe `../.venv`, usa `python` a secas):
 | `metodos` | Comprueba el conocimiento y rehace la ventana de métodos del addon y `../datos/panel.md` |
 | `guia <profesión> [--desde N] [--hasta N]` | Guía de subida con su coste |
 | `cajones` | Qué cajón saqueado sale más barato llenar por punto de favor de mercader (cajón + su lote más barato) |
-| `chollos [--todos]` / `chollo <id> nadie\|vende "detalle"` | Posibles chollos de vendedor |
 | `fuentes [--dias N]` / `fuentes --hecho [N ...]` | Novedades de las fuentes sin revisar |
 | `ajustes [--horas-semana N] [--semanas N] [--legado-subida N] [--minimo-hora N]` | Ajustes (horas de juego, talento de Legacy, oro/h mínimo) |
 | `estado` | Resumen de personajes, oro y profesiones |
@@ -69,7 +68,6 @@ hoy?», «busca métodos nuevos»...), lee el guion y síguelo. `$ARGUMENTS` es 
   en `../fuentes/` y lo publicado estos días, convertido en métodos del catálogo con lo que dan por hora.
   También cuando Piti diga «investiga» (el addon se lo pide si ningún método guardado da dinero).
 - `revisar [qué]` (`comandos/revisar.md`): nota del 1 al 10, por qué y pasos de cada método para Piti.
-- `chollos` (`comandos/chollos.md`): comprueba fuera del juego si algún vendedor vende los posibles chollos.
 - `subir-profesion <profesión> [nivel]` (`comandos/subir-profesion.md`): si compensa subirla, cuánto
   cuesta y cómo.
 

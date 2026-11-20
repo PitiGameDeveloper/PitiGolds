@@ -154,22 +154,15 @@ class ItemPrice:
 
     @property
     def buy_price(self) -> int | None:
-        """Lo que cuesta conseguir una unidad: en la subasta o a un vendedor sin límite."""
-        options = []
-        if self.market is not None:
-            options.append(self.market)
-        if self.shop_price:
-            options.append(self.shop_price)
-        return min(options) if options else None
+        """Lo que cuesta conseguir una unidad: en la subasta. Solo si no está en la subasta, a un
+        vendedor sin límite (aunque un vendedor lo tenga más barato, se compra en la subasta)."""
+        return self.market if self.market is not None else self.shop_price
 
     @property
     def buy_source(self) -> str | None:
-        price = self.buy_price
-        if price is None:
-            return None
-        if self.shop_price == price:
-            return "vendedor"
-        return "subasta"
+        if self.market is not None:
+            return "subasta"
+        return "vendedor" if self.shop_price else None
 
 
 def load_prices(conn: sqlite3.Connection, item_ids: Iterable[int] | None = None) -> dict[int, ItemPrice]:

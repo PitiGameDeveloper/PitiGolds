@@ -76,7 +76,7 @@ def recipe_parts(c, prices: dict) -> str:
     """Desglose de una receta para que el addon la recalcule con los precios que ve en la subasta:
     "objeto,unidades,valor,venta_vendedor,depósito|material:cantidad:coste:tienda;..."
     valor: lo que el motor cobra por lo fabricado (por fabricación); coste: lo que el motor paga por
-    unidad del material; tienda: lo que cuesta a un vendedor sin límite (vacío si no hay)."""
+    unidad del material; tienda: lo que cuesta al vendedor si no está en la subasta (vacío si no)."""
     out = prices.get(c.output_item_id) if c.output_item_id else None
     head = ",".join([
         _num(c.output_item_id), _num(c.output_qty), _num(c.value),
@@ -86,8 +86,8 @@ def recipe_parts(c, prices: dict) -> str:
     for r in c.reagents:
         if r.item_id is None:
             continue
-        p = prices.get(r.item_id)
-        shop = p.shop_price if p is not None else None
+        # Tienda: solo si el material no está en la subasta y se cuenta a precio de vendedor.
+        shop = r.unit_cost if r.source == "vendedor" else None
         parts.append(f"{r.item_id}:{r.quantity}:{_num(r.unit_cost)}:{_num(shop)}")
     return head + "|" + ";".join(parts)
 

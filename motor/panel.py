@@ -766,6 +766,11 @@ def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None
     d.append(f"Beneficio: {format_money(row.profit_item)} por unidad (se vende a {format_money(row.sell_price)}, "
              f"materiales {format_money(round(c.cost / c.output_qty))})"
              + (f". Aproximado: {row.approx_why}" if row.approx else "") + ".")
+    for r in row.reagents:
+        if r.source == "vendedor":
+            where = (f" a {r.vendor}" + (f" ({r.zone})" if r.zone else "")) if r.vendor else " a un vendedor"
+            d.append(f"{r.name} no está en la subasta: se cuenta comprado{where} por "
+                     f"{format_money(r.unit_price)} la unidad.")
     if row.per_day is not None:
         cap = c.capacity
         limit = "su espera" if cap.by_cooldown else "el mercado"

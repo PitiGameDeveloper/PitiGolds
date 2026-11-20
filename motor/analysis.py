@@ -13,10 +13,8 @@ from .catalogo import CatalogEntry, CatalogError, GuideMethod, evaluate_catalog,
 from .crafting import CraftResult, evaluate_recipes, recipe_item_ids
 from .farming import FarmSession, FarmSummary, farm_item_ids, load_sessions, summarize, value_sessions
 from .market import Backtest, MarketSignals, backtest, compute_signals, load_series
-from .merchantmap import sold_item_ids
 from .pricing import ItemPrice, load_prices
 from .selling import SellAdvice, advise
-from .vendors import VendorCandidate, VendorFlip, vendor_candidates, vendor_flips
 
 
 @dataclass
@@ -30,8 +28,6 @@ class Analysis:
     farms: list[FarmSession] = field(default_factory=list)
     farm_summary: list[FarmSummary] = field(default_factory=list)
     business: Business = field(default_factory=Business)
-    vendor_flips: list[VendorFlip] = field(default_factory=list)
-    vendor_candidates: list[VendorCandidate] = field(default_factory=list)
     guide_methods: list[GuideMethod] = field(default_factory=list)
     guide_unknown_items: list[str] = field(default_factory=list)   # objetos de las guías sin reconocer
     guide_resolved: dict[str, int] = field(default_factory=dict)   # nombre en las guías -> objeto
@@ -104,7 +100,7 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
     except (ValueError, KeyError, TypeError):
         writs = WritBook()
     ids = (set(owned) | recipe_item_ids(conn) | farm_item_ids(conn) | ledger_ids | vendor_ids
-           | sold_item_ids(conn) | set(resolved.values()) | DISENCHANT_MATERIALS | crate_item_ids(crates)
+           | set(resolved.values()) | DISENCHANT_MATERIALS | crate_item_ids(crates)
            | writ_item_ids(writs))
     prices = load_prices(conn, ids)
 
@@ -130,8 +126,6 @@ def analyze(conn: sqlite3.Connection, catalog: list[CatalogEntry] | None = None)
     result.farms = load_sessions(conn)
     value_sessions(conn, result.farms, prices, signals)
     result.farm_summary = summarize(result.farms)
-    result.vendor_flips = vendor_flips(conn, prices, signals)
-    result.vendor_candidates = vendor_candidates(conn, prices, crafts, result.farms)
     result.crates = crates
     result.crate_costs = evaluate_crates(crates, prices)
     result.writs = writs
