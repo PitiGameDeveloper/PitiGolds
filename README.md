@@ -312,7 +312,9 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
      15 minutos por cuenta** (contando los de Auctionator): cuando ya ha llegado uno, el addon no pide
      otro hasta que pasen y te dice a qué hora puedes. Una petición que no llegó a contestarse no
      cuenta. Si el servidor tarda más de 3 minutos en contestar, se da por perdido, pero si la lista
-     llega después se guarda igual.
+     llega después se guarda igual. Si el que se da por perdido es el automático, no se vuelve a
+     pedir solo hasta 15 minutos después (te avisa una vez, no cada vez que abres la subasta);
+     PG: Completo sí lo puede pedir antes.
      `/pg auto` lo apaga o lo vuelve a encender.
    - **Fabricar x**: cuántas veces quieres fabricar la receta del botón **Buscar** (empieza con el número
      que tengas junto a «Crear todo»). Al abrir uno de sus materiales para comprarlo se marca solo lo que

@@ -176,7 +176,11 @@ function Scan.StartFull(auto)
   local token = Scan.token
   C_Timer.After(FULL_TIMEOUT, function()
     if Scan.token == token and Scan.state == "full_wait" then
-      Cancel("el servidor no respondió al escaneo completo. Si llega más tarde se guarda solo;"
+      PitiGoldsDB.lastFullTimeout = time()
+      ns.Log("Escaneo completo: el servidor no respondió")
+      Cancel(auto and ("el servidor no respondió al escaneo completo automático; no lo vuelvo a pedir"
+        .. " solo hasta las %s. Si llega más tarde se guarda solo."):format(date("%H:%M", time() + REPLICATE_EVERY))
+        or "el servidor no respondió al escaneo completo. Si llega más tarde se guarda solo;"
         .. " si no, vuelve a pedirlo con PG: Completo.")
     end
   end)
@@ -588,8 +592,11 @@ ns.On("OWNED_AUCTIONS_UPDATED", RecordOwnedAuctions)
 
 -- Apertura y cierre de la subasta -------------------------------------------------------
 
+-- Si el servidor dejó sin contestar un completo, el automático no insiste hasta 15 minutos
+-- después: cada intento sin respuesta solo da otro aviso. PG: Completo sí se puede pedir.
 local function AutoScanDue()
   return PitiGoldsDB.autoScan ~= false and time() - (PitiGoldsDB.lastFull or 0) >= AUTO_EVERY
+    and time() - (PitiGoldsDB.lastFullTimeout or 0) >= REPLICATE_EVERY
 end
 
 local function OnAuctionHouseOpened()

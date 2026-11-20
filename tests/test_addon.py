@@ -400,6 +400,25 @@ class EscaneoAutomatico(unittest.TestCase):
         self.assertEqual(self.lua.eval("Mock.peticiones"), 2)
         self.assertNotEqual(mock.ns.Scan.state, "idle")
 
+    def test_el_automatico_no_insiste_si_no_contesta(self):
+        mock = self.mock
+        self.contar_peticiones(contesta=False)
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(200)               # el automático se da por perdido
+        self.assertEqual(mock.ns.Scan.state, "idle")
+        avisos = self.lua.eval("#Mock.chat")
+        for _ in range(3):              # abrir y cerrar la subasta no lo vuelve a pedir
+            mock.Fire("AUCTION_HOUSE_CLOSED")
+            mock.Fire("AUCTION_HOUSE_SHOW")
+            mock.Advance(200)
+        self.assertEqual(self.lua.eval("Mock.peticiones"), 1)
+        self.assertEqual(self.lua.eval("#Mock.chat"), avisos)
+        mock.Fire("AUCTION_HOUSE_CLOSED")
+        mock.Advance(15 * 60)
+        mock.Fire("AUCTION_HOUSE_SHOW")
+        mock.Advance(6)
+        self.assertEqual(self.lua.eval("Mock.peticiones"), 2)
+
     def test_guarda_el_completo_que_llega_tarde(self):
         mock = self.mock
         self.lua.execute("""PitiGoldsDB.autoScan = false
