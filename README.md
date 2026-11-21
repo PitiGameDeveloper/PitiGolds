@@ -5,7 +5,7 @@ Addon personal para WoW Forever que ayuda a decidir en qué gastar el tiempo par
 - **Fase 0 (hecha):** recoger datos (personajes, profesiones, recetas, inventario, divisas, vendedores y
   los precios de la subasta de Auctionator) y guardarlos con su histórico en una base de datos.
 - **Fase 1 (hecha):** valorar lo que tienes, ver qué crafteos dan beneficio, qué recetas te convendría
-  aprender y qué vender, dónde y a qué precio. Los precios salen también en el tooltip de cada objeto.
+  aprender y qué vender, dónde y a qué precio. El tooltip de cada objeto dice cuánto ganas fabricándolo.
 - **Fase 2 (hecha):** señales de mercado y previsión a 36 horas (con su acierto medido sobre el propio
   historial), y registro de tus farmeos con tu oro por hora real.
 - **Fase 3 (hecha):** comparador de métodos, guía de subida de profesión con su coste y cuándo se
@@ -309,7 +309,7 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    arrastrándolo.
 3. **Los precios de la subasta salen de Auctionator** (hace falta tenerlo instalado; si no, PitiGolds avisa
    al entrar, al abrir la subasta y en su panel). PitiGolds no escanea la subasta: escanéala con el botón
-   de Auctionator, o busca con él lo que te interese. Lo que ve Auctionator lo usan al momento el tooltip,
+   de Auctionator, o busca con él lo que te interese. Lo que ve Auctionator lo usan al momento
    la ventana de profesión, la sesión y las pestañas Cajones y Libranzas; al salir o con `/reload` el addon
    copia su base de precios (el último mínimo de cada objeto y, por día, el mínimo más bajo, el más alto
    y cuántas unidades había, de las dos últimas semanas) para que la lea el motor. `/pg auctionator` dice
@@ -356,9 +356,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 5. Haz doble clic en **`informe.cmd`** para ver qué hacer: crafteos rentables, recetas que te convendría
    aprender y qué vender. Queda guardado también en `datos/informe.md`.
 6. Tras el siguiente `/reload`, al pasar el ratón por un objeto verás en su tooltip:
-   - **Venta:** lo que paga el vendedor (sustituye a la línea «Precio de venta» del juego).
-   - **Subasta:** el precio de mercado, una **flecha verde hacia arriba** si el motor ve que va a subir
-     en las próximas 36 horas o **roja hacia abajo** si va a bajar (sin flecha si no está claro).
+   - Los precios de venta al vendedor y de la subasta no los pone PitiGolds: salen en las líneas de
+     Auctionator (con Auctionator, PitiGolds quita además la línea «Precio de venta» del juego).
    - Si sabes fabricarlo, cuánto cuesta y cuánto ganas.
    - **Desencantar:** si es un arma o armadura verde, azul o morada, lo que sale al desencantarla (con la
      probabilidad de cada material, de la tabla clásica) y lo que vale cada material en la subasta; arriba,
@@ -422,7 +421,7 @@ tus recetas):
 Son reglas fijas, sin IA, y su acierto se mide repitiendo la previsión en momentos pasados: el informe
 dice qué porcentaje acertó y cuánto habría acertado decir siempre «estable». Si no supera a eso, no te
 fíes de ella. Con confianza media o alta, la previsión cambia los consejos: lo que tiende a bajar se
-vende ya aunque esté barato, y lo que sube se espera. En el tooltip sale como una flecha verde (sube) o roja (baja).
+vende ya aunque esté barato, y lo que sube se espera.
 
 Todo el motor usa la **última semana** (`HISTORY_DAYS` en `motor/pricing.py`): la mediana y la tendencia.
 La previsión es a 36 horas (`OUTLOOK_DAYS` en `motor/market.py`): «sube» o «baja» sale de ella, y el precio
@@ -575,7 +574,7 @@ Con estos datos el informe añade:
 
 - **Precio de mercado**: el de Auctionator. De hoy, su último mínimo (lo que enseña él); de los días
   anteriores, el mínimo más alto que vio cada día, así una sola unidad de cebo no hunde el historial.
-  El tooltip, el recuadro de fabricación y la sesión usan al momento lo último que ha visto Auctionator.
+  El recuadro de fabricación y la sesión usan al momento lo último que ha visto Auctionator.
   Con precios de 3 días o más de la última semana se usa también la **mediana**,
   y nada se valora por encima de la mediana + 25 %.
 - **Coste de un crafteo**: cada material a su precio de subasta, aunque un vendedor lo venda más barato.

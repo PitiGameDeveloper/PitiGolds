@@ -1,5 +1,5 @@
--- Añade al tooltip de cada objeto lo que ha calculado el motor: precio de mercado
--- en la subasta, si va a subir o bajar (flecha verde o roja) y cuánto cuesta fabricarlo.
+-- Añade al tooltip de cada objeto lo que ha calculado el motor: cuánto cuesta fabricarlo, lo que
+-- sale al desencantarlo y cuántos tienes. Los precios de venta y de subasta los pone Auctionator.
 local ADDON, ns = ...
 
 -- Iconos de moneda del juego. GetCoinTextureString ya no es global en todos los clientes
@@ -37,13 +37,12 @@ function ns.MarketPrice(itemID)
 end
 
 local LABEL_R, LABEL_G, LABEL_B = 0.9, 0.7, 0.1
-local BEST_R, BEST_G, BEST_B = 0.25, 1, 0.25
-local AUCTION_CUT = 0.05 -- la subasta se queda el 5 % de lo vendido
 
 -- Lo que ya hemos puesto en cada tooltip para el objeto que enseña.
--- Las líneas se ponen en cuanto el juego da su precio de venta (lo quitamos y va como «Venta»),
--- o al final si el objeto no tiene precio de venta. Así no dependemos del orden en que el
--- cliente procesa las líneas ni de si llama a los post-calls tras quitar una.
+-- Las líneas se ponen en cuanto el juego da su precio de venta (con Auctionator, que ya lo
+-- enseña, quitamos la línea del juego), o al final si el objeto no tiene precio de venta.
+-- Así no dependemos del orden en que el cliente procesa las líneas ni de si llama a los
+-- post-calls tras quitar una.
 local shown = {}
 local hooked = {}
 
@@ -54,44 +53,6 @@ local function Mark(tooltip, itemID, by)
     hooked[tooltip] = true
     pcall(tooltip.HookScript, tooltip, "OnTooltipCleared", function(self) shown[self] = nil end)
   end
-end
-
-local function ItemSellPrice(itemID)
-  local getInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
-  if not getInfo then return nil end
-  local price = select(11, getInfo(itemID))
-  if type(price) == "number" and price > 0 then return price end
-end
-
--- Cuántas unidades hay en el montón que señala el ratón (bolsas, banco, correo, vendedor...).
-local function StackCount(tooltip, itemID, sellTotal)
-  local owner = tooltip.GetOwner and tooltip:GetOwner()
-  if type(owner) == "table" then
-    if owner.GetBagID and owner.GetID and C_Container and C_Container.GetContainerItemInfo then
-      local ok, bag = pcall(owner.GetBagID, owner)
-      local info = ok and bag and C_Container.GetContainerItemInfo(bag, owner:GetID())
-      if info and info.stackCount and info.stackCount > 0 then return info.stackCount end
-    end
-    if type(owner.count) == "number" and owner.count > 0 then return owner.count end
-  end
-  -- Si no, lo sacamos del precio de venta del juego, que viene por el montón entero.
-  local unit = ItemSellPrice(itemID)
-  if sellTotal and unit and sellTotal % unit == 0 then return sellTotal / unit end
-  return 1
-end
-
--- Flechas de color (la fuente del juego no trae «↑» ni «↓»): la de las listas, teñida.
--- |Truta:alto:ancho:x:y:anchoTextura:altoTextura:izq:der:arriba:abajo:r:g:b|t
-local ARROW_UP = "|TInterface\\Buttons\\Arrow-Up-Up:14:14:0:-2:16:16:0:16:0:16:64:255:64|t"
-local ARROW_DOWN = "|TInterface\\Buttons\\Arrow-Down-Up:14:14:0:2:16:16:0:16:0:16:255:64:64|t"
-
--- Lo que vale el montón que tienes (no uno lleno) y, entre paréntesis, la unidad.
-
-local function PriceText(unit, count, total)
-  if count > 1 then
-    return ns.Money(total or unit * count) .. " |cffcccccc(" .. ns.Money(unit) .. ")|r"
-  end
-  return ns.Money(total or unit)
 end
 
 -- Cuántos tienes: este personaje en bolsas y banco, el banco de banda y tus otros personajes
@@ -160,53 +121,10 @@ local function AddOwnedLines(tooltip, itemID)
   end
 end
 
-local function AddLines(tooltip, itemID, sellTotal)
+local function AddLines(tooltip, itemID)
   local gen = PitiGoldsGenerated
   if not itemID then return end
-  local price = type(gen) == "table" and gen.prices and gen.prices[itemID]
   local craft = type(gen) == "table" and gen.craft and gen.craft[itemID]
-  local count = StackCount(tooltip, itemID, sellTotal)
-
-  -- "mercado,mediana,tendencia,ventas" (mediana de 36 horas; tendencia: b = baja, s = sube;
-  -- ventas: unidades vendidas al día, estimadas)
-  local market, _, trend, sales
-  if price then market, _, trend, sales = price:match("^(%d*),(%d*),?(%a*),?([%d%.]*)$") end
-  market = tonumber(market)
-  -- Lo último que vio Auctionator manda sobre el precio del motor.
-  local seen = ns.LivePrice and ns.LivePrice(itemID)
-  if seen then market = seen end
-
-  local sellUnit = sellTotal and (ItemSellPrice(itemID) or math.floor(sellTotal / count))
-  -- En verde lo que más deja por unidad: la subasta, quitada su comisión, o el vendedor.
-  local auctionWins = market and sellUnit and market * (1 - AUCTION_CUT) > sellUnit
-  local sellWins = market and sellUnit and not auctionWins
-
-  if sellTotal then
-    local right = PriceText(sellUnit, count, sellTotal)
-    if sellWins then
-      tooltip:AddDoubleLine("Venta:", right, BEST_R, BEST_G, BEST_B, 1, 1, 1)
-    else
-      tooltip:AddDoubleLine("Venta:", right, LABEL_R, LABEL_G, LABEL_B, 1, 1, 1)
-    end
-  end
-
-  if market then
-    local right = PriceText(market, count)
-    if sales and sales ~= "" then
-      right = right .. "  |cffccccccventas/día: " .. sales .. "|r"
-    end
-    -- Hacia dónde va el precio en las próximas 36 horas, según el motor.
-    if trend == "b" then
-      right = right .. " " .. ARROW_DOWN
-    elseif trend == "s" then
-      right = right .. " " .. ARROW_UP
-    end
-    if auctionWins then
-      tooltip:AddDoubleLine("Subasta:", right, BEST_R, BEST_G, BEST_B, 1, 1, 1)
-    else
-      tooltip:AddDoubleLine("Subasta:", right, LABEL_R, LABEL_G, LABEL_B, 1, 1, 1)
-    end
-  end
 
   if craft then
     -- "coste,beneficio" de la receta conocida más barata
@@ -244,19 +162,21 @@ if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and
     end
   end
 
-  -- Pone nuestras líneas con el precio de venta del juego. Devuelve true si lo ha hecho,
-  -- y entonces quien llama quita la línea del juego. Un precio con máximo (rango) se deja.
+  -- Pone nuestras líneas en el sitio del precio de venta del juego. Devuelve true si lo ha hecho,
+  -- y entonces quien llama quita la línea del juego: solo con Auctionator, que ya enseña lo que
+  -- paga el vendedor. Un precio con máximo (rango) se deja.
   local function ShowWithSellPrice(tooltip, price, maxPrice)
+    if not (ns.Auctionator and ns.Auctionator.Available()) then return false end
     price, maxPrice = tonumber(price), tonumber(maxPrice)
     if not price or price <= 0 or (maxPrice and maxPrice > price) then return false end
     local itemID = TooltipItemID(tooltip)
     if not itemID then return false end
-    AddLines(tooltip, itemID, price)
+    AddLines(tooltip, itemID)
     Mark(tooltip, itemID, "pre")
     return true
   end
 
-  -- Quitamos la línea «Precio de venta» del juego y ponemos las nuestras en su sitio.
+  -- Quitamos la línea «Precio de venta» del juego (la enseña Auctionator) y ponemos las nuestras.
   local lineTypes = Enum.TooltipDataLineType
   if TooltipDataProcessor.AddLinePreCall and lineTypes and lineTypes.SellPrice then
     TooltipDataProcessor.AddLinePreCall(lineTypes.SellPrice, function(tooltip, lineData)
@@ -274,7 +194,7 @@ if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and
     if original then
       GameTooltip:SetScript("OnTooltipAddMoney", function(self, cost, maxCost, ...)
         local ok, done = pcall(function()
-          -- Si el post-call ya puso la subasta, aquí solo falta la venta: dejamos la del juego.
+          -- Si el post-call ya puso nuestras líneas, dejamos la del juego.
           local mark = shown[self]
           if mark and mark.by == "post" and mark.id == TooltipItemID(self) then return false end
           return ShowWithSellPrice(self, cost, maxCost)

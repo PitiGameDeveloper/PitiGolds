@@ -77,7 +77,9 @@ class PasosDeUnCrafteoConPerdida(unittest.TestCase):
         self.assertTrue(steps[2].startswith("Hoy: 1 × Madeja"))
 
 
-class TooltipVentaYSubasta(unittest.TestCase):
+class TooltipSinPrecios(unittest.TestCase):
+    """Los precios de venta y de subasta los enseña Auctionator: PitiGolds no los repite."""
+
     def setUp(self):
         lua = LuaRuntime(unpack_returned_tuples=True)
         lua.execute(f'dofile("{lua_path(TESTS_DIR / "wow_mock.lua")}")')
@@ -85,60 +87,23 @@ class TooltipVentaYSubasta(unittest.TestCase):
         self.mock = lua.globals().Mock
         self.lua = lua
         self.mock.LoadAddon(lua_path(ADDON_DIR), lua.table_from(toc_files()))
-        # Barra de cobre: 3p en subasta y 10c en el vendedor. Ojo de tigre: 1p 40c y 1p 50c.
-        lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,,", [818] = "140,140," } }')
+        lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,250,s,4.5" } }')
 
-    def test_quita_la_linea_del_juego_y_pone_venta(self):
-        tooltip = self.mock.Tooltip(2840, 1, 10)
-        self.assertNotIn("Precio de venta", tooltip)
-        self.assertEqual(tooltip.split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c", TIENES])
+    def test_sin_venta_ni_subasta(self):
+        self.assertEqual(self.mock.Tooltip(2840, 1, 10), TIENES)
+        self.assertEqual(self.mock.Tooltip(2840, 3), TIENES)
 
-    def test_por_unidad_y_por_el_monton(self):
-        tooltip = self.mock.Tooltip(2840, 5, 50)
-        self.assertIn("Venta: = 50c |cffcccccc(10c)|r", tooltip)
-        self.assertIn("[verde] Subasta: = 15p 0c |cffcccccc(3p 0c)|r", tooltip)
-
-    def test_el_monton_sale_del_precio_del_juego(self):
-        tooltip = self.mock.Tooltip(2840, None, 70)
-        self.assertIn("21p 0c |cffcccccc(3p 0c)|r", tooltip)
-
-    def test_verde_al_vendedor_si_la_subasta_deja_menos(self):
-        # 1p 40c menos el 5 % de comisión no llega al 1p 50c del vendedor.
-        tooltip = self.mock.Tooltip(818, 1, 150)
-        self.assertEqual(tooltip.split("\n"), ["[verde] Venta: = 1p 50c", "Subasta: = 1p 40c"])
-
-    def test_sin_precio_de_venta_solo_subasta(self):
-        self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 9p 0c |cffcccccc(3p 0c)|r\n" + TIENES)
-
-    def test_muestra_las_ventas_diarias_si_el_motor_las_tiene(self):
-        self.lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,,,4.5", [818] = "140,140,s," } }')
-        self.assertIn("|cffccccccventas/día: 4.5|r", self.mock.Tooltip(2840, 1, 10))
-        # Sin ventas en el dato no sale la línea.
-        self.assertNotIn("ventas/día", self.mock.Tooltip(818, 1, 150))
-
-    def test_flecha_verde_si_sube_y_roja_si_baja_sin_la_mediana(self):
-        self.lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,250,s,", [818] = "140,170,b," } }')
-        up = self.mock.Tooltip(2840, 1, 10)
-        self.assertIn("Arrow-Up-Up", up)
-        self.assertIn(":64:255:64|t", up)          # verde
-        self.assertNotIn("36 horas", up)
-        self.assertNotIn("2p 50c", up)              # ni la mediana
-        down = self.mock.Tooltip(818, 1, 150)
-        self.assertIn("Arrow-Down-Up", down)
-        self.assertIn(":255:64:64|t", down)         # roja
-        # Si no se sabe hacia dónde va, sin flecha.
-        self.lua.execute('PitiGoldsGenerated = { prices = { [2840] = "300,250,," } }')
-        self.assertNotIn("Arrow-", self.mock.Tooltip(2840, 3))
+    def test_sin_auctionator_se_queda_la_linea_del_juego(self):
+        self.lua.execute("Auctionator = nil")
+        self.assertEqual(self.mock.Tooltip(2840, 1, 10), "Precio de venta: 10\n" + TIENES)
 
     def test_sale_aunque_el_cliente_no_llame_a_los_post_calls(self):
-        tooltip = self.mock.Tooltip(2840, 1, 10, True)
-        self.assertEqual(tooltip.split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c", TIENES])
+        self.assertEqual(self.mock.Tooltip(2840, 1, 10, True), TIENES)
 
     def test_pasar_el_raton_otra_vez_no_repite_ni_pierde_lineas(self):
         for _ in range(3):
-            self.assertEqual(self.mock.Tooltip(2840, 1, 10).split("\n"), ["Venta: = 10c", "[verde] Subasta: = 3p 0c", TIENES])
-            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 9p 0c |cffcccccc(3p 0c)|r\n" + TIENES)
-            self.assertEqual(self.mock.Tooltip(2840, 3), "Subasta: = 9p 0c |cffcccccc(3p 0c)|r\n" + TIENES)
+            self.assertEqual(self.mock.Tooltip(2840, 1, 10), TIENES)
+            self.assertEqual(self.mock.Tooltip(2840, 3), TIENES)
 
 
 class IconosDeMoneda(unittest.TestCase):
@@ -185,8 +150,6 @@ class SubastaEnVivoYCompra(unittest.TestCase):
     def test_usa_al_momento_el_precio_de_auctionator(self):
         mock = self.mock
         mock.AuctionatorPrice(2840, 400, 50)
-        # El tooltip ya enseña el precio nuevo.
-        self.assertIn("Subasta: = 4p 0c", mock.Tooltip(2840, 1, 10))
         # Y la receta se recalcula: 6 × 4p + 1p de flujo = 25p; 46p 50c - 25p = 21p 50c.
         self.assertEqual(mock.ns.CraftInfoText(1002),
                          "Fabricar: |cffffffff25p 0c|r\nGanancia: |cff40ff4021p 50c|r"
@@ -709,7 +672,7 @@ class AddonMasMotor(unittest.TestCase):
             lua.execute(f'dofile("{generated.as_posix()}")')
 
             tooltip = mock.Tooltip(2840)
-            self.assertIn("Subasta: = 3p 0c", tooltip)
+            self.assertNotIn("Subasta", tooltip)
             self.assertIn("PitiGolds fabricar = 1p 20c  |cff40ff40+1p 60c|r", tooltip)
             self.assertEqual(mock.Tooltip(123456), "")
 
