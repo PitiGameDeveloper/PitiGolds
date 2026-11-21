@@ -231,7 +231,7 @@ class Panel(unittest.TestCase):
         c.capacity = None
         row = self.build([], [c]).crafts[0]
         self.assertGreater(row.profit_item, 0)
-        self.assertEqual((row.profit_note, row.per_day_note), ("", "faltan escaneos"))
+        self.assertEqual((row.profit_note, row.per_day_note), ("", "sin datos"))
 
     def test_lo_que_sabes_sale_aunque_de_perdida(self):
         def loss(c):

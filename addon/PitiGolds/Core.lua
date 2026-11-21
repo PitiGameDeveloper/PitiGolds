@@ -3,10 +3,6 @@ local ADDON, ns = ...
 
 ns.VERSION = "0.5.9"
 ns.SCHEMA = 1
--- Escaneos que se guardan como máximo mientras el motor no los haya leído.
--- Un escaneo completo de un mega-reino puede ocupar varios MB y WoW carga todo
--- el archivo en cada /reload, así que no conviene acumular muchos.
-ns.MAX_PENDING_SCANS = 5
 
 local PREFIX = "|cffe6b422PitiGolds|r: "
 
@@ -161,36 +157,6 @@ function ns.NoteItem(itemID, name)
   end
 end
 
--- Quita escaneos viejos hasta dejar MAX_PENDING_SCANS. Primero se van los de tus búsquedas
--- (uno por visita a la subasta, con pocos objetos), para no perder un escaneo completo.
-local function TrimScans(scans)
-  while #scans > ns.MAX_PENDING_SCANS do
-    local victim = 1
-    for i = 1, #scans - 1 do
-      if scans[i].type == "search" then victim = i break end
-    end
-    table.remove(scans, victim)
-  end
-end
-
-function ns.AddScan(scan)
-  local scans = PitiGoldsDB.scans
-  scans[#scans + 1] = scan
-  TrimScans(scans)
-end
-
--- Quita los escaneos que el motor ya ha guardado en su base de datos.
-function ns.PruneScans()
-  local gen = PitiGoldsGenerated
-  local upTo = (type(gen) == "table" and tonumber(gen.ingestedUpTo)) or 0
-  local kept = {}
-  for _, scan in ipairs(PitiGoldsDB.scans) do
-    if (scan.time or 0) > upTo then kept[#kept + 1] = scan end
-  end
-  TrimScans(kept)
-  PitiGoldsDB.scans = kept
-end
-
 local function InitDB()
   PitiGoldsDB = PitiGoldsDB or {}
   local db = PitiGoldsDB
@@ -204,13 +170,14 @@ local function InitDB()
   db.vendorItems = db.vendorItems or {}
   db.farmLog = db.farmLog or {}
   db.ledger = db.ledger or {}
-  db.scans = db.scans or {}
+  -- De cuando PitiGolds escaneaba la subasta: ahora los precios salen de Auctionator.
+  db.scans, db.lastFull, db.lastFullRequest, db.lastFullReply, db.lastFullTimeout, db.autoScan =
+    nil, nil, nil, nil, nil, nil
   db.discovery = db.discovery or {}
   db.log = db.log or {}
   db.ui = db.ui or {}
   local version, build, buildDate, toc = GetBuildInfo()
   db.client = { version = version, build = build, buildDate = buildDate, toc = toc }
-  ns.PruneScans()
   for _, event in ipairs(ns.missingEvents) do
     ns.Log("Evento no disponible en este cliente: " .. event)
   end
@@ -258,12 +225,8 @@ ns.Command("estado", "resumen de lo que hay guardado", function()
   for _ in pairs(db.characters) do nChars = nChars + 1 end
   for _ in pairs(db.recipes) do nRecipes = nRecipes + 1 end
   ns.Print(("personaje: %s | personajes: %d | recetas vistas: %d"):format(ns.charKey or "?", nChars, nRecipes))
-  local last = db.scans[#db.scans]
-  if last then
-    ns.Print(("escaneos por leer en el PC: %d | último: %s, %d objetos, hace %d min"):format(
-      #db.scans, last.type, last.count or 0, math.floor((time() - last.time) / 60)))
-  else
-    ns.Print("no hay escaneos por leer en el PC")
+  if ns.Auctionator and not ns.Auctionator.Warn() then
+    ns.Print("precios de la subasta: los de Auctionator (/pg auctionator)")
   end
   local gen = PitiGoldsGenerated
   if type(gen) == "table" and (gen.generatedAt or 0) > 0 then

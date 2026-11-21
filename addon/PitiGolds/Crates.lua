@@ -2,7 +2,7 @@
 -- caro. Cada cajón se llena con UNO de sus lotes (20 de polvo extraño, o 4 esencias...): cuenta el
 -- más barato, más lo que cuesta el cajón, y lo divide entre el favor que da. Qué pide cada uno lo
 -- pone el motor (crates en Generated.lua, de conocimiento/cajones.json). Solo cuenta la subasta:
--- lo que acabas de ver en ella o, si no, los precios del motor, como el tooltip.
+-- lo último que ha visto Auctionator o, si no, los precios del motor, como el tooltip.
 -- La lista va en árbol: cada cajón y debajo sus lotes, del más barato al más caro (precio por la
 -- cantidad que pide). Al pulsar un lote se buscan en la subasta el cajón y ese lote, y al abrirlos
 -- se marca la cantidad, como con el botón Buscar de la profesión.
@@ -385,7 +385,7 @@ end
 ns.On("AUCTION_HOUSE_SHOW", OnAuctionShow)
 ns.On("PLAYER_INTERACTION_MANAGER_FRAME_SHOW", OnAuctionShow)
 
--- Lo que acabas de ver en la subasta cambia las cuentas.
+-- Los precios nuevos de Auctionator cambian las cuentas.
 local previousLive = ns.OnLivePrices
 function ns.OnLivePrices()
   if previousLive then previousLive() end

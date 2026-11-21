@@ -12,7 +12,6 @@ from typing import Any
 
 from .db import set_meta
 from .luaparse import as_dict, as_list, parse_saved_variables
-from .pricing import market_price
 
 WARBAND_KEY = "_warband"
 AUCTION_STATUS_ACTIVE = 0  # Enum.AuctionStatus.Active
@@ -43,8 +42,8 @@ class IngestReport:
     path: Path
     characters: int = 0
     recipes: int = 0
-    new_scans: int = 0
-    new_prices: int = 0
+    auctionator_items: int = 0   # objetos con precio en la copia de Auctionator
+    auctionator_time: int = 0    # cuándo se copió (0: no había copia)
     farm_buckets: int = 0
     ledger_events: int = 0
 
@@ -64,7 +63,8 @@ def ingest_file(conn: sqlite3.Connection, account: str, path: Path) -> IngestRep
         report.recipes = _ingest_recipes(conn, db)
         _ingest_vendors(conn, account, as_dict(db.get("vendorItems")))
         _ingest_trainers(conn, as_dict(db.get("trainerRecipes")))
-        report.new_scans, report.new_prices = _ingest_scans(conn, account, as_list(db.get("scans")))
+        report.auctionator_items, report.auctionator_time = _ingest_auctionator(
+            conn, account, as_dict(db.get("auctionator")))
         report.farm_buckets = _ingest_farm(conn, as_dict(db.get("farmLog")))
         report.ledger_events = _ingest_ledger(conn, as_list(db.get("ledger")))
         _ingest_misc(conn, account, db, now)
@@ -261,41 +261,69 @@ def _ingest_trainers(conn: sqlite3.Connection, trainers: dict) -> None:
     )
 
 
-# Escaneos de subasta -------------------------------------------------------------------
+# Precios de Auctionator ----------------------------------------------------------------
 
-def _parse_price(entry: str) -> tuple[int, int, int | None, int | None, str | None]:
-    """'mínimo,cantidad[,subastas,vendedores][|libro]' -> tupla."""
-    head, _, book = entry.partition("|")
-    parts = head.split(",")
-    min_price = int(float(parts[0]))
-    quantity = int(float(parts[1]))
-    auctions = int(parts[2]) if len(parts) > 2 else None
-    owners = int(parts[3]) if len(parts) > 3 else None
-    return min_price, quantity, auctions, owners, (book or None)
+DAY = 86400
+AUCTIONATOR = "auctionator"
 
 
-def _ingest_scans(conn: sqlite3.Connection, account: str, scans: list) -> tuple[int, int]:
-    new_scans = new_prices = 0
-    for s in scans:
-        scan_time = int(s.get("time") or 0)
-        scan_id = f"{scan_time}-{s.get('char')}-{s.get('type')}"
-        cur = conn.execute(
-            "INSERT OR IGNORE INTO scans VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (scan_id, s.get("type"), scan_time, s.get("started"), s.get("duration"), s.get("realm"),
-             s.get("faction"), s.get("char"), s.get("count"), account),
-        )
-        if cur.rowcount == 0:
-            continue  # ya estaba en la base de datos
-        rows = []
-        for item_id, entry in as_dict(s.get("items")).items():
-            if isinstance(entry, str):
-                min_price, quantity, auctions, owners, book = _parse_price(entry)
-                rows.append((scan_id, int(item_id), min_price, quantity, auctions, owners, book,
-                             market_price(min_price, quantity, book)))
-        conn.executemany("INSERT OR REPLACE INTO prices VALUES (?, ?, ?, ?, ?, ?, ?, ?)", rows)
-        new_scans += 1
-        new_prices += len(rows)
-    return new_scans, new_prices
+def _parse_auctionator(entry: str) -> tuple[int, list[tuple[int, int, int, int]]]:
+    """'último|día:mínimo:máximo:unidades;...' -> (último, [(día, mínimo, máximo, unidades)])."""
+    last, _, history = entry.partition("|")
+    days = []
+    for part in history.split(";"):
+        fields = part.split(":")
+        if len(fields) == 4:
+            day, low, high, units = (int(float(f)) for f in fields)
+            days.append((day, low, high, units))
+    return int(float(last)), sorted(days)
+
+
+def _ingest_auctionator(conn: sqlite3.Connection, account: str, data: dict) -> tuple[int, int]:
+    """La copia de la base de precios de Auctionator (Auctionator.lua del addon) pasa a la base de
+    datos como un escaneo por día. El precio de cada día es el mínimo más alto que vio Auctionator
+    ese día (una unidad suelta de cebo no lo hunde); el del último día de cada objeto, su último
+    mínimo. Los días de antes de ayer que ya estaban no se vuelven a escribir."""
+    exported = int(data.get("time") or 0)
+    day0 = data.get("day0")
+    items = as_dict(data.get("items"))
+    if not exported or day0 is None or not items:
+        return 0, 0
+    day0 = int(day0)
+    today = int(data.get("today") or (exported - day0) // DAY)
+    realm = str(data.get("realm") or "?")
+    faction = data.get("faction")
+    prefix = f"{AUCTIONATOR}-{realm}-"
+    known = {row[0] for row in conn.execute("SELECT scan_id FROM scans WHERE scan_id LIKE ?", (prefix + "%",))}
+
+    def scan_id(day: int) -> str:
+        return f"{prefix}{day}"
+
+    def writes(day: int) -> bool:
+        return day >= today - 1 or scan_id(day) not in known
+
+    rows: dict[int, list[tuple]] = {}
+    count = 0
+    for item_id, entry in items.items():
+        if not isinstance(entry, str):
+            continue
+        last, days = _parse_auctionator(entry)
+        if not days:
+            continue
+        count += 1
+        for i, (day, _low, high, units) in enumerate(days):
+            if writes(day):
+                price = last if i == len(days) - 1 else high
+                rows.setdefault(day, []).append((scan_id(day), int(item_id), price, units or None,
+                                                 None, None, None, price))
+    for day, prices in rows.items():
+        when = exported if day == today else day0 + day * DAY + DAY // 2
+        conn.execute("DELETE FROM prices WHERE scan_id = ?", (scan_id(day),))
+        conn.execute("INSERT OR REPLACE INTO scans VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                     (scan_id(day), AUCTIONATOR, when, when, 0, realm, faction, data.get("char"),
+                      len(prices), account))
+        conn.executemany("INSERT INTO prices VALUES (?, ?, ?, ?, ?, ?, ?, ?)", prices)
+    return count, exported
 
 
 # Resto ------------------------------------------------------------------------------------

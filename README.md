@@ -3,7 +3,7 @@
 Addon personal para WoW Forever que ayuda a decidir en qué gastar el tiempo para ganar oro.
 
 - **Fase 0 (hecha):** recoger datos (personajes, profesiones, recetas, inventario, divisas, vendedores y
-  subasta) y guardarlos con su histórico en una base de datos.
+  los precios de la subasta de Auctionator) y guardarlos con su histórico en una base de datos.
 - **Fase 1 (hecha):** valorar lo que tienes, ver qué crafteos dan beneficio, qué recetas te convendría
   aprender y qué vender, dónde y a qué precio. Los precios salen también en el tooltip de cada objeto.
 - **Fase 2 (hecha):** señales de mercado y previsión a 36 horas (con su acierto medido sobre el propio
@@ -48,8 +48,8 @@ cada método guardado se vuelve a comprobar con tus últimos precios. Lo nuevo s
 |---|---|
 | Crafteo | Lo que se fabrica y su profesión. |
 | Nota | La del asesor. |
-| Beneficio/u | Por unidad, ya sin materiales ni comisión (* si los precios son de pocos escaneos). «sin precio»: algún material o el objeto no ha salido en tus escaneos de la subasta (el detalle dice cuál). «no aplica»: no fabrica un objeto, como los encantamientos. |
-| Al día | Las que absorbe el mercado al día sin hundir el precio (o las que deja la espera de la receta). «faltan escaneos»: hacen falta escaneos completos que cubran al menos 6 horas, sin más de 12 entre uno y otro. «-»: da pérdida. «0»: no se ha vendido ninguna. |
+| Beneficio/u | Por unidad, ya sin materiales ni comisión (* si los precios son de pocos días). «sin precio»: algún material o el objeto no tiene precio en Auctionator (el detalle dice cuál). «no aplica»: no fabrica un objeto, como los encantamientos. |
+| Al día | Las que absorbe el mercado al día sin hundir el precio (o las que deja la espera de la receta). «sin datos»: no se sabe cuántas se venden (Auctionator no lo dice). «-»: da pérdida. «0»: no se ha vendido ninguna. |
 | ¿Puedo? | Verde: ya la sabe hacer un personaje. Amarillo: casi (le faltan 25 puntos o menos y la receta se compra en un momento). Naranja: le falta algo (hasta 75 puntos, un poco de reputación o de divisas), o no se sabe de dónde sale la receta o a qué nivel la enseña el instructor. Los datos de Forever no lo dicen: lo apunta el addon al abrir la ventana de cada instructor (cualquier personaje vale), y solo de los que puedes abrir. Rojo: falta mucho (más puntos, receta de botín, mucha reputación o ninguna profesión libre). |
 
 **Al pulsar un método** se despliega lo que se sabe de él: la opinión del asesor y sus pasos, de dónde
@@ -307,22 +307,15 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 2. En el juego verás un panel pequeño, **PitiGolds**, con lo que llevas ganado en la sesión y los botones
    **Mejor farmeo**, **Sesión** y **Farmeos activos**. Se pone al día en cuanto looteas. Puedes moverlo
    arrastrándolo.
-3. En la casa de subastas aparecen dos botones encima de la ventana:
-   - **PG: Materiales**: recorre materiales, consumibles, recetas y gemas. Guarda el precio mínimo y la cantidad total de cada objeto. Se puede repetir cuando quieras.
-   - **PG: Completo**: toda la subasta, subasta por subasta, con cantidades por precio y número de vendedores.
-     **Se hace solo** a los 5 segundos de abrir la subasta, si el último tiene más de 15 minutos. Es una
-     sola petición al servidor (tarda de medio minuto a un minuto), así que puedes buscar y comprar
-     mientras tanto: lo que buscas se sigue apuntando. Si cierras la subasta antes de que acabe, al
-     volver a abrirla se guarda lo que ya hubiera llegado o, si no llegó nada, se pide otra vez. Si
-     pides un escaneo completo desde otro addon (el botón de Auctionator), también se aprovecha. Un
-     escaneo en el que el servidor no manda nada no se guarda. El servidor solo da **un completo cada
-     15 minutos por cuenta** (contando los de Auctionator): cuando ya ha llegado uno, el addon no pide
-     otro hasta que pasen y te dice a qué hora puedes. Una petición que no llegó a contestarse no
-     cuenta. Si el servidor tarda más de 3 minutos en contestar, se da por perdido, pero si la lista
-     llega después se guarda igual. Si el que se da por perdido es el automático, no se vuelve a
-     pedir solo hasta 15 minutos después (te avisa una vez, no cada vez que abres la subasta);
-     PG: Completo sí lo puede pedir antes.
-     `/pg auto` lo apaga o lo vuelve a encender.
+3. **Los precios de la subasta salen de Auctionator** (hace falta tenerlo instalado; si no, PitiGolds avisa
+   al entrar, al abrir la subasta y en su panel). PitiGolds no escanea la subasta: escanéala con el botón
+   de Auctionator, o busca con él lo que te interese. Lo que ve Auctionator lo usan al momento el tooltip,
+   la ventana de profesión, la sesión y las pestañas Cajones y Libranzas; al salir o con `/reload` el addon
+   copia su base de precios (el último mínimo de cada objeto y, por día, el mínimo más bajo, el más alto
+   y cuántas unidades había, de las dos últimas semanas) para que la lea el motor. `/pg auctionator` dice
+   si los está leyendo.
+
+   Encima de la ventana de la subasta está la casilla:
    - **Fabricar x**: cuántas veces quieres fabricar la receta del botón **Buscar** (empieza con el número
      que tengas junto a «Crear todo»). Al abrir uno de sus materiales para comprarlo se marca solo lo que
      falta: lo que pide la receta por ese número, menos lo que ya tienes en bolsas y banco. Si vienes de la
@@ -356,14 +349,8 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    entrega y qué zonas van juntas está en `conocimiento/libranzas.json` (de la guía de Wowhead, solo las
    46 misiones que ya tienen zona).
 
-   Además, todo lo que ves al buscar en la subasta (a mano, con **Buscar** o desde otro addon) se apunta al
-   momento: el tooltip, la ventana de profesión y las pestañas Cajones y Libranzas usan ese precio sin esperar al motor,
-   y el motor lo lee como un escaneo más («de tus búsquedas» en el informe). Lo mismo al **comprar**: lo
-   que te llevas se quita de las subastas más baratas que se vieron, así que el precio sube en el momento
-   (si compras los 20 cajones más baratos, la pestaña ya cuenta con los siguientes), y se vuelve a pedir
-   al servidor la lista de ese objeto para dejarla exacta.
 4. No hace falta exportar nada: el addon apunta solo lo que pasa (al entrar con cada personaje, al lootear,
-   al escanear...) y WoW lo guarda en disco al cambiar de personaje, al salir del juego o con `/reload`.
+   al hablar con un vendedor...) y WoW lo guarda en disco al cambiar de personaje, al salir del juego o con `/reload`.
    el motor lo lee en un par de segundos, y el addon lo enseña al entrar con el siguiente personaje o
    tras otro `/reload`.
 5. Haz doble clic en **`informe.cmd`** para ver qué hacer: crafteos rentables, recetas que te convendría
@@ -371,7 +358,7 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
 6. Tras el siguiente `/reload`, al pasar el ratón por un objeto verás en su tooltip:
    - **Venta:** lo que paga el vendedor (sustituye a la línea «Precio de venta» del juego).
    - **Subasta:** el precio de mercado, una **flecha verde hacia arriba** si el motor ve que va a subir
-     en las próximas 36 horas o **roja hacia abajo** si va a bajar (sin flecha si no está claro), y **ventas/día**: las unidades que se venden al día en la subasta (estimadas).
+     en las próximas 36 horas o **roja hacia abajo** si va a bajar (sin flecha si no está claro).
    - Si sabes fabricarlo, cuánto cuesta y cuánto ganas.
    - **Desencantar:** si es un arma o armadura verde, azul o morada, lo que sale al desencantarla (con la
      probabilidad de cada material, de la tabla clásica) y lo que vale cada material en la subasta; arriba,
@@ -388,16 +375,16 @@ Las guías que compres, guárdalas en `fuentes/`: no se suben a GitHub.
    (lo que cuestan los materiales de una fabricación, cada uno a su precio de subasta, o al de vendedor si
    no está en la subasta)
    y **Ganancia:** (lo que se cobra vendiendo lo fabricado, ya sin comisión, menos ese coste; en verde o
-   en rojo). Son las mismas cuentas del informe, así que se ponen al día con cada `/reload`; si acabas de
-   ver en la subasta alguno de sus materiales o lo fabricado, se recalculan al momento con ese precio
-   (lo dice debajo, en gris). Al lado, el botón **Buscar** busca en la subasta lo que se fabrica y los
+   en rojo). Son las mismas cuentas del informe, así que se ponen al día con cada `/reload`; si Auctionator
+   ha visto después otro precio de alguno de sus materiales o de lo fabricado, se recalculan al momento
+   con ese precio (lo dice debajo, en gris). Al lado, el botón **Buscar** busca en la subasta lo que se fabrica y los
    materiales de la receta, para ver el precio de todo;
    si está cerrada, lo hace al abrirla. Si tienes Auctionator, el recuadro se pone debajo del suyo.
 
 **`estado.cmd`** da el resumen general: oro, profesiones, valor del inventario y divisas de Forever.
 
-Si el motor no está vigilando, no pasa nada: el addon guarda hasta 5 escaneos pendientes. A partir de ahí borra
-los más antiguos, y esos precios se pierden del histórico.
+Si el motor no está vigilando, no pasa nada: Auctionator guarda tres semanas de precios y el addon copia
+las dos últimas cada vez, así que el motor recupera los días que se perdió.
 
 ## Qué recoge y cuándo
 
@@ -411,26 +398,23 @@ los más antiguos, y esos precios se pierden del histórico.
 | Recetas conocidas, materiales y de dónde sale cada receta | Al abrir la ventana de cada profesión |
 | Divisas (Merchant's Favor, Legacy...) y reputaciones | Al entrar y cada vez que cambian |
 | Tus subastas puestas | Al abrir la subasta |
-| Precios de la subasta | Con los botones PG |
+| Precios de la subasta | Los de Auctionator: se copian al salir o con `/reload` |
 | Lo que vende cada vendedor y a cuánto (también lo que se paga con divisas) | Al hablar con el vendedor |
 | Lo que paga un vendedor por cada objeto | Cuando el objeto pasa por tus bolsas, banco o recetas |
 
 ## Mercado: tendencias y previsión
 
-Con al menos 3 escaneos repartidos en más de un día, el motor calcula para cada objeto que te afecta
-(lo que tienes, lo que farmeas y lo que entra o sale de tus recetas):
+Los precios son los de Auctionator, uno por día: el mínimo más alto que vio ese día (una sola unidad
+barata de cebo no lo hunde) y, el último día, su último mínimo. Con precios de al menos 3 días, el
+motor calcula para cada objeto que te afecta (lo que tienes, lo que farmeas y lo que entra o sale de
+tus recetas):
 
 - **Tendencia del precio** y lo limpia que es: una caída constante cuenta mucho; un precio que va y
   viene, poco.
-- **Unidades a la venta y número de vendedores**: si cada vez hay más, el precio acabará cediendo.
-- **Ventas al día**: unidades que había a buen precio y desaparecen entre dos fotos seguidas de la
-  lista de subastas del objeto (como mucho 12 horas de diferencia), menos las que aparecen nuevas a un
-  precio más bajo (alguien que quita su montón y lo vuelve a poner más barato). Sirven de foto los
-  escaneos completos y también tus búsquedas: cada vez que abres un objeto en la subasta, a mano o
-  desde Auctionator, se apunta su lista entera. Mira los últimos 7 días (el precio, solo 36 horas),
-  y hacen falta al menos 6 horas observadas en total. La subasta no dice si lo que falta se vendió
-  o caducó, así que es una cota alta. Si en ese tiempo no ha desaparecido ninguna, el panel lo manda
-  al vendedor en vez de decir que aún no lo sabe.
+- **Unidades a la venta**: si cada vez hay más, el precio acabará cediendo.
+- **Ventas al día**: ya no salen. Se medían comparando la lista entera de subastas de dos escaneos
+  seguidos, y Auctionator no la guarda (solo el mínimo y las unidades). Sin ellas, «Al día» sale como
+  «sin datos».
 - **Días de oferta**: para cuántos días de ventas hay género.
 - **Riesgo de bajada (0-100)** y **previsión a 36 horas**, que mezcla la tendencia (a mitad de fuerza)
   con la vuelta a la mediana según lo limpia que sea la tendencia.
@@ -440,10 +424,9 @@ dice qué porcentaje acertó y cuánto habría acertado decir siempre «estable�
 fíes de ella. Con confianza media o alta, la previsión cambia los consejos: lo que tiende a bajar se
 vende ya aunque esté barato, y lo que sube se espera. En el tooltip sale como una flecha verde (sube) o roja (baja).
 
-Todo el motor usa las **últimas 36 horas** (`HISTORY_DAYS` en `motor/pricing.py`): la mediana, la tendencia
-y la previsión. «Sube» o «baja» sale de esa previsión, y el precio al que se espera un objeto que sube es
-la misma previsión a 36 horas. Así, al empezar el server, cuando los precios fluctúan mucho, no mandan
-señales de una semana entera.
+Todo el motor usa la **última semana** (`HISTORY_DAYS` en `motor/pricing.py`): la mediana y la tendencia.
+La previsión es a 36 horas (`OUTLOOK_DAYS` en `motor/market.py`): «sube» o «baja» sale de ella, y el precio
+al que se espera un objeto que sube es esa misma previsión.
 
 ## Tus farmeos
 
@@ -470,8 +453,8 @@ más a menos valioso. **Reiniciar** empieza a contar desde cero (`/pg sesion rei
 - La sesión es de cada personaje. Sigue tras un `/reload` o un cambio rápido de personaje, sin contar el
   rato fuera; si pasas más de 30 minutos sin jugar con él, empieza otra.
 - Cada objeto vale lo que da en la subasta quitando la comisión y el depósito (ver «Cómo decide el
-  informe»), o lo que paga el vendedor si paga más (sale con «(v)»). El precio de la subasta es el del último escaneo si el motor aún no lo ha leído, así
-  que si escaneas a media sesión, la cuenta cambia en ese momento; si no, el del motor.
+  informe»), o lo que paga el vendedor si paga más (sale con «(v)»). El precio de la subasta es lo último que ha visto Auctionator, así
+  que si escaneas a media sesión, la cuenta cambia en ese momento; sin él, el del motor.
 
 ## Tu negocio en la subasta
 
@@ -492,8 +475,8 @@ comisión, menos lo que te costaron los materiales a ti (o a precio de mercado s
 menos los depósitos sin recuperar. Y el **oro por hora de gestión**, comparable con el de tus farmeos.
 Lo que vendes de lo farmeado no cuenta como negocio: ya está en tus farmeos.
 
-Lo vendido al día se mide comparando escaneos completos separados menos de 12 horas, y hacen falta al
-menos 6 horas observadas: con menos no se calcula y sale `?`. La ventana de métodos tampoco propone
+Lo vendido al día se medía con los escaneos completos que hacía PitiGolds; con los precios de Auctionator
+no se sabe y sale `?`. La ventana de métodos tampoco propone
 fabricar más de lo que cabe en tus horas de juego al día (`ajustes --horas-semana`).
 
 En los crafteos rentables, la columna **«Como mucho al día»** responde a la diferencia clave con
@@ -590,12 +573,10 @@ Con estos datos el informe añade:
 
 ## Cómo decide el informe
 
-- **Precio de mercado**: la media del 1 % más barato de las unidades a la venta, y nunca menos de 5
-  unidades. Así una sola unidad regalada (o puesta de cebo para que la gente rebaje) no hunde el precio.
-  El addon lo calcula igual, así que el tooltip, el recuadro de fabricación y el informe dan lo mismo
-  con el mismo escaneo. Lo que solo trae el precio mínimo (el escaneo de materiales, o buscar sin abrir
-  el objeto) no rebaja lo que dijo un escaneo completo de hace menos de 6 horas; si el mínimo ha subido,
-  sí manda. Con 3 escaneos o más en las últimas 36 horas se usa también la **mediana**,
+- **Precio de mercado**: el de Auctionator. De hoy, su último mínimo (lo que enseña él); de los días
+  anteriores, el mínimo más alto que vio cada día, así una sola unidad de cebo no hunde el historial.
+  El tooltip, el recuadro de fabricación y la sesión usan al momento lo último que ha visto Auctionator.
+  Con precios de 3 días o más de la última semana se usa también la **mediana**,
   y nada se valora por encima de la mediana + 25 %.
 - **Coste de un crafteo**: cada material a su precio de subasta, aunque un vendedor lo venda más barato.
   Solo si un material no está en la subasta se mira si lo vende un vendedor sin límite de existencias:
@@ -612,7 +593,7 @@ Con estos datos el informe añade:
 - **Qué hacer con cada objeto** (solo los no ligados):
   - **guardar** si es material de una receta tuya que da beneficio;
   - **vendedor** si el vendedor paga más que la subasta;
-  - **esperar** si está un 20 % o más por debajo de su mediana de 36 horas;
+  - **esperar** si está un 20 % o más por debajo de su mediana de la última semana;
   - **subastar** en otro caso, 1 cobre por debajo del más barato (nunca por debajo de lo que paga el
     vendedor). Avisa si tienes más de lo que hay a la venta.
 - **Ritmo de venta**: se supone que puedes vender un 30 % de lo que se vende al día en toda la subasta
@@ -632,9 +613,7 @@ Cada personaje queda guardado tal como estaba la última vez que lo usaste.
 
 | Comando | Qué hace |
 |---|---|
-| `/pg materiales` | Escaneo de materiales (con la subasta abierta) |
-| `/pg completo` | Escaneo completo (con la subasta abierta) |
-| `/pg auto` | Enciende o apaga el escaneo completo automático al abrir la subasta |
+| `/pg auctionator` | Dice si PitiGolds está leyendo los precios de Auctionator |
 | `/pg estado` | Qué hay guardado y cuánto hace que lo leyó el motor |
 | `/pg log` | Últimas líneas del registro, con los errores si los hay |
 | `/pg panel` | Muestra u oculta el panel |
@@ -656,7 +635,7 @@ El addon está escrito para la API del cliente moderno, pero no se ha podido pro
    *desactualizado*, marca "Cargar addons desactualizados" y escribe en el chat `/dump select(4, GetBuildInfo())`
    para saber el número de versión correcto.
 2. Abre una vez la ventana de cada profesión, el banco y el buzón con cada personaje.
-3. Prueba los dos botones de la subasta.
+3. Instala Auctionator, escanea la subasta con él y comprueba con `/pg auctionator` que PitiGolds lee sus precios.
 4. Si algo falla, el error sale en el chat (los tres primeros de cada sesión) y queda en `/pg log`.
 5. Ejecuta `estado.cmd`. La línea **APIs nuevas encontradas** lista las funciones de Forever relacionadas con
    Legacy, Merchant's Favor, cajas, etc. Con eso se programa la lectura de los Legacy Points.

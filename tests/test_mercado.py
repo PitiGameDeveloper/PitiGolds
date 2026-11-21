@@ -12,8 +12,8 @@ T0 = 1_762_000_000
 H = 3600
 
 
-def series(prices, quantities=None, owners=None, step=6 * H, kind="browse"):
-    # Por defecto un escaneo cada 6 h: la ventana de la previsión es de 36 h.
+def series(prices, quantities=None, owners=None, step=DAY, kind="auctionator"):
+    # Por defecto un precio por día, como los de Auctionator: la ventana es de una semana.
     n = len(prices)
     quantities = quantities or [100] * n
     owners = owners or [None] * n
@@ -68,13 +68,13 @@ class VentasEstimadas(unittest.TestCase):
         b = Point(T0 + 6 * H, 100, 10, None, None, "search")   # solo el mínimo de la lista de resultados
         self.assertIsNone(estimate_sales([a, b], [a.time]))
 
-    def test_las_ventas_miran_una_semana_y_el_precio_36_horas(self):
+    def test_las_ventas_y_el_precio_miran_una_semana(self):
         a = Point(T0, 100, 10, 1, "100:10", "full")
         b = Point(T0 + 6 * H, 100, 4, 1, "100:4", "full")
         later = Point(T0 + 4 * DAY, 100, 4, 1, "100:4", "browse")
         s = compute_signals([a, b, later], [a.time, b.time])
         self.assertAlmostEqual(s.sales_per_day, 24.0)
-        self.assertEqual(s.points, 1)   # el precio solo con las últimas 36 h
+        self.assertEqual(s.points, 3)   # el precio, con la última semana
         too_old = Point(T0 + 8 * DAY, 100, 4, 1, "100:4", "browse")
         self.assertIsNone(compute_signals([a, b, too_old], [a.time, b.time]).sales_per_day)
 
@@ -86,21 +86,21 @@ class VentasEstimadas(unittest.TestCase):
 
 class Prevision(unittest.TestCase):
     def test_mercado_que_se_hunde(self):
-        pts = series([100, 97, 93, 90, 86, 82, 78, 74],
-                     quantities=[100, 110, 125, 140, 150, 165, 185, 200],
-                     owners=[5, 5, 6, 7, 7, 8, 9, 10])
+        pts = series([100, 88, 77, 68, 60, 53, 47, 41],
+                     quantities=[100, 120, 145, 170, 200, 235, 270, 310],
+                     owners=[5, 6, 7, 8, 9, 11, 12, 14])
         s = compute_signals(pts, [])
         self.assertEqual(s.outlook, "baja")
         self.assertLess(s.forecast, s.current)
-        self.assertGreater(s.drop_risk, 50)
-        self.assertEqual(s.confidence, "media")
+        self.assertGreater(s.drop_risk, 30)
+        self.assertEqual(s.confidence, "alta")
         text = " ".join(s.reasons)
         self.assertIn("precio -", text)
         self.assertIn("de unidades a la venta", text)
         self.assertIn("de vendedores", text)
 
     def test_mercado_que_sube(self):
-        pts = series([50, 53, 57, 61, 66, 70, 75], quantities=[200, 180, 160, 140, 120, 100, 80])
+        pts = series([50, 56, 63, 70, 78, 87, 97], quantities=[200, 180, 160, 140, 120, 100, 80])
         s = compute_signals(pts, [])
         self.assertEqual(s.outlook, "sube")
         self.assertGreater(s.forecast, s.current)
@@ -116,7 +116,7 @@ class Prevision(unittest.TestCase):
         self.assertIsNone(s.forecast)
 
     def test_backtest(self):
-        falling = series([round(200 * 0.97 ** i) for i in range(40)], step=DAY // 4)
+        falling = series([round(2000 * 0.88 ** i) for i in range(40)])
         result = backtest({1: falling}, [])
         self.assertGreater(result.cases, 5)
         self.assertGreater(result.accuracy, 0.8)      # bajaba y dijo que bajaba
@@ -132,10 +132,10 @@ class ConsejoConTendencia(unittest.TestCase):
             conn.execute("INSERT INTO items VALUES (1, 'Mineral', 1)")
             conn.execute("INSERT INTO gd_items (item_id, name, stackable) VALUES (1, 'Mineral', 20)")
             conn.execute("INSERT INTO inventory VALUES ('A-R', 'bags', 1, 0, 50, 0)")
-            for day, price in enumerate([100, 100, 100, 100, 95, 85, 75, 65]):
+            for day, price in enumerate([100, 88, 77, 68, 60, 53, 47, 41]):
                 scan = f"s{day}"
-                conn.execute("INSERT INTO scans VALUES (?, 'browse', ?, 0, 0, 'R', 'Horde', 'A-R', 1, 'X')",
-                             (scan, T0 + day * 6 * H))
+                conn.execute("INSERT INTO scans VALUES (?, 'auctionator', ?, 0, 0, 'R', 'Horde', 'A-R', 1, 'X')",
+                             (scan, T0 + day * DAY))
                 conn.execute("INSERT INTO prices VALUES (?, 1, ?, ?, NULL, NULL, NULL, ?)",
                              (scan, price, 100 + day * 20, price))
             conn.commit()

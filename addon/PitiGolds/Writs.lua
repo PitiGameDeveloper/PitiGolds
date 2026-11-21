@@ -1,6 +1,6 @@
 -- Pestaña «Libranzas» en la subasta: las misiones de libranza del artesano, de la más barata a la
 -- más cara. Cada misión se coge con la libranza y se entrega con el objeto que pide: lo que cuesta es
--- la libranza más el objeto, los dos de la subasta (lo que acabas de ver en ella o, si no, los
+-- la libranza más el objeto, los dos de la subasta (lo último que ha visto Auctionator o, si no, los
 -- precios del motor, como el tooltip). Qué pide cada una, su zona y los grupos de zonas pegadas los
 -- pone el motor (writs en Generated.lua, de conocimiento/libranzas.json).
 -- Dos órdenes, con los botones de arriba a la izquierda:

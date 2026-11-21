@@ -61,11 +61,11 @@ def build_report(conn: sqlite3.Connection, top: int = 10) -> str:
 
     out.append("")
     out.append("Subasta")
-    for kind, label in (("full", "completos"), ("browse", "de materiales"), ("search", "de tus búsquedas")):
-        row = conn.execute(
-            "SELECT COUNT(*) AS n, MAX(time) AS last FROM scans WHERE type = ?", (kind,)
-        ).fetchone()
-        out.append(f"  Escaneos {label}: {row['n']} (último {ago(row['last'])})")
+    row = conn.execute("SELECT COUNT(*) AS n, MAX(time) AS last FROM scans").fetchone()
+    if row["n"]:
+        out.append(f"  Precios de Auctionator: {row['n']} días (los últimos, {ago(row['last'])})")
+    else:
+        out.append("  Sin precios de Auctionator: instálalo, escanea la subasta con él y haz /reload.")
     priced = conn.execute("SELECT COUNT(*) FROM latest_prices").fetchone()[0]
     out.append(f"  Objetos con precio: {priced}")
 
@@ -273,7 +273,7 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
     """plan: (métodos, referencia, ajustes) de planner.build_methods, para «Qué te conviene hacer»."""
     out = ["# PitiGolds: qué hacer", ""]
     priced = sum(1 for p in a.prices.values() if p.market is not None)
-    out.append(f"Último escaneo de subasta: {ago(a.last_scan)}. Objetos tuyos o de tus recetas con precio: {priced}.")
+    out.append(f"Últimos precios de Auctionator: {ago(a.last_scan)}. Objetos tuyos o de tus recetas con precio: {priced}.")
     out.append("Precios de mercado: media del 1 % más barato de lo que hay a la venta (mínimo 5 unidades). "
                "Lo que vendes ya tiene descontado el 5 % de comisión.")
     if plan is not None:
@@ -297,7 +297,7 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
                    "precio), y el tiempo que te lleva fabricarlo y ponerlo a la venta. Si la receta tiene espera "
                    "(tela lunar, transmutaciones), lo que deja la espera: cada personaje que la sabe hace una.")
     else:
-        out.append("Ninguno todavía. Hace falta abrir la ventana de tus profesiones y un escaneo de materiales.")
+        out.append("Ninguno todavía. Hace falta abrir la ventana de tus profesiones y escanear la subasta con Auctionator.")
 
     learn = sorted((c for c in a.crafts if c.yours and not c.known and c.complete and c.profit > 0),
                    key=lambda c: c.profit, reverse=True)
@@ -324,7 +324,7 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
                        "Confianza", "Por qué"], moving[:limit])
     else:
         out.append("")
-        out.append("Nada que destacar: hacen falta al menos 3 escaneos repartidos en más de un día.")
+        out.append("Nada que destacar: hacen falta precios de Auctionator de al menos 3 días.")
 
     useful = [s for s in a.sales if s.action != "sin precio"]
     out += ["", "## Qué hacer con lo que tienes", ""]
@@ -333,7 +333,7 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
                       [[s.name, s.count, s.places, s.action, format_money(s.unit_price),
                         format_money(s.total), s.pace, s.reason] for s in useful[:limit * 2]])
     else:
-        out.append("Nada todavía: hace falta saber qué tienes y haber escaneado la subasta.")
+        out.append("Nada todavía: hace falta saber qué tienes y haber escaneado la subasta con Auctionator.")
 
     out += ["", "## Tus farmeos (últimos 14 días)", ""]
     if a.farms:
@@ -389,7 +389,7 @@ def build_advice_report(conn: sqlite3.Connection, a: Analysis, limit: int = 15, 
     if unscanned:
         notes.append("Profesiones sin abrir todavía (ábrelas una vez): " + "; ".join(unscanned))
     if a.last_scan and time.time() - a.last_scan > 24 * 3600:
-        notes.append(f"El último escaneo de subasta es de {ago(a.last_scan)}: los precios pueden haber cambiado.")
+        notes.append(f"Los últimos precios de Auctionator son de {ago(a.last_scan)}: escanea la subasta con él.")
     if notes:
         out += ["", "## Faltan datos", ""] + [f"- {n}" for n in notes]
     return "\n".join(out) + "\n"
@@ -551,7 +551,7 @@ def render_guide(plan) -> str:
     """Guía de subida en Markdown."""
     out = [f"### Guía: {plan.profession} de {plan.start} a {plan.target}", ""]
     if not plan.steps:
-        out.append("No hay recetas con precio para este tramo todavía: hace falta escanear la subasta.")
+        out.append("No hay recetas con precio para este tramo todavía: hace falta escanear la subasta con Auctionator.")
         return "\n".join(out) + "\n"
     out.append(f"Coste real: {format_money(plan.net_cost)} ({format_money(plan.materials_cost)} en materiales, "
                f"menos {format_money(plan.recovered)} que te paga un vendedor por lo fabricado"

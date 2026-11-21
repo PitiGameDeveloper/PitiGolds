@@ -89,8 +89,13 @@ def cmd_leer(config: Config) -> int:
     try:
         for account, path in files:
             r = ingest_file(conn, account, path)
+            if r.auctionator_time:
+                prices = (f"precios de Auctionator de {r.auctionator_items} objetos "
+                          f"(copiados a las {time.strftime('%H:%M', time.localtime(r.auctionator_time))})")
+            else:
+                prices = "sin precios de Auctionator (¿está instalado?)"
             print(f"[{time.strftime('%H:%M:%S')}] {account}: {r.characters} personajes, {r.recipes} recetas, "
-                  f"{r.new_scans} escaneos nuevos ({r.new_prices} precios)")
+                  f"{prices}")
         print("  " + refresh_outputs(conn, config))
     finally:
         conn.close()

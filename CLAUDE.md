@@ -8,7 +8,7 @@ Todo va en español: textos del juego, código, comentarios, mensajes del motor 
 ## Carpetas
 
 - `addon/PitiGolds/`: el addon (Lua). Apunta lo que ve en el juego (personajes, profesiones, subasta,
-  vendedores, farmeos) en sus SavedVariables. `Generated.lua` lo escribe el motor: no se edita a mano.
+  vendedores, farmeos y los precios de Auctionator) en sus SavedVariables. `Generated.lua` lo escribe el motor: no se edita a mano.
 - `motor/`: lee esas SavedVariables (`ingest.py`) a `datos/pitigolds.db` y calcula precios, crafteos,
   farmeos, métodos y el informe. Se usa con `python -m motor <comando>` (`--help` para la lista).
 - `conocimiento/`: lo que se mantiene a mano: catálogo de métodos, notas de revisión, rutas de
@@ -21,6 +21,9 @@ Todo va en español: textos del juego, código, comentarios, mensajes del motor 
 ## De dónde salen los datos
 
 - **El addon**, en partida. Si un dato está en varios sitios, manda lo visto en el juego.
+- **Auctionator** (addon de terceros, hace falta tenerlo instalado): todos los precios de la subasta.
+  PitiGolds no escanea; lee los precios de Auctionator en partida y los copia a sus SavedVariables al
+  salir (`addon/PitiGolds/Auctionator.lua`), y el motor los guarda como un escaneo por día (`ingest.py`).
 - **wago.tools**: tablas del cliente de Forever (recetas, objetos, precios de vendedor de catálogo,
   zonas). `motor/gamedata.py`.
 - **Merchant Map** (addon de terceros, GPLv3; se bajan sus datos de GitHub, no se instala): qué vende

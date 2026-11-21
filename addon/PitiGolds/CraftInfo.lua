@@ -7,13 +7,13 @@ local ADDON, ns = ...
 
 local AH_CUT = 0.05
 
--- La receta con lo último visto en la subasta (tus búsquedas o un escaneo que el motor aún no ha
--- leído). Parte del desglose del motor (recipeParts): "objeto,unidades,valor,venta,depósito|
+-- La receta con lo último que ha visto Auctionator (puede ser más nuevo que lo que leyó el motor).
+-- Parte del desglose del motor (recipeParts): "objeto,unidades,valor,venta,depósito|
 -- material:cantidad:coste:tienda;...". tienda solo viene si el motor no lo vio en la subasta y lo
 -- cuenta a precio de vendedor: si ahora sí se ve en la subasta, manda la subasta.
--- Devuelve coste y ganancia, o nil si no hay nada más nuevo.
+-- Devuelve coste y ganancia, o nil si Auctionator no tiene precio de nada.
 local function LiveCraft(detail)
-  if type(detail) ~= "string" or not ns.ScanMarket then return nil end
+  if type(detail) ~= "string" or not ns.LivePrice then return nil end
   local head, parts = detail:match("^([^|]*)|(.*)$")
   if not head then return nil end
   local out, outQty, value, vendorSell, deposit = head:match("^(%d*),([%d%.]*),(%-?%d*),(%d*),([%d%.]*)$")
@@ -21,7 +21,7 @@ local function LiveCraft(detail)
   local used, cost = false, 0
   for item, qty, unit, shop in parts:gmatch("(%d+):(%d+):(%d*):(%d*)") do
     local price = tonumber(unit)
-    local seen = ns.ScanMarket(tonumber(item))
+    local seen = ns.LivePrice(tonumber(item))
     if seen then
       used = true
       price = seen
@@ -30,7 +30,7 @@ local function LiveCraft(detail)
     cost = cost + price * tonumber(qty)
   end
   value = tonumber(value)
-  local seenOut = tonumber(out) and ns.ScanMarket(tonumber(out))
+  local seenOut = tonumber(out) and ns.LivePrice(tonumber(out))
   if seenOut then
     used = true
     local net = math.max(0, math.floor(seenOut * (1 - AH_CUT) - (tonumber(deposit) or 0) + 0.5))
@@ -49,14 +49,19 @@ function ns.CraftInfoText(recipeID)
   local cost, profit = data:match("^(%d+),(%-?%d*)$")
   if not cost then return nil end
   local liveCost, liveProfit = LiveCraft(gen.recipeParts and gen.recipeParts[recipeID])
-  if liveCost then cost, profit = liveCost, liveProfit end
+  -- Solo se avisa si los precios de ahora cambian las cuentas del motor.
+  if liveCost and (liveCost ~= tonumber(cost) or liveProfit ~= tonumber(profit)) then
+    cost, profit = liveCost, liveProfit
+  else
+    liveCost = nil
+  end
   local text = "Fabricar: |cffffffff" .. ns.Money(cost) .. "|r"
   profit = tonumber(profit)
   if profit then
     text = text .. "\nGanancia: " .. (profit >= 0 and "|cff40ff40" or "|cffff4040") .. ns.Money(profit) .. "|r"
   end
   if liveCost then
-    text = text .. "\n|cff999999con lo que acabas de ver en la subasta|r"
+    text = text .. "\n|cff999999con lo último que ha visto Auctionator|r"
   end
   return text
 end
@@ -213,10 +218,6 @@ local function RunSearch(search)
   if #search.items == 0 then return end
   local AH = C_AuctionHouse
   if not AH then return end
-  if ns.Scan and ns.Scan.state == "browse" then
-    ns.Print("espera a que acabe el escaneo para buscar los materiales.")
-    return
-  end
   if AuctionHouseFrame and AuctionHouseFrame.SetDisplayMode and AuctionHouseFrameDisplayMode then
     pcall(AuctionHouseFrame.SetDisplayMode, AuctionHouseFrame, AuctionHouseFrameDisplayMode.Buy)
   end
@@ -355,7 +356,7 @@ local function Setup()
   end)
 end
 
--- Lo que acabas de ver en la subasta cambia las cuentas de la receta abierta.
+-- Los precios nuevos de Auctionator cambian las cuentas de la receta abierta.
 function ns.OnLivePrices()
   if lastForm and info and lastForm.IsShown and lastForm:IsShown() then
     local ok, err = pcall(Update, lastForm)

@@ -424,7 +424,7 @@ local function FarmCells(row)
 end
 
 local function CraftCells(row)
-  -- Sin cifra, el motor manda qué falta («sin precio», «faltan escaneos»...): se pinta en gris.
+  -- Sin cifra, el motor manda qué falta («sin precio», «sin datos»...): se pinta en gris.
   local function Note(text) return text and ("|cff999999" .. text .. "|r") or "" end
   local profit = row.profit and (ns.Money(row.profit) .. (row.approx and "*" or "")) or Note(row.profitNote)
   local perDay = row.perDay and tostring(row.perDay) or Note(row.perDayNote)
@@ -494,9 +494,9 @@ function M.Refresh()
   end
   local made = type(gen) == "table" and gen.generatedAt or 0
   local scan = type(gen) == "table" and gen.lastScan or nil
-  local fresh = ("Calculado %s · último escaneo de la subasta %s"):format(Ago(made), Ago(scan))
+  local fresh = ("Calculado %s · precios de Auctionator %s"):format(Ago(made), Ago(scan))
   if not scan or time() - scan > 12 * 3600 then
-    fresh = fresh .. " · |cffff8040escanea la subasta: se recalcula al cambiar de personaje|r"
+    fresh = fresh .. " · |cffff8040escanea la subasta con Auctionator: se recalcula al cambiar de personaje|r"
   end
   freshText:SetText(fresh)
 

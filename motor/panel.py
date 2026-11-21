@@ -343,7 +343,7 @@ def _expected(ctx: _Context, e: CatalogEntry, resolved: dict[str, int]) -> tuple
         ah = (p.net_sale or 0) if p else 0
         vendor = (p.vendor_sell or 0) if p else 0
         if not ah and not vendor:
-            lines.append(f"{qty:g} {name}/h: sin precio todavía (escanea la subasta)")
+            lines.append(f"{qty:g} {name}/h: sin precio todavía (escanea la subasta con Auctionator)")
             continue
         priced = True
         if ah <= vendor:
@@ -656,11 +656,11 @@ def _craft_row(ctx: _Context, c: CraftResult, review: Review | None, vendors: di
         row.profit_item = round(c.profit / c.output_qty)
         approx = []
         if out is None or not out.has_history:
-            approx.append("el precio de venta es de pocos escaneos")
+            approx.append("el precio de venta es de pocos días")
         for r in c.reagents:
             p = a.prices.get(r.item_id) if r.item_id else None
             if r.source == "subasta" and (p is None or not p.has_history):
-                approx.append("algún material tiene precio de pocos escaneos")
+                approx.append("algún material tiene precio de pocos días")
                 break
         row.approx, row.approx_why = bool(approx), "; ".join(approx)
     cap = c.capacity
@@ -748,7 +748,7 @@ def _missing_notes(c: CraftResult, row: CraftRow) -> tuple[str, str]:
     s = c.output_signals
     if s is not None and s.sales_per_day == 0:
         return "", "0"
-    return "", "faltan escaneos"
+    return "", "sin datos"
 
 
 def _craft_details(row: CraftRow, c: CraftResult, review: Review | None) -> None:
@@ -811,7 +811,7 @@ def _verdict(farms: list[FarmRow], crafts: list[CraftRow], best_value: int | Non
     if not usable:
         lines = []
         if not a.last_scan:
-            lines.append("Escanea la subasta (botón «PG: Completo»).")
+            lines.append("Escanea la subasta con Auctionator y haz /reload para que lea sus precios.")
         if not any(r.per_hour is not None for r in farms):
             lines.append("Los métodos guardados aún no tienen estimación por hora: pídele al asesor que los revise.")
         return Verdict("sin_datos", "Aún no puedo decirte el mejor farmeo", lines)
@@ -819,7 +819,7 @@ def _verdict(farms: list[FarmRow], crafts: list[CraftRow], best_value: int | Non
         lines = ["Entra con cada personaje (sus datos se guardan al cambiar de uno a otro): así sabré quién "
                  "puede hacer cada farmeo."]
         if not a.last_scan:
-            lines.append("Escanea también la subasta (botón «PG: Completo»): sin ella solo cuento lo que paga el vendedor.")
+            lines.append("Escanea también la subasta con Auctionator: sin sus precios solo cuento lo que paga el vendedor.")
         lines.append("Mientras, los que más rinden sobre el papel:")
         for r in sorted(usable, key=lambda r: -r.value)[:3]:
             lines.append(f"- {r.name}: ~{format_money(r.per_hour)}/h" + (f" ({r.requirement})." if r.requirement else "."))

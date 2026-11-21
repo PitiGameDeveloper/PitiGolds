@@ -78,9 +78,8 @@ class HistorialYConsejos(unittest.TestCase):
         self.assertIn("buen momento", sales[2].reason)
 
 
-class MinimoSuelto(unittest.TestCase):
-    """Lo que pasó con el Paño de seda: escaneo completo a 1 p 90 c y, 2 minutos después, el de
-    materiales con un mínimo de 89 c que se comía el precio."""
+class PreciosGuardados(unittest.TestCase):
+    """Los precios de cuando PitiGolds escaneaba la subasta entera (con el libro de precios)."""
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -94,21 +93,6 @@ class MinimoSuelto(unittest.TestCase):
         self.conn.execute("INSERT INTO scans VALUES (?, 'x', ?, 0, 0, 'R', 'Horde', 'A-R', 1, 'X')", (name, t))
         self.conn.execute("INSERT INTO prices VALUES (?, ?, ?, 1000, NULL, NULL, ?, ?)",
                           (name, item_id, min_price, book, market_price(min_price, 1000, book)))
-
-    def test_un_minimo_mas_barato_no_rebaja_el_escaneo_completo(self):
-        self.scan("full", T0, 1, 190, "190:500;200:500")
-        self.scan("browse", T0 + 120, 1, 89)
-        self.assertEqual(load_prices(self.conn)[1].market, 190)
-
-    def test_un_minimo_mas_caro_si_manda(self):
-        self.scan("full", T0, 1, 190, "190:500;200:500")
-        self.scan("browse", T0 + 120, 1, 250)
-        self.assertEqual(load_prices(self.conn)[1].market, 250)
-
-    def test_un_escaneo_completo_viejo_ya_no_manda(self):
-        self.scan("full", T0, 1, 190, "190:500;200:500")
-        self.scan("browse", T0 + 7 * 3600, 1, 89)
-        self.assertEqual(load_prices(self.conn)[1].market, 89)
 
     def test_los_precios_guardados_se_recalculan(self):
         self.scan("full", T0, 1, 10, "10:1;100:999")

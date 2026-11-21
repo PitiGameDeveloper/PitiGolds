@@ -184,32 +184,11 @@ class PestanaCajones(unittest.TestCase):
         self.assertTrue(lua.eval("PitiGoldsCratesTab.point[2] == Mock.blizzardTab"))
         self.assertEqual(self.chat(), "")
 
-    def test_al_comprar_sube_el_precio_al_momento(self):
-        lua, mock = self.lua, self.mock
-        lua.execute('''
-          Mock.commodity = { [2002] = { { unitPrice = 200, quantity = 4 }, { unitPrice = 230, quantity = 10 } } }
-          C_AuctionHouse.GetNumCommoditySearchResults = function(id) return #(Mock.commodity[id] or {}) end
-          C_AuctionHouse.GetCommoditySearchResultInfo = function(id, i) return Mock.commodity[id][i] end
-          Mock.requeried = {}
-          C_AuctionHouse.SendSearchQuery = function(key) table.insert(Mock.requeried, key.itemID) end''')
-        mock.Fire("AUCTION_HOUSE_SHOW")
-        mock.Fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2002)
-        mock.Advance(1)
-        scan = lua.eval("PitiGoldsDB.scans[#PitiGoldsDB.scans]")
-        self.assertEqual(scan["items"][2002], "200,14,2|200:4;230:10")
-        # Te llevas las 4 a 2 p: lo que queda empieza en 2 p 30 c.
-        lua.execute("C_AuctionHouse.ConfirmCommoditiesPurchase(2002, 4)")
-        mock.Advance(1)
-        self.assertEqual(scan["items"][2002], "230,10,2|230:10")
-        self.assertEqual(list(lua.eval("Mock.requeried").values()), [2002])
-        polvos = next(r for r in mock.ns.Crates.Rows().values() if r["id"] == 1001)
+    def test_el_precio_de_auctionator_cambia_el_coste_al_momento(self):
+        self.mock.AuctionatorPrice(2002, 230, 10)
+        polvos = next(r for r in self.mock.ns.Crates.Rows().values() if r["id"] == 1001)
         esencia = next(o for o in polvos["options"].values() if o["id"] == 2002)
         self.assertEqual(esencia["cost"], 4 * 230)
-        # Cuando llega la lista nueva del servidor, manda ella.
-        lua.execute("Mock.commodity[2002] = { { unitPrice = 240, quantity = 10 } }")
-        mock.Fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2002)
-        mock.Advance(1)
-        self.assertEqual(scan["items"][2002], "240,10,1|240:10")
 
     def test_comando_del_chat(self):
         self.mock.Slash("cajones")

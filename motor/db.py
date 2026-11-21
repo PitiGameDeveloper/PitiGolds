@@ -99,15 +99,16 @@ CREATE TABLE IF NOT EXISTS owned_auctions (
   status INTEGER, time_left INTEGER, updated INTEGER
 );
 
--- type: full (subasta completa, una por una) o browse (materiales: mínimo y cantidad).
+-- Precios de la subasta, de Auctionator (ingest.py): un «escaneo» por reino y día, type auctionator.
+-- time: la hora de la copia si es de hoy, o el mediodía de ese día.
 CREATE TABLE IF NOT EXISTS scans (
   scan_id TEXT PRIMARY KEY, type TEXT, time INTEGER, started INTEGER, duration INTEGER,
   realm TEXT, faction TEXT, char_key TEXT, item_count INTEGER, account TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_scans_time ON scans(time);
 
--- book: "precio:cantidad;precio:cantidad" con los niveles de precio más baratos.
--- market_price: precio medio del 1 % más barato de las unidades (mínimo 5) (ver pricing.py).
+-- min_price y market_price: el mínimo de Auctionator ese día (ver pricing.py); quantity: las unidades
+-- que había. book: "precio:cantidad;..." de cuando PitiGolds escaneaba la subasta (ya no se rellena).
 CREATE TABLE IF NOT EXISTS prices (
   scan_id TEXT, item_id INTEGER, min_price INTEGER, quantity INTEGER,
   num_auctions INTEGER, num_owners INTEGER, book TEXT, market_price INTEGER,
@@ -228,12 +229,24 @@ def connect(path: Path) -> sqlite3.Connection:
         for column, kind in columns.items():
             if column not in existing:
                 conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
+    _drop_own_scans(conn)
     conn.executescript(VIEWS)
     conn.execute(
         "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', ?)", (str(SCHEMA_VERSION),)
     )
     conn.commit()
     return conn
+
+
+def _drop_own_scans(conn: sqlite3.Connection) -> None:
+    """Una sola vez: borra los escaneos que hacía PitiGolds. Los precios salen solo de Auctionator,
+    y mezclarlos daría medianas y tendencias de dos fuentes distintas."""
+    if conn.execute("SELECT 1 FROM meta WHERE key = 'prices_from_auctionator'").fetchone():
+        return
+    old = "SELECT scan_id FROM scans WHERE type IS NOT 'auctionator'"
+    conn.execute(f"DELETE FROM prices WHERE scan_id IN ({old})")
+    conn.execute("DELETE FROM scans WHERE type IS NOT 'auctionator'")
+    conn.execute("INSERT INTO meta (key, value) VALUES ('prices_from_auctionator', '1')")
 
 
 def get_meta(conn: sqlite3.Connection, key: str) -> str | None:

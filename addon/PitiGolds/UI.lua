@@ -1,7 +1,7 @@
 -- Interfaz mínima: un panel movible con lo que llevas ganado en la sesión y los botones
--- Mejor farmeo (ventana de métodos), Sesión (lista de lo farmeado) y Farmeos activos, y dos botones de
--- escaneo encima de la ventana de la subasta. Se pone al día en cuanto entra algo en las
--- bolsas o cambia tu oro. No hace falta exportar: WoW guarda los datos al cambiar de
+-- Mejor farmeo (ventana de métodos), Sesión (lista de lo farmeado) y Farmeos activos, y encima de la
+-- ventana de la subasta la casilla de cuántas veces comprar. Se pone al día en cuanto entra algo en
+-- las bolsas o cambia tu oro. No hace falta exportar: WoW guarda los datos al cambiar de
 -- personaje, al salir o con /reload.
 local ADDON, ns = ...
 
@@ -9,14 +9,7 @@ local CLOCK_SECONDS = 60   -- sin botín, solo cambian los minutos y el oro por 
 local LINE_HEIGHT = 12
 
 local panel, statusText
-local ahBar, ahStatus
-
-local function Ago(t)
-  local minutes = math.floor((time() - t) / 60)
-  if minutes < 1 then return "ahora" end
-  if minutes < 60 then return ("hace %d min"):format(minutes) end
-  return ("hace %d h"):format(math.floor(minutes / 60))
-end
+local ahBar
 
 local function Silver(copper)
   return ns.Money(math.floor(copper / 100) * 100)
@@ -32,17 +25,13 @@ function ns.RefreshUI()
   end
   local perHour = ns.FarmLastHour and ns.FarmLastHour()
   if perHour then lines[#lines + 1] = "Última hora: " .. Silver(perHour) .. "/h" end
-  local scans = PitiGoldsDB and PitiGoldsDB.scans or {}
-  local last = scans[#scans]
-  if last then
-    lines[#lines + 1] = ("Por leer en el PC: %d escaneo%s"):format(#scans, #scans == 1 and "" or "s")
-    lines[#lines + 1] = "Último: " .. Ago(last.time)
+  if ns.Auctionator and not ns.Auctionator.Available() then
+    lines[#lines + 1] = "|cffff4040Falta Auctionator: sin precios|r"
   end
   if statusText then
     statusText:SetText(table.concat(lines, "\n"))
     panel:SetHeight(30 + LINE_HEIGHT * #lines + 74)
   end
-  if ahStatus then ahStatus:SetText(ns.Scan.Status() or "") end
   if ns.Session then ns.Session.Refresh() end
   if ns.Tracker then ns.Tracker.Refresh() end
 end
@@ -114,30 +103,18 @@ end
 local function CreateAuctionBar()
   local parent = AuctionHouseFrame or UIParent
   ahBar = CreateFrame("Frame", nil, parent)
-  ahBar:SetSize(520, 22)
+  ahBar:SetSize(200, 22)
   if AuctionHouseFrame then
     ahBar:SetPoint("BOTTOMLEFT", AuctionHouseFrame, "TOPLEFT", 60, 2)
   else
     ahBar:SetPoint("TOP", UIParent, "TOP", 0, -80)
   end
 
-  local full = CreateFrame("Button", nil, ahBar, "UIPanelButtonTemplate")
-  full:SetSize(120, 22)
-  full:SetPoint("LEFT")
-  full:SetText("PG: Completo")
-  full:SetScript("OnClick", function() ns.Scan.StartFull() end)
-
-  local mats = CreateFrame("Button", nil, ahBar, "UIPanelButtonTemplate")
-  mats:SetSize(120, 22)
-  mats:SetPoint("LEFT", full, "RIGHT", 4, 0)
-  mats:SetText("PG: Materiales")
-  mats:SetScript("OnClick", function() ns.Scan.StartMaterials() end)
-
   -- Cuántas veces quieres fabricar la receta del botón Buscar (o cuántos cajones llenar, desde la
   -- pestaña Cajones, o cuántas veces las misiones de Libranzas): al abrir uno de sus materiales se marca para comprar lo que pide
   -- multiplicado por esto (menos lo que ya tienes).
   local label = ahBar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  label:SetPoint("LEFT", mats, "RIGHT", 10, 0)
+  label:SetPoint("LEFT")
   label:SetText(ns.CraftCountLabel())
   ns.craftCountLabel = label
   local box = CreateFrame("EditBox", nil, ahBar, "InputBoxTemplate")
@@ -155,9 +132,6 @@ local function CreateAuctionBar()
   box:SetScript("OnEditFocusLost", function(self) ns.SetCraftCount(tonumber(self:GetText()) or 1) end)
   box:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
   ns.craftCountBox = box
-
-  ahStatus = ahBar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  ahStatus:SetPoint("LEFT", box, "RIGHT", 8, 0)
 end
 
 function ns.UpdateCraftCountBox()

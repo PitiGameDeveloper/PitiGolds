@@ -642,3 +642,35 @@ function Mock.Serialize(name, value)
   out[#out + 1] = "\n"
   return table.concat(out)
 end
+
+-- Auctionator: su base de precios (la del reino actual) y su API. Mock.AuctionatorPrice(itemID, precio,
+-- unidades) apunta un precio como lo haría su escaneo. Para probar sin él: Auctionator = nil.
+Auctionator = {
+  Constants = { SCAN_DAY_0 = 1577836800 },   -- 1 de enero de 2020
+  State = { CurrentRealm = "Dio Horde" },
+  API = { v1 = {} },
+  Database = { db = {} },
+}
+
+function Auctionator.Database:SetPrice(key, price, available)
+  local day = tostring(math.floor((time() - Auctionator.Constants.SCAN_DAY_0) / 86400))
+  local d = self.db[key]
+  if not d then
+    d = { l = {}, h = {}, a = {}, m = 0 }
+    self.db[key] = d
+  end
+  d.m = price
+  if d.h[day] == nil or price > d.h[day] then d.h[day] = price end
+  if price < d.h[day] and (d.l[day] == nil or price < d.l[day]) then d.l[day] = price end
+  if available then d.a[day] = math.max(d.a[day] or 0, available) end
+end
+
+function Auctionator.API.v1.GetAuctionPriceByItemID(callerID, itemID)
+  assert(type(callerID) == "string" and callerID ~= "", "callerID")
+  local d = Auctionator.Database.db[tostring(itemID)]
+  return d and d.m
+end
+
+function Mock.AuctionatorPrice(itemID, price, available)
+  Auctionator.Database:SetPrice(tostring(itemID), price, available)
+end

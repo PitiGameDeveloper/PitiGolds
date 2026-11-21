@@ -17,11 +17,11 @@ Piti va a jugar: $ARGUMENTS (si no dice cuánto, supón 2 horas).
    3. **El resto del tiempo**: el mejor farmeo del panel, con «Farmear este» (se mide solo) si es estimado. Si el
       panel dice «preparar», di qué preparar y cuánto cuesta; si dice «investigar», propón una sesión de
       investigación (`comandos/buscar-metodos.md`).
-   4. **Antes de salir**: pasar por la subasta. El escaneo completo se hace solo al abrirla (si el
-      último tiene más de 15 minutos); basta con esperar a que acabe, para que mañana los precios estén al día.
+   4. **Antes de salir**: pasar por la subasta y escanearla con Auctionator (los precios de PitiGolds
+      salen de él); al salir se copian para el motor y mañana los precios están al día.
 4. Responde corto: una lista numerada con un tiempo aproximado por paso (que sumen las horas) y, en cada
    paso, el porqué en una línea con la cifra del informe. Termina con lo que falte («Faltan datos») en
    una línea.
 
-No inventes cifras ni métodos. Si el informe no tiene datos (sin escaneos todavía), dilo y propón cómo
+No inventes cifras ni métodos. Si el informe no tiene datos (sin precios de Auctionator todavía), dilo y propón cómo
 conseguirlos en esta sesión.

@@ -27,10 +27,9 @@ function ns.Money(copper)
   return ("%d%s"):format(rest, icons.copper)
 end
 
--- Precio de mercado de un objeto: lo último visto en la subasta si el motor aún no lo ha leído,
--- o el del motor.
+-- Precio de un objeto en la subasta: lo último que vio Auctionator o, sin él, el del motor.
 function ns.MarketPrice(itemID)
-  local seen = ns.ScanMarket and ns.ScanMarket(itemID)
+  local seen = ns.LivePrice and ns.LivePrice(itemID)
   if seen then return seen, true end
   local gen = PitiGoldsGenerated
   local text = type(gen) == "table" and gen.prices and gen.prices[itemID]
@@ -173,8 +172,8 @@ local function AddLines(tooltip, itemID, sellTotal)
   local market, _, trend, sales
   if price then market, _, trend, sales = price:match("^(%d*),(%d*),?(%a*),?([%d%.]*)$") end
   market = tonumber(market)
-  -- Lo que acabas de ver en la subasta manda sobre el precio del motor.
-  local seen = ns.ScanMarket and ns.ScanMarket(itemID)
+  -- Lo último que vio Auctionator manda sobre el precio del motor.
+  local seen = ns.LivePrice and ns.LivePrice(itemID)
   if seen then market = seen end
 
   local sellUnit = sellTotal and (ItemSellPrice(itemID) or math.floor(sellTotal / count))

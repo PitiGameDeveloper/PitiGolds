@@ -1,21 +1,20 @@
 """Escribe Generated.lua, el archivo que el addon carga al hacer /reload.
 
 Lleva:
-  ingestedUpTo  hasta qué escaneo ha guardado ya el motor, para que el addon los
-                borre de SavedVariables y el archivo no crezca sin parar.
+  ingestedUpTo  hora del último precio guardado (de cuando el addon escaneaba; ya no lo usa).
   prices        "mercado,mediana,tendencia,ventas" de tus objetos y de los materiales de tus
                 recetas, para el tooltip. Tendencia: b (baja), s (sube) o vacía. Ventas: unidades
                 vendidas al día (estimadas), o vacío si no hay datos suficientes.
   craft         coste y beneficio por unidad de lo que sabes fabricar.
   recipes       "coste,ganancia" de cada fabricación de las recetas de tus profesiones, para
                 la ventana de profesión. Ganancia vacía si lo fabricado no tiene precio.
-  recipeParts   desglose de esas recetas (recipe_parts) para recalcularlas en el juego con lo que
-                se acaba de ver en la subasta.
+  recipeParts   desglose de esas recetas (recipe_parts) para recalcularlas en el juego con lo último
+                que ha visto Auctionator.
   crates        los cajones saqueados con el favor que dan y sus lotes (se llenan con uno, a elegir),
                 para la pestaña Cajones de la subasta (cajones.py). Sus precios van en prices.
   writs         las libranzas del artesano con el objeto que piden, su zona y los grupos de zonas
                 pegadas, para la pestaña Libranzas de la subasta (libranzas.py).
-  lastScan      hora del último escaneo de la subasta.
+  lastScan      hora de los últimos precios de Auctionator.
   methods       la ventana de métodos: el mejor farmeo y las pestañas de farmeos y crafteos
                 (panel.py).
 """

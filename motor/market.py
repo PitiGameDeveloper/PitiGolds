@@ -1,11 +1,11 @@
-"""Señales de mercado y previsión de precios a partir del historial de escaneos.
+"""Señales de mercado y previsión de precios a partir del historial de precios.
 
-Todo es cálculo, sin IA. Para cada objeto se miran las últimas 36 horas (al empezar el server los
-precios fluctúan mucho, así que una semana entera daría señales viejas):
+Todo es cálculo, sin IA. Los precios son los de Auctionator, uno por día (pricing.py). Para cada
+objeto se mira la última semana:
   - tendencia del precio (regresión sobre el logaritmo del precio de mercado),
   - si hay cada vez más o menos unidades a la venta, y más o menos vendedores,
-  - cuántas unidades se venden al día (comparando fotos seguidas de la lista de subastas: escaneos
-    completos y búsquedas que traen la lista entera; esto mira 7 días, porque cambia más despacio),
+  - cuántas unidades se venden al día (comparando fotos seguidas de la lista de subastas entera; solo
+    con los escaneos que hacía PitiGolds: Auctionator no guarda la lista, así que ya no sale),
   - para cuántos días de ventas hay género («días de oferta»),
   - si el precio está por encima o por debajo de su mediana.
 Con eso se calcula un riesgo de bajada (0-100) y una previsión a 36 horas que mezcla la tendencia
@@ -26,10 +26,10 @@ from .money import format_pct
 from .pricing import HISTORY_DAYS, parse_book
 
 DAY = 86400
-WINDOW_DAYS = HISTORY_DAYS  # ventana de datos (36 h), la misma que la mediana de pricing.py
-OUTLOOK_DAYS = WINDOW_DAYS  # plazo de la previsión: «sube», «baja» y el precio esperado
-MIN_POINTS = 3            # escaneos mínimos para hablar de tendencia
-MIN_SPAN_DAYS = 1.0       # y que cubran al menos un día
+WINDOW_DAYS = HISTORY_DAYS  # ventana de datos (una semana), la misma que la mediana de pricing.py
+OUTLOOK_DAYS = 1.5        # plazo de la previsión (36 horas): «sube», «baja» y el precio esperado
+MIN_POINTS = 3            # días con precio mínimos para hablar de tendencia
+MIN_SPAN_DAYS = 2.0       # y que cubran al menos dos días
 MAX_PAIR_GAP_HOURS = 12   # escaneos más separados no sirven para contar ventas (las subastas caducan)
 MIN_SALES_HOURS = 6       # con menos tiempo observado, estirarlo a un día da cifras absurdas
 SALES_WINDOW_DAYS = 7     # las ventas al día cambian despacio: se miran más días que el precio
@@ -268,9 +268,9 @@ def compute_signals(points: list[Point], full_scan_times: list[int], now: int | 
             s.outlook = "sube"
         else:
             s.outlook = "estable"
-        if s.points >= 20 and s.span_days >= 1.2:
+        if s.points >= 6 and s.span_days >= 5:
             s.confidence = "alta"
-        elif s.points >= 6 and s.span_days >= 1:
+        elif s.points >= 4 and s.span_days >= 3:
             s.confidence = "media"
     return s
 

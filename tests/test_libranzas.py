@@ -193,40 +193,9 @@ class PestanaLibranzas(unittest.TestCase):
         self.assertTrue(self.lua.eval("PitiGoldsWritsTab.point[2] == PitiGoldsCratesTab"))
         self.assertEqual(self.chat(), "")
 
-    def item_results(self, browse_min, rows, item_id=4001):
-        """Abre en la subasta un objeto suelto: la lista de resultados (si browse_min) y sus filas."""
-        lua, mock = self.lua, self.mock
-        lua.execute(f'''
-          Mock.itemRows = {lua_value([{"buyoutAmount": p, "quantity": q} for p, q in rows])}
-          C_AuctionHouse.GetNumItemSearchResults = function() return #Mock.itemRows end
-          C_AuctionHouse.GetItemSearchResultInfo = function(_, i) return Mock.itemRows[i] end
-          C_AuctionHouse.GetBrowseResults = function()
-            if not {lua_value(browse_min)} then return {{}} end
-            return {{ {{ itemKey = {{ itemID = {item_id}, battlePetSpeciesID = 0 }}, minPrice = {lua_value(browse_min)},
-                       totalQuantity = 1 }} }}
-          end''')
-        mock.Fire("AUCTION_HOUSE_SHOW")
-        if browse_min:
-            mock.Fire("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED")
-            mock.Advance(1)
-        lua.execute(f"Mock.Fire('ITEM_SEARCH_RESULTS_UPDATED', {{ itemID = {item_id} }})")
-        mock.Advance(1)
-        scan = lua.eval("PitiGoldsDB.scans[#PitiGoldsDB.scans]")
-        return scan["items"][item_id] if scan and scan["type"] == "search" else None
-
-    def test_filas_que_juntan_subastas_iguales_no_hunden_el_precio(self):
-        # Como la Cerradura de prácticas en Forever: una fila «702 a 1 p», y no 702 por 1 p en total.
-        self.assertEqual(self.item_results(100, [(100, 702), (400, 5)]), "100,707,2|100:702;400:5")
+    def test_el_precio_de_auctionator_manda(self):
+        self.mock.AuctionatorPrice(4001, 100, 707)
         self.assertEqual(self.mock.ns.MarketPrice(4001), (100, True))
-
-    def test_un_monton_de_verdad_se_divide(self):
-        # Una subasta de 20 por 20 p: 1 p cada una, que es lo que dice la lista de resultados.
-        self.assertEqual(self.item_results(100, [(2000, 20)]), "100,20,1|100:20")
-
-    def test_sin_lista_de_resultados_y_filas_de_varios_no_se_apunta(self):
-        self.assertIsNone(self.item_results(None, [(100, 702)]))
-        # Si cada fila es una subasta de una unidad, no hay duda.
-        self.assertEqual(self.item_results(None, [(3500, 1), (4100, 1)]), "3500,2,2|3500:1;4100:1")
 
     def test_comando_del_chat(self):
         self.mock.Slash("libranzas")

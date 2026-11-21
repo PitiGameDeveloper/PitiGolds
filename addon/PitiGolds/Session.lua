@@ -3,19 +3,14 @@
 -- Cuenta lo mismo que el registro de farmeos (nada del correo, la subasta, el banco...)
 -- y se actualiza en cuanto entra algo en las bolsas.
 --
--- Cada objeto se valora con el precio más reciente que haya: un escaneo de la subasta que
--- el motor aún no ha leído, el precio del motor o, si paga más, el vendedor. A la subasta se
+-- Cada objeto se valora con el precio más reciente que haya: el de Auctionator, el del motor
+-- (que también sale de Auctionator) o, si paga más, el vendedor. A la subasta se
 -- le quitan la comisión y el depósito, como en el motor: 1 plata por pila puesta, que se pierde
 -- si no se vende (se cuenta una perdida por pila vendida).
 local ADDON, ns = ...
 
 local AH_CUT = 0.05
 local AH_DEPOSIT = 100               -- depósito mínimo por puesta (una pila), en cobre
--- Como el motor (pricing.py): media del 1 % más barato a la venta, nunca menos de 5 unidades,
--- y un mínimo suelto no rebaja lo que dijo un escaneo completo de hace menos de 6 horas.
-local MARKET_SHARE = 0.01
-local MARKET_MIN_UNITS = 5
-local BOOK_TRUST = 6 * 3600
 local NEW_SESSION_AFTER = 30 * 60    -- tanto rato sin jugar con el personaje empieza otra sesión
 local MIN_SECONDS = 300              -- el oro por hora no se calcula sobre menos de 5 minutos
 local WIDTH, HEIGHT = 380, 340
@@ -27,84 +22,6 @@ ns.Session = S
 
 -- Precios ---------------------------------------------------------------------------------
 
--- Lo último escaneado de cada objeto que el motor aún no ha leído; se rehace al escanear.
--- El precio se saca solo de los objetos que hacen falta: un escaneo completo trae miles.
-local scanText, scanCache
-
--- "min,cantidad[,subastas,vendedores]|precio:cantidad;..." -> precio de mercado
-local function MarketFromScan(text)
-  local head, book = text:match("^([^|]*)|?(.*)$")
-  local min, qty = (head or ""):match("^(%d+),(%d+)")
-  min, qty = tonumber(min), tonumber(qty)
-  if not min then return nil end
-  if book == "" or qty <= 0 then return min, false end
-  local target = math.max(MARKET_MIN_UNITS, math.ceil(qty * MARKET_SHARE))
-  local taken, cost = 0, 0
-  for price, n in book:gmatch("(%d+):(%d+)") do
-    local take = math.min(tonumber(n), target - taken)
-    cost = cost + take * tonumber(price)
-    taken = taken + take
-    if taken >= target then break end
-  end
-  if taken == 0 then return min, false end
-  return math.floor(cost / taken + 0.5), true
-end
-ns.MarketFromScan = MarketFromScan
-
--- scanText[itemID] = { texto, hora } de lo último visto; bookText, de lo último con el libro entero.
-local bookText
-
-local function BuildScanIndex()
-  scanText, scanCache, bookText = {}, {}, {}
-  for _, scan in ipairs(PitiGoldsDB and PitiGoldsDB.scans or {}) do
-    local t = scan.time or 0
-    for itemID, text in pairs(scan.items or {}) do
-      if type(text) == "string" then
-        if t >= (scanText[itemID] and scanText[itemID][2] or -1) then scanText[itemID] = { text, t } end
-        if text:find("|", 1, true) and t >= (bookText[itemID] and bookText[itemID][2] or -1) then
-          bookText[itemID] = { text, t }
-        end
-      end
-    end
-  end
-end
-
-local function ScanPrice(itemID)
-  if not scanText then BuildScanIndex() end
-  local price = scanCache[itemID]
-  if price == nil then
-    local last = scanText[itemID]
-    price = false
-    if last then
-      local hasBook
-      price, hasBook = MarketFromScan(last[1])
-      local book = bookText[itemID]
-      if price and not hasBook and book and last[2] - book[2] <= BOOK_TRUST then
-        local fromBook = MarketFromScan(book[1])
-        if fromBook and fromBook > price then price = fromBook end
-      end
-      price = price or false
-    end
-    scanCache[itemID] = price
-  end
-  return price or nil
-end
-
--- Precio de mercado de lo escaneado que el motor aún no ha leído (más nuevo que el suyo), o nil.
--- Incluye lo que acabas de ver buscando en la subasta.
-ns.ScanMarket = ScanPrice
-
--- Hay que llamarla cuando cambia un escaneo pendiente (tus búsquedas lo van completando).
-function ns.InvalidateScanPrices()
-  scanText, scanCache, bookText = nil, nil, nil
-end
-
-local addScan = ns.AddScan
-function ns.AddScan(scan)
-  addScan(scan)
-  scanText, scanCache, bookText = nil, nil, nil
-end
-
 -- Cuántos caben en una pila (1 si no se sabe: lo que no se apila paga la plata entera).
 local function StackSize(itemID)
   local size = C_Item and C_Item.GetItemMaxStackSizeByID and C_Item.GetItemMaxStackSizeByID(itemID)
@@ -115,10 +32,10 @@ local function StackSize(itemID)
   return (type(size) == "number" and size > 0) and size or 1
 end
 
--- Lo que vale una unidad y de dónde sale el precio: "escaneo" (de la subasta, aún sin leer
--- por el motor), "subasta" (el del motor) o "vendedor". 0 y nil si no hay ninguno.
+-- Lo que vale una unidad y de dónde sale el precio: "auctionator" (lo último que vio),
+-- "subasta" (el del motor) o "vendedor". 0 y nil si no hay ninguno.
 function ns.ItemValue(itemID)
-  local market, source = ScanPrice(itemID), "escaneo"
+  local market, source = ns.LivePrice and ns.LivePrice(itemID), "auctionator"
   if not market then
     local gen = PitiGoldsGenerated
     local text = type(gen) == "table" and gen.prices and gen.prices[itemID]
@@ -348,8 +265,8 @@ local function CreateWindow()
   legendText:SetPoint("BOTTOMLEFT", 12, 38)
   legendText:SetWidth(WIDTH - 24)
   legendText:SetJustifyH("LEFT")
-  legendText:SetText("Precio de la subasta sin la comisión (el último escaneo, si el motor aún no lo ha"
-    .. " leído) o del vendedor si paga más (v).")
+  legendText:SetText("Precio de la subasta (Auctionator) sin la comisión, o del vendedor si paga"
+    .. " más (v).")
 
   local reset = CreateFrame("Button", nil, window, "UIPanelButtonTemplate")
   reset:SetSize(110, 22)

@@ -95,27 +95,23 @@ Mock.inbox = {
   } },
 }
 
-Mock.replicate = {
-  { itemID = 2589, count = 20, buyout = 20 * 45, owner = "Vendedor1", name = "Paño de lino" },
-  { itemID = 2589, count = 10, buyout = 10 * 40, owner = "Vendedor2", name = "Paño de lino" },
-  { itemID = 2589, count = 5, buyout = 5 * 40, owner = "Vendedor1", name = "Paño de lino" },
-  { itemID = 2770, count = 20, buyout = 20 * 120, owner = "Minero", name = "Mineral de cobre" },
-  { itemID = 2845, count = 1, buyout = 5000, owner = "Herrero", name = "Hacha de cobre" },
-  { itemID = 19019, count = 1, buyout = 75000000000, owner = "Rico", name = "Furia del Viento" },
-  { itemID = 2592, count = 1, buyout = 0, owner = "Pujador", name = "Paño de lana" },
-}
-
-Mock.browseData = {
-  [7] = {
-    { itemKey = { itemID = 2589 }, minPrice = 40, totalQuantity = 35 },
-    { itemKey = { itemID = 2592 }, minPrice = 90, totalQuantity = 100 },
-    { itemKey = { itemID = 2770 }, minPrice = 120, totalQuantity = 20 },
-    { itemKey = { itemID = 2840 }, minPrice = 300, totalQuantity = 50 },
-    { itemKey = { itemID = 818 }, minPrice = 2500, totalQuantity = 4 },
-    { itemKey = { itemID = 5000 }, minPrice = 300, totalQuantity = 50 },
-  },
-  [0] = { { itemKey = { itemID = 118 }, minPrice = 50, totalQuantity = 200 } },
-}
+-- Lo que ha visto Auctionator en la subasta (precio mínimo por unidad y unidades a la venta).
+-- No se apunta aquí para que cada prueba elija: Mock.PreciosDeAuctionator() los pone.
+function Mock.PreciosDeAuctionator()
+  for itemID, p in pairs({
+    [2589] = { 40, 35 }, [2592] = { 90, 100 }, [2770] = { 120, 20 }, [2840] = { 300, 50 },
+    [818] = { 2500, 4 }, [5000] = { 300, 50 }, [118] = { 50, 200 }, [2845] = { 5000, 1 },
+    [19019] = { 75000000000, 1 },
+  }) do
+    Mock.AuctionatorPrice(itemID, p[1], p[2])
+  end
+  -- Ayer el paño estaba más caro: Auctionator guarda el mínimo más alto y el más bajo de cada día.
+  local d = Auctionator.Database.db["2589"]
+  local yesterday = tostring(math.floor((time() - Auctionator.Constants.SCAN_DAY_0) / 86400) - 1)
+  d.h[yesterday], d.l[yesterday], d.a[yesterday] = 50, 45, 30
+  -- El equipo con nivel de objeto va con otra clave: no se copia.
+  Auctionator.Database.db["g:2845:10"] = { m = 1, h = {}, l = {}, a = {} }
+end
 
 Mock.owned = {
   { itemKey = { itemID = 2840 }, quantity = 10, buyoutAmount = 3500, status = 0, timeLeftSeconds = 40000,
