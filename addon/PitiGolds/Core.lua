@@ -1,7 +1,7 @@
 -- Núcleo de PitiGolds: base de datos, eventos, utilidades y comandos /pg.
 local ADDON, ns = ...
 
-ns.VERSION = "0.5.9"
+ns.VERSION = "0.6.0"
 ns.SCHEMA = 1
 
 local PREFIX = "|cffe6b422PitiGolds|r: "

@@ -2,7 +2,7 @@
 ## Title: PitiGolds
 ## Notes: Recoge personajes, profesiones e inventario para el motor de PitiGolds. Los precios de la subasta salen de Auctionator.
 ## Author: Piti
-## Version: 0.5.9
+## Version: 0.6.0
 ## SavedVariables: PitiGoldsDB
 ## OptionalDeps: Auctionator
 ## IconTexture: Interface\Icons\INV_Misc_Coin_01
